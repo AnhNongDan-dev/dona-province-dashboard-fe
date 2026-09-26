@@ -1,0 +1,374 @@
+/* Custom theme colors (success, warning, info, error) */
+:root {
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+  --warning: oklch(77.018% 0.16577 71.018);
+  --warning-foreground: oklch(98.463% 0.00181 249.248);
+  --info: #19b9f2;
+  --info-foreground: #06245a;
+  --error: oklch(58.287% 0.19407 25.576);
+  --error-foreground: oklch(98.463% 0.00181 249.248);
+
+  /* ── ELP brand kit (see mock/brand-tokens.css) — navy + cyan + yellow ──
+     custom.css is imported last in main.css, so these overrides win over
+     theme.css for the default color theme. */
+  --elp-navy: #073b8e;
+  --elp-navy-dark: #061a3d;
+  --elp-cyan: #19b9f2;
+  --elp-yellow: #ffc400;
+  --elp-light-blue: #eaf7ff;
+
+  /* Map the app's semantic tokens onto the brand (navy primary, light-blue
+     surfaces). Everything that reads --primary/--accent rebrands from here. */
+  --primary: var(--elp-navy);
+  --primary-foreground: #ffffff;
+  --secondary: var(--elp-light-blue);
+  --secondary-foreground: var(--elp-navy);
+  --accent: var(--elp-light-blue);
+  --accent-foreground: var(--elp-navy);
+  --ring: var(--elp-cyan);
+
+  /* Brand gradient second stop — navy → cyan for headline accents / CTA band.
+     NOTE: surface tokens (--foreground/--border/--muted/--input) live in
+     theme.css :root so theme.css's .dark block can still override them — setting
+     them here (custom.css loads last) would leak light values into dark mode. */
+  --lp-violet: var(--elp-cyan);
+}
+
+.dark {
+  /* The app defaults to dark mode, so primary is brightened from the deep navy
+     to stay legible and let buttons/CTAs pop; surfaces shift to a navy tint. */
+  --primary: #2f86e0;
+  --primary-foreground: #ffffff;
+  --ring: #2f86e0;
+  --secondary: #0e2a52;
+  --secondary-foreground: #cfe8fb;
+  --accent: #0e2a52;
+  --accent-foreground: #cfe8fb;
+  --success: #2fcf6c;
+  --info: #2bb6f2;
+  --lp-violet: #38c3fb;
+}
+
+@theme inline {
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Smooth in-page anchor navigation (landing nav). Disabled under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Override Tabler illustration SVG colors to match app theme */
+/* 503 - Service Unavailable */
+.dark.dark .tblr-illustrations-computer-fix-a {
+  opacity: 0.07;
+  fill: oklch(0.1697 0.0482 263.6546);
+}
+
+.dark.dark .tblr-illustrations-computer-fix-b {
+  fill: oklch(0.1697 0.0482 263.6546);
+}
+
+.dark.dark .tblr-illustrations-computer-fix-c {
+  fill: oklch(0.2554 0.0955 264.1721);
+}
+
+.dark.dark .tblr-illustrations-computer-fix-d {
+  fill: oklch(0.2921 0.0629 262.0505);
+}
+
+/* 404 - Not Found */
+.dark.dark .tblr-illustrations-not-found-a {
+  fill: oklch(0.1697 0.0482 263.6546);
+}
+
+.dark.dark .tblr-illustrations-not-found-b {
+  opacity: 0.07;
+  fill: oklch(0.1697 0.0482 263.6546);
+}
+
+.dark.dark .tblr-illustrations-not-found-c {
+  fill: oklch(0.2921 0.0629 262.0505);
+}
+
+.dark.dark .tblr-illustrations-not-found-d {
+  fill: oklch(0.2554 0.0955 264.1721);
+}
+
+/* browser autofill issue */
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
+  transition:
+    background-color 6000s 0s,
+    color 6000s 0s;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+  border: none;
+}
+
+::-webkit-scrollbar-thumb {
+  min-height: 24px;
+  background: oklch(from var(--border) l c h);
+  border: 2px solid transparent;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(from var(--border) calc(l + 0.15) c h);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* hide eye - input type=password */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+@layer utilities {
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .shadow-premium {
+    box-shadow:
+      0 10px 30px -10px oklch(from var(--primary) l c h / 0.15),
+      0 4px 12px -4px oklch(0 0 0 / 0.05);
+  }
+
+  /* ---- Landing color utilities ---- */
+
+  /* Indigo -> violet text gradient for headline accents */
+  .text-brand-gradient {
+    color: transparent;
+    background-image: linear-gradient(102deg, var(--primary), var(--lp-violet));
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  /* Solid indigo -> violet fill for icon tiles, CTA band, etc. */
+  .bg-brand-band {
+    background-image: linear-gradient(118deg, var(--primary), var(--lp-violet));
+  }
+
+  /* Layered radial mesh for the hero backdrop — richer than a flat tint */
+  .bg-brand-mesh {
+    background-image:
+      radial-gradient(52% 50% at 82% -8%, oklch(from var(--primary) l c h / 0.22), transparent 60%),
+      radial-gradient(44% 46% at 6% 8%, oklch(from var(--lp-violet) l c h / 0.16), transparent 58%);
+  }
+}
+
+@layer base {
+  .preview-layout {
+    width: 100dvw;
+    height: 100dvh;
+    overflow: hidden;
+
+    .preview-layout__header {
+      width: 100dvw;
+      height: 64px;
+      overflow: hidden;
+    }
+
+    .preview-layout__body {
+      width: 100dvw;
+      height: calc(100dvh - 64px);
+      overflow: hidden;
+    }
+  }
+}
+
+/* ── Landing hero ambience: gently swaying waves + sparse fireworks ──
+   All motion is gated behind no-preference so reduced-motion users get a calm,
+   static hero (waves hold still; fireworks stay at opacity 0 → invisible). */
+@media (prefers-reduced-motion: no-preference) {
+  .elp-wave {
+    will-change: transform;
+  }
+  .elp-wave-back {
+    animation: elp-wave-a 13s ease-in-out infinite;
+  }
+  .elp-wave-mid {
+    animation: elp-wave-b 9.5s ease-in-out infinite;
+  }
+  .elp-wave-front {
+    animation: elp-wave-c 17s ease-in-out infinite;
+  }
+
+  .elp-fw-spark {
+    animation: elp-fw-spark var(--fw-dur, 7s) ease-out var(--fw-delay, 0s) infinite;
+  }
+  .elp-fw-core {
+    animation: elp-fw-core var(--fw-dur, 7s) ease-out var(--fw-delay, 0s) infinite;
+  }
+}
+
+/* Horizontal sway — small amplitude; paths overshoot the viewBox so no gaps. */
+@keyframes elp-wave-a {
+  0%,
+  100% {
+    transform: translateX(-24px);
+  }
+  50% {
+    transform: translateX(24px);
+  }
+}
+@keyframes elp-wave-b {
+  0%,
+  100% {
+    transform: translateX(22px);
+  }
+  50% {
+    transform: translateX(-22px);
+  }
+}
+@keyframes elp-wave-c {
+  0%,
+  100% {
+    transform: translateX(-10px);
+  }
+  50% {
+    transform: translateX(10px);
+  }
+}
+
+/* Firework: brief fan-out + fade in the first ~24% of the cycle, then idle. */
+@keyframes elp-fw-spark {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4);
+  }
+  5% {
+    opacity: var(--fw-op, 0.5);
+    transform: translate(0, 0) scale(1);
+  }
+  24%,
+  100% {
+    opacity: 0;
+    transform: translate(var(--sx, 0), var(--sy, 0)) scale(0.3);
+  }
+}
+@keyframes elp-fw-core {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  5% {
+    opacity: var(--fw-op, 0.45);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  20%,
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(2.4);
+  }
+}
+
+/* Excel Table Styling */
+.excel-preview-container table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.excel-preview-container table tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.excel-preview-container table tr:last-child {
+  border-bottom: none;
+}
+
+.excel-preview-container td {
+  max-width: 400px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #374151;
+  word-break: break-word;
+  white-space: normal;
+  border: 1px solid #e5e7eb;
+}
+
+/* Header rows styling */
+.excel-preview-container tr:nth-child(1) td,
+.excel-preview-container tr:nth-child(2) td {
+  padding: 12px;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: left;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+}
+
+/* Numeric values alignment */
+.excel-preview-container td[data-t="n"] {
+  font-family: "Menlo", "Monaco", "Courier New", monospace;
+  font-size: 12px;
+  text-align: right;
+}
+
+/* String values alignment */
+.excel-preview-container td[data-t="s"] {
+  text-align: left;
+}
+
+/* Merged cells (colspan) */
+.excel-preview-container td[colspan] {
+  padding: 12px;
+  font-weight: 500;
+  text-align: center;
+  background-color: #fafafa;
+}
+
+/* Merged cells (rowspan) */
+.excel-preview-container td[rowspan] {
+  font-weight: 500;
+  vertical-align: middle;
+}
+
+/* Hover effect for better readability */
+.excel-preview-container tr:hover td {
+  background-color: #f9fafb;
+}
+
+/* Title row styling */
+.excel-preview-container tr:first-child td {
+  padding: 14px 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+  background-color: #1f2937;
+  border: 1px solid #111827;
+}

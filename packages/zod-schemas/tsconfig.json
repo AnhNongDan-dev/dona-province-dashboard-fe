@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Consumed as source by Vite / the frontend tsconfig — never emitted to .d.ts,
+    // so disable the base's declaration emit (otherwise TS4023 naming checks fire).
+    "declaration": false,
+    "declarationMap": false,
+    "paths": {
+      "@repo/shared/*": ["../shared/*"]
+    }
+  },
+  "include": ["src"]
+}

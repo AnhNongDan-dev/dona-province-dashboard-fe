@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    "bradlc.vscode-tailwindcss",
+    "biomejs.biome",
+    "formulahendry.auto-rename-tag",
+    "kamikillerto.vscode-colorize",
+    "yoavbls.pretty-ts-errors",
+    "simonsiefke.svg-preview",
+    "meganrogge.template-string-converter",
+    "prisma.prisma-insider",
+    "gruntfuggly.todo-tree"
+  ]
+}

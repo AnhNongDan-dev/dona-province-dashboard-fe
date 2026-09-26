@@ -1,0 +1,15 @@
+{
+  "name": "@repo/zod-schemas",
+  "version": "1.0.0",
+  "description": "Zod schemas and API contracts",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./*": "./*"
+  },
+  "dependencies": {
+    "@repo/shared": "workspace:*",
+    "@ts-rest/core": "3.53.0-rc.1",
+    "zod": "^4.4.3"
+  }
+}

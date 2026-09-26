@@ -1,0 +1,24 @@
+{
+  // Skill example files (*.example.tsx) are portable templates, not project code.
+  // They are explicitly "SEED ONLY — not compiled or linted". This config exists
+  // solely so VS Code's TS server treats them as part of THIS project (with
+  // diagnostics disabled) instead of an inferred fallback that flags every
+  // unresolved @repo/* / @/* import. Not referenced by the root tsconfig.json,
+  // not built by `tsc -b`, not scanned by Biome (excluded in biome.json).
+  "compilerOptions": {
+    "noEmit": true,
+    "noCheck": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ESNext",
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "types": []
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}

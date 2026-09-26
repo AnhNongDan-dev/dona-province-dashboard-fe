@@ -1,0 +1,20 @@
+{
+  "name": "@repo/open-api",
+  "version": "1.0.0",
+  "description": "OpenAPI documentation generator",
+  "private": true,
+  "scripts": {
+    "dev:docs": "mkdirp ./dist && cpy \"./public/*\" ./dist && nodemon",
+    "openapi": "mkdirp ./dist && cpy \"./public/*\" ./dist && tsx ./src/open-api.ts",
+    "clean": "rimraf dist node_modules .turbo dist"
+  },
+  "dependencies": {
+    "@repo/zod-schemas": "workspace:*",
+    "@ts-rest/open-api": "3.53.0-rc.1",
+    "nodemon": "^3.1.10",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0"
+  }
+}

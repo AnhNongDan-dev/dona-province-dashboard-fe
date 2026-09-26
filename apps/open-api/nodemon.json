@@ -1,0 +1,7 @@
+{
+  "watch": ["src", "../../packages/zod-schemas/*"],
+  "ignore": ["node_modules", "dist", "public"],
+  "ext": "ts,js",
+  "exec": "tsx ./src/open-api.ts",
+  "delay": "500"
+}

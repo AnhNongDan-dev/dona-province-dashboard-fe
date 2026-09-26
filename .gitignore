@@ -1,0 +1,53 @@
+# Env
+.env
+
+# dev/build
+.turbo
+.tanstack
+.next
+.cache
+package-lock.json
+*.bundled*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea
+.DS_Store
+.pnpm-store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# db
+tmp
+
+# AI
+.agents
+GEMINI.md
+.claude/scheduled_tasks.lock
+
+# Docs
+docs/
+.docs
+
+# mcp
+.playwright-mcp
+__pycache__/

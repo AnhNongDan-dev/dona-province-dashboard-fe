@@ -1,0 +1,93 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "maxSize": 100000,
+    "includes": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.css",
+      "**/*.json",
+      "**/*.js",
+      "**/*.html",
+      "!**/routeTree.gen.ts",
+      "!**/dist",
+      "!**/node_modules",
+      "!**/.docs",
+      "!**/.claude",
+      "!**/dona-edu-api-docs"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "linter": {
+    "enabled": true,
+    "includes": ["**", "!**/components/ui/*.tsx", "!**/clientAPI.config.ts"],
+    "rules": {
+      "style": { "noNonNullAssertion": "off" },
+      "recommended": true,
+      "suspicious": {
+        "noExplicitAny": "error"
+      },
+      "a11y": {
+        "useButtonType": "off",
+        "noSvgWithoutTitle": "off"
+      },
+      "security": {
+        "noBlankTarget": "off"
+      },
+      "correctness": {
+        "useParseIntRadix": "off"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "jsxQuoteStyle": "double"
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none",
+      "enabled": true,
+      "lineWidth": 100
+    },
+    "assist": {
+      "enabled": true
+    },
+    "parser": { "allowTrailingCommas": false }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "recommended": true,
+        "organizeImports": "on",
+        "useSortedProperties": "on",
+        "useSortedAttributes": "off",
+        "useSortedKeys": "off"
+      }
+    }
+  },
+  "css": {
+    "assist": { "enabled": true },
+    "parser": {
+      "tailwindDirectives": true
+    },
+    "formatter": { "enabled": true }
+  },
+  "html": {
+    "formatter": { "enabled": true }
+  }
+}

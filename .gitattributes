@@ -1,0 +1,15 @@
+# Ghim LF cho mọi file text.
+#
+# Vì sao cần: repo trước giờ không có file này, nên mỗi máy tự xử theo `core.autocrlf`
+# của riêng nó. Máy Windows đang để `core.autocrlf=true` thì git ghi CRLF ra đĩa lúc
+# checkout, rồi Biome/editor ghi lại LF — hai bên đá nhau, stat cache của index hỏng
+# liên tục và `git status` phình lên hàng trăm file "modified" mà nội dung y hệt.
+#
+# Ghim ở đây thì cấu hình từng máy hết quyền quyết định, cả team giống nhau.
+#
+# Chọn LF vì đó đã là sự thật trong repo: kiểm 400 file trong HEAD → 400 LF, 0 CRLF.
+# Cũng không có .bat/.cmd/.ps1 nào cần CRLF.
+#
+# `text=auto` vẫn tự nhận diện nhị phân (file có byte NUL) và không đụng vào, nên
+# ảnh/font/zip an toàn, khỏi liệt kê thêm.
+* text=auto eol=lf
