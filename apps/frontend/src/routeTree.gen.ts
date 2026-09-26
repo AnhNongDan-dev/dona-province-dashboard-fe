@@ -9,50 +9,181 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteRouteImport } from './routes/_app/route'
+import { Route as AuthRouteRouteImport } from './routes/_auth/route'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AuthLoggedOutRouteImport } from './routes/_auth/logged-out'
+import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as AuthSessionChangedRouteImport } from './routes/_auth/session-changed'
+import { Route as AuthSessionEndedRouteImport } from './routes/_auth/session-ended'
 
-const IndexRoute = IndexRouteImport.update({
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRouteRoute = AuthRouteRouteImport.update({
+  id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AuthLoggedOutRoute = AuthLoggedOutRouteImport.update({
+  id: '/logged-out',
+  path: '/logged-out',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthSessionChangedRoute = AuthSessionChangedRouteImport.update({
+  id: '/session-changed',
+  path: '/session-changed',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthSessionEndedRoute = AuthSessionEndedRouteImport.update({
+  id: '/session-ended',
+  path: '/session-ended',
+  getParentRoute: () => AuthRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
+  '/logged-out': typeof AuthLoggedOutRoute
+  '/login': typeof AuthLoginRoute
+  '/session-changed': typeof AuthSessionChangedRoute
+  '/session-ended': typeof AuthSessionEndedRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
+  '/logged-out': typeof AuthLoggedOutRoute
+  '/login': typeof AuthLoginRoute
+  '/session-changed': typeof AuthSessionChangedRoute
+  '/session-ended': typeof AuthSessionEndedRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppRouteRouteWithChildren
+  '/_auth': typeof AuthRouteRouteWithChildren
+  '/_auth/logged-out': typeof AuthLoggedOutRoute
+  '/_auth/login': typeof AuthLoginRoute
+  '/_auth/session-changed': typeof AuthSessionChangedRoute
+  '/_auth/session-ended': typeof AuthSessionEndedRoute
+  '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    '/' | '/logged-out' | '/login' | '/session-changed' | '/session-ended'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/logged-out' | '/login' | '/session-changed' | '/session-ended'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/_auth'
+    | '/_auth/logged-out'
+    | '/_auth/login'
+    | '/_auth/session-changed'
+    | '/_auth/session-ended'
+    | '/_app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AppRouteRoute: typeof AppRouteRouteWithChildren
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_auth/logged-out': {
+      id: '/_auth/logged-out'
+      path: '/logged-out'
+      fullPath: '/logged-out'
+      preLoaderRoute: typeof AuthLoggedOutRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/login': {
+      id: '/_auth/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/session-changed': {
+      id: '/_auth/session-changed'
+      path: '/session-changed'
+      fullPath: '/session-changed'
+      preLoaderRoute: typeof AuthSessionChangedRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/session-ended': {
+      id: '/_auth/session-ended'
+      path: '/session-ended'
+      fullPath: '/session-ended'
+      preLoaderRoute: typeof AuthSessionEndedRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
   }
 }
 
+interface AppRouteRouteChildren {
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
+)
+
+interface AuthRouteRouteChildren {
+  AuthLoggedOutRoute: typeof AuthLoggedOutRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthSessionChangedRoute: typeof AuthSessionChangedRoute
+  AuthSessionEndedRoute: typeof AuthSessionEndedRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthLoggedOutRoute: AuthLoggedOutRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthSessionChangedRoute: AuthSessionChangedRoute,
+  AuthSessionEndedRoute: AuthSessionEndedRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AppRouteRoute: AppRouteRouteWithChildren,
+  AuthRouteRoute: AuthRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

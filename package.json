@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "dev:fe": "turbo run dev --filter=@repo/frontend",
-    "dev:be": "cd ../dona-province-dashboard-be && sh ./gradlew bootRun --args='--server.port=8080'",
+    "dev:be": "cd ../dona-province-dashboard-be && sh ./gradlew bootRun",
     "dev:fullstack": "concurrently -n fe,be -c cyan,yellow --kill-others-on-fail \"pnpm dev:fe\" \"pnpm dev:be\"",
     "dev:docs": "turbo run dev:docs",
     "dev:scan": "cross-env VITE_ENABLE_SCAN=true turbo run dev",

@@ -74,6 +74,19 @@ export const ErrorCode = {
   InvalidStatusTransition: "InvalidStatusTransition",
   ServiceUnavailable: "ServiceUnavailable",
   AuthFailed: "E_AUTH_FAILED",
+  // Central Auth (TASK-001 bảng mã lỗi) — BE trả nguyên tên mã
+  Unauthenticated: "UNAUTHENTICATED",
+  SessionExpired: "SESSION_EXPIRED",
+  SessionChanged: "SESSION_CHANGED",
+  CsrfInvalid: "CSRF_INVALID",
+  ReauthRequired: "REAUTH_REQUIRED",
+  InvalidLoginCredentials: "INVALID_CREDENTIALS",
+  RateLimited: "RATE_LIMITED",
+  AccountLocked: "ACCOUNT_LOCKED",
+  IdentityMerged: "IDENTITY_MERGED",
+  LoginRequestExpired: "LOGIN_REQUEST_EXPIRED",
+  ValidationError: "VALIDATION_ERROR",
+  InternalError: "INTERNAL_ERROR",
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
@@ -165,6 +178,54 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   [ErrorCode.AuthFailed]: {
     statusCode: StatusCode.Unauthorized,
     message: "Token không hợp lệ hoặc đã hết hạn",
+  },
+  [ErrorCode.Unauthenticated]: {
+    statusCode: StatusCode.Unauthorized,
+    message: "Bạn chưa đăng nhập.",
+  },
+  [ErrorCode.SessionExpired]: {
+    statusCode: StatusCode.Unauthorized,
+    message: "Phiên đăng nhập đã kết thúc.",
+  },
+  [ErrorCode.SessionChanged]: {
+    statusCode: StatusCode.Forbidden,
+    message: "Phiên đăng nhập đã thay đổi sang người dùng khác.",
+  },
+  [ErrorCode.CsrfInvalid]: {
+    statusCode: StatusCode.Forbidden,
+    message: "Phiên làm việc của trang đã cũ. Vui lòng tải lại trang.",
+  },
+  [ErrorCode.ReauthRequired]: {
+    statusCode: StatusCode.Forbidden,
+    message: "Vui lòng nhập lại mật khẩu để tiếp tục.",
+  },
+  [ErrorCode.InvalidLoginCredentials]: {
+    statusCode: StatusCode.Unauthorized,
+    message: "Thông tin đăng nhập không đúng.",
+  },
+  [ErrorCode.RateLimited]: {
+    statusCode: StatusCode.TooManyRequests,
+    message: "Bạn đã thử quá nhiều lần. Vui lòng thử lại sau.",
+  },
+  [ErrorCode.AccountLocked]: {
+    statusCode: StatusCode.Locked,
+    message: "Tài khoản đang bị khóa. Vui lòng liên hệ quản trị đơn vị.",
+  },
+  [ErrorCode.IdentityMerged]: {
+    statusCode: StatusCode.Conflict,
+    message: "Tài khoản này đã được gộp vào tài khoản khác. Hãy đăng nhập bằng tài khoản đó.",
+  },
+  [ErrorCode.LoginRequestExpired]: {
+    statusCode: StatusCode.Gone,
+    message: "Yêu cầu đăng nhập đã hết hạn.",
+  },
+  [ErrorCode.ValidationError]: {
+    statusCode: StatusCode.BadRequest,
+    message: "Dữ liệu nhập không hợp lệ.",
+  },
+  [ErrorCode.InternalError]: {
+    statusCode: StatusCode.InternalServerError,
+    message: "Lỗi hệ thống. Vui lòng thử lại sau.",
   },
 };
 

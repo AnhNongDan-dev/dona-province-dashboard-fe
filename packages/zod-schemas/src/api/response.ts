@@ -21,6 +21,8 @@ export const errorResponseSchema = z
       success: z.literal(false),
       errorCode: errorCodeZod.catch(ErrorCode.ResponseParseFailed),
       message: z.string(),
+      // Tham số kèm lỗi: retryAfterSeconds, attemptsRemaining, returnUrl, clientName…
+      data: z.record(z.string(), z.unknown()).nullable().catch(null),
       errors: z
         .array(
           z.object({

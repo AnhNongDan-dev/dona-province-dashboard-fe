@@ -1,6 +1,6 @@
 # Tech Stack — DONA Province Dashboard Frontend
 
-> Kế thừa baseline từ project **ELP-fe**. Backend duy nhất: `../dona-province-dashboard-be` (Spring Boot, port `8080`).
+> Kế thừa baseline từ project **ELP-fe**. Backend duy nhất: `../dona-province-dashboard-be` (Spring Boot, port `8081` (dev)).
 
 ## 1. Nền tảng & Ngôn ngữ
 
@@ -102,7 +102,7 @@ Thư viện domain khác (xlsx, react-pdf, react-dropzone, @dnd-kit…) — ch�
 
 ```bash
 pnpm dev:fe        # Frontend only (Vite)
-pnpm dev:be       # Backend ../dona-province-dashboard-be (port 8080)
+pnpm dev:be       # Backend ../dona-province-dashboard-be (port 8081)
 pnpm dev:fullstack # FE + BE concurrently
 pnpm build         # turbo run build
 pnpm lint          # turbo lint (tsc -b) + biome lint

@@ -14,7 +14,7 @@ dona-province-dashboard-fe — frontend monorepo for the DONA Province Dashboard
 
 Exactly **one** backend: sibling repo `../dona-province-dashboard-be` (not a submodule).
 
-- Spring Boot 4 / Java 21, port **8080** → FE env `VITE_SERVER_URL=http://localhost:8080` (root `.env`, see `.env.example`).
+- Spring Boot 4 / Java 21, dev port **8081** → FE env `VITE_SERVER_URL=http://localhost:8081` (root `.env`, see `.env.example`). Vite **proxies** `/api/ /oauth2/ /.well-known/ /userinfo /connect/ /sso/` to it keeping Host `localhost:3000` (= BE dev issuer) — browser is always same-origin, never call `:8081` directly.
 - Java package `com.donasky.province_dashboard` — `controller/`, `service/` + `service/impl/`, `repository/`, `entity/`, `dto/request|response/` (`{Resource}{Action}Request/Response`), `mapper/`, `constant/CommonConstant.java`.
 - Uses `org.donasky:common-lib`: `ResponseObject` envelope (mirrored by `packages/zod-schemas/src/api/response.ts`), JWT security, `PermissionProvider`/`RoleProvider` hooks, public URLs via `UrlPermitMatcher` in `config/AppSecurityConfig.java`.
 - Schema = Flyway migrations in `src/main/resources/db/migration/V{n}__*.sql`.
@@ -38,7 +38,7 @@ Workspace aliases: `@repo/frontend`, `@repo/shared`, `@repo/zod-schemas`. In `ap
 
 ```bash
 pnpm dev:fe          # Frontend only (Vite, port FRONTEND_PORT or 3000)
-pnpm dev:be          # Backend on :8080
+pnpm dev:be          # Backend on :8081
 pnpm dev:fullstack   # FE + BE concurrently
 pnpm dev:scan        # FE with react-scan overlay
 pnpm openapi         # Regenerate OpenAPI YAML from contracts
@@ -64,7 +64,7 @@ packages/zod-schemas/src/
 └── api/               # Response envelope + ErrorCode
 ```
 
-- `apps/frontend/src/config/clientAPI.config.ts` — typed RPC client over `initClient(appContract)`: `clientAPI.Province.list({ query })`. **No JWT handling yet** — port `lib/token-manager.ts` + the auth-header branch from ELP-fe when auth lands.
+- `apps/frontend/src/config/clientAPI.config.ts` — typed RPC client over `initClient(appContract)`: `clientAPI.Province.list({ query })`. **Auth = SSO Central session cookie (HttpOnly, same origin), NOT JWT** — the browser never holds a token; do not port ELP-fe's `token-manager`. The client attaches `X-CSRF-TOKEN` (per-tab, from `GET /api/session`, `lib/session-store.ts`) to every write and routes session errors to `lib/central-session.ts` (multi-tab sync, logout, step-up). Contract/flow: `../collaboration/tasks/TASK-001-sso-central-auth.md`, `TASK-002-…`.
 - `apps/frontend/src/repositories/` — every API call goes through TanStack Query factories in `-factory.ts` (`createQueryRepository`) and `-paging.ts`. See skill `repository-pattern`.
 - `apps/frontend/src/routes/` — file-based routing; `routeTree.gen.ts` is generated. `-` prefixed files/folders are route-ignored.
 - `apps/frontend/src/components/ui/` — shadcn components (generated, biome-excluded).

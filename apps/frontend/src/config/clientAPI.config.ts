@@ -4,6 +4,7 @@ import { appContract } from "@repo/zod-schemas/src/api-contract";
 import { type ApiFetcher, initClient, isAppRouteMutation, tsRestFetchApi } from "@ts-rest/core";
 import { ZodObject } from "zod";
 import { logger } from "@/lib/client-logger";
+import { recordServerDate, sessionHooks, sessionStore } from "@/lib/session-store";
 
 type DecrementDepth<T extends number> = T extends 4
   ? 3
@@ -61,40 +62,70 @@ const customInitClientType = <T>(a: T): CustomType<T> => a as CustomType<T>;
 const customResponseType = (data: IResponse): ReturnType<ApiFetcher> =>
   data as unknown as ReturnType<ApiFetcher>;
 
+// Tab tin là đang đăng nhập mà nhận một trong các mã này → phiên đã đổi/hết → đối chiếu lại D1.
+const SESSION_LOST_CODES: string[] = [
+  ErrorCode.SessionChanged,
+  ErrorCode.SessionExpired,
+  ErrorCode.CsrfInvalid,
+  ErrorCode.Unauthenticated,
+];
+
 export const clientAPI = customInitClientType(
   initClient(appContract, {
-    baseUrl: import.meta.env.VITE_SERVER_URL,
+    // Cùng origin với BE (dev: Vite proxy; prod: reverse proxy) — cookie phiên HttpOnly đi kèm tự nhiên.
+    baseUrl: "",
     jsonQuery: true,
     validateResponse: false,
-    credentials: "omit",
+    credentials: "same-origin",
     api: async (args): ReturnType<ApiFetcher> => {
       if (isAppRouteMutation(args.route) && args.route.body instanceof ZodObject) {
         args.body = JSON.stringify(args.route.body.parse(args.rawBody));
       }
-      // ponytail: no JWT header yet — add tokenManager + jwtAuthHeaderSchema check (see ELP-fe) when auth lands.
 
-      return tsRestFetchApi(args)
-        .then((rawResult) => {
-          logger.debug("logger ~ clientAPI.config.ts ~ line 90:", rawResult);
-          // Trust the BE envelope; safeParse only normalizes errorCode/errors and NEVER
-          // throws — a malformed envelope falls back to the raw body instead of being
-          // masked as a fake ServiceUnavailable in the catch below.
-          const parsed = responseSchema.safeParse(rawResult.body);
-          const res = parsed.success ? parsed.data : (rawResult.body as IResponse);
-          return customResponseType(res);
-        })
-        .catch((error) => {
-          logger.error(
-            "Failed to fetch from API. Server may be down or unreachable (ERR_CONNECTION_REFUSED).",
-            { error },
-          );
-          return customResponseType({
-            success: false,
-            errorCode: ErrorCode.ServiceUnavailable,
-            errors: [],
-            ...ERROR_DATA[ErrorCode.ServiceUnavailable],
+      const send = (): Promise<IResponse> => {
+        // CSRF token gắn phiên, giữ theo tab; gửi ở mọi request ghi.
+        const csrfToken = sessionStore.get()?.csrfToken;
+        if (args.method !== "GET" && csrfToken) args.headers["x-csrf-token"] = csrfToken;
+
+        return tsRestFetchApi(args)
+          .then((rawResult) => {
+            logger.debug("logger ~ clientAPI.config.ts ~ line 90:", rawResult);
+            recordServerDate(rawResult.headers.get("date"));
+            // Trust the BE envelope; safeParse only normalizes errorCode/errors and NEVER
+            // throws — a malformed envelope falls back to the raw body instead of being
+            // masked as a fake ServiceUnavailable in the catch below.
+            const parsed = responseSchema.safeParse(rawResult.body);
+            return parsed.success ? parsed.data : (rawResult.body as IResponse);
+          })
+          .catch((error): IResponse => {
+            logger.error(
+              "Failed to fetch from API. Server may be down or unreachable (ERR_CONNECTION_REFUSED).",
+              { error },
+            );
+            return {
+              success: false,
+              errorCode: ErrorCode.ServiceUnavailable,
+              errors: [],
+              data: null,
+              ...ERROR_DATA[ErrorCode.ServiceUnavailable],
+            };
           });
-        });
+      };
+
+      let res = await send();
+      // Step-up: mở S2, thành công thì gửi lại thao tác đúng một lần.
+      if (!res.success && res.errorCode === ErrorCode.ReauthRequired) {
+        if (await sessionHooks.onReauthRequired()) res = await send();
+      }
+      // Không bao giờ tự gửi lại request ghi khi phiên đổi — chỉ đối chiếu lại phiên.
+      if (
+        !res.success &&
+        SESSION_LOST_CODES.includes(res.errorCode) &&
+        sessionStore.get()?.authenticated
+      ) {
+        sessionHooks.onSessionLost();
+      }
+      return customResponseType(res);
     },
   }),
 );

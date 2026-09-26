@@ -1,5 +1,7 @@
+import type { NotifiedClient } from "@repo/zod-schemas/src/entity/central-auth-schema";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { createRoot } from "react-dom/client";
+import "@fontsource-variable/inter";
 import "@/css/main.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
@@ -11,6 +13,10 @@ import { routeTree } from "@/routeTree.gen";
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
+  }
+  interface HistoryState {
+    /** D6 → S3: hệ thống đã được gửi yêu cầu đăng xuất. */
+    notifiedClients?: NotifiedClient[];
   }
 }
 

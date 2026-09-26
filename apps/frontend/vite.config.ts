@@ -102,6 +102,14 @@ export default defineConfig(({ mode }) => {
   return {
     server: {
       port: Number(env.FRONTEND_PORT) || 3000,
+      // Cùng origin với BE như prod: trình duyệt chỉ thấy :3000, cookie phiên HttpOnly đi kèm tự nhiên.
+      // changeOrigin=false giữ Host localhost:3000 (issuer dev của BE). Regex có dấu "/" cuối để
+      // không nuốt route FE trùng tiền tố (/api-docs, /sso-error, /connect-…).
+      proxy: Object.fromEntries(
+        ["^/api/", "^/oauth2/", "^/\\.well-known/", "^/userinfo", "^/connect/", "^/sso/"].map(
+          (path) => [path, { target: env.VITE_SERVER_URL, changeOrigin: false }],
+        ),
+      ),
     },
     plugins,
     resolve: {
@@ -184,7 +192,6 @@ export default defineConfig(({ mode }) => {
             // Heavy libs
             if (pkg === "recharts" || pkg.startsWith("d3-") || pkg === "victory-vendor")
               return "vendor-recharts";
-
 
             // Forms
             if (pkg === "react-hook-form" || pkg.startsWith("@hookform/")) return "vendor-forms";
