@@ -9,8 +9,10 @@ import {
   notifiedResultSchema,
   pagedSchema,
   passwordUpdateResultSchema,
+  pendingContactSchema,
   revokeAllResultSchema,
 } from "../entity/account-center-schema";
+import { otpChannelZod } from "../entity/link-transaction-schema";
 import { OpenAPIHelper } from "../openapi/openAPI.helper";
 
 const c = initContract();
@@ -83,6 +85,51 @@ export const accountCenterContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(
       ErrorCode.ReauthRequired,
       ErrorCode.PasswordPolicyViolation,
+    ),
+  },
+  addMyContact: {
+    summary: "D24 — Gửi mã thêm / đổi kênh liên lạc",
+    description:
+      "Cần xác thực lại ≤ 5 phút. Gọi lại cùng channel = gửi lại mã (destination khác thì thay đích).",
+    method: "POST",
+    path: "/api/me/contacts",
+    body: z.object({ channel: otpChannelZod, destination: z.string().trim().min(1) }),
+    responses: { 200: successResponseSchema(pendingContactSchema) },
+    metadata: OpenAPIHelper.generateErrorCodes(
+      ErrorCode.ReauthRequired,
+      ErrorCode.ValidationError,
+      ErrorCode.RateLimited,
+      ErrorCode.OtpTooManyAttempts,
+    ),
+  },
+  verifyMyContact: {
+    summary: "D24 — Xác minh kênh liên lạc",
+    description:
+      "Không cần fresh (mã gắn phiên đã gửi). Giá trị mới thêm vào hoặc thay giá trị cũ cùng loại; trả D20a.",
+    method: "POST",
+    path: "/api/me/contacts/verify",
+    body: z.object({ channel: otpChannelZod, code: z.string().trim().min(1) }),
+    responses: { 200: successResponseSchema(accountSecuritySchema) },
+    metadata: OpenAPIHelper.generateErrorCodes(
+      ErrorCode.OtpInvalid,
+      ErrorCode.OtpExpired,
+      ErrorCode.OtpTooManyAttempts,
+      ErrorCode.ContactAlreadyUsed,
+    ),
+  },
+  removeMyContact: {
+    summary: "D20c — Gỡ kênh liên lạc",
+    description:
+      "Cần xác thực lại ≤ 5 phút. SĐT không gỡ được; email gỡ được nếu còn SĐT. Trả D20a.",
+    method: "DELETE",
+    path: "/api/me/contacts/:channel",
+    pathParams: z.object({ channel: otpChannelZod }),
+    body: c.noBody(),
+    responses: { 200: successResponseSchema(accountSecuritySchema) },
+    metadata: OpenAPIHelper.generateErrorCodes(
+      ErrorCode.ReauthRequired,
+      ErrorCode.LastAuthMethod,
+      ErrorCode.ValidationError,
     ),
   },
 });

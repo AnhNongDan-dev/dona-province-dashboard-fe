@@ -1,6 +1,6 @@
 import { APP_CONFIG } from "@repo/shared/src/app-config";
 import { LogoutMode, type Session } from "@repo/zod-schemas/src/entity/central-auth-schema";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +23,7 @@ const NAV_LINK =
 
 export function AppHeader({ session }: { session: Session }) {
   const runLogout = useLogout();
+  const onAccountPage = useLocation({ select: (l) => l.pathname.startsWith("/account/") });
   const { identity, personalDevice, idleExpiresAt } = session;
   if (!identity) return null;
 
@@ -39,7 +40,12 @@ export function AppHeader({ session }: { session: Session }) {
               Các hệ thống
             </Link>
             <DropdownMenu>
-              <DropdownMenuTrigger className={NAV_LINK}>Tài khoản ▾</DropdownMenuTrigger>
+              <DropdownMenuTrigger
+                data-status={onAccountPage ? "active" : undefined}
+                className={`${NAV_LINK} rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+              >
+                Tài khoản ▾
+              </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 {ACCOUNT_NAV.map((item) => (
                   <DropdownMenuItem key={item.to} asChild>

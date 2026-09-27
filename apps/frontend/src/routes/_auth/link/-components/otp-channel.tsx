@@ -6,7 +6,6 @@ import {
 } from "@repo/zod-schemas/src/entity/link-transaction-schema";
 import { format } from "date-fns";
 import { type FormEvent, useState } from "react";
-import z from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -14,7 +13,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { clientAPI } from "@/config/clientAPI.config";
 import { formatSeconds, useCountdown, useSecondsUntil } from "@/hooks/use-countdown";
 import { errorParam } from "@/lib/api-error";
-import { normalizePhoneInput, VN_MOBILE, type Wizard } from "../-lib";
+import { isValidContact, normalizeContact } from "@/lib/contact-validation";
+import type { Wizard } from "../-lib";
 
 const LABEL = { [OtpChannel.SMS]: "Số điện thoại", [OtpChannel.EMAIL]: "Email" } as const;
 
@@ -24,12 +24,6 @@ const SWITCHED_NOTICE = {
   [OtpChannel.EMAIL]:
     'Email này đã gắn với một tài khoản SSO — nhiều khả năng bạn đã có tài khoản. Hãy đăng nhập tài khoản đó để liên kết. Nếu email này không phải của bạn, chọn "Tôi chưa có tài khoản SSO — tạo mới" và dùng email khác.',
 } as const;
-
-function isValidDestination(channel: OtpChannel, value: string) {
-  return channel === OtpChannel.SMS
-    ? VN_MOBILE.test(normalizePhoneInput(value))
-    : z.email().safeParse(value).success;
-}
 
 /**
  * Một kênh liên lạc trong F7: nhập → gửi mã → nhập mã. Trạng thái (đã xác minh / mã đang chờ)
@@ -51,8 +45,8 @@ export function OtpChannelBlock({ w, channel }: { w: Wizard; channel: OtpChannel
   const resendIn = useSecondsUntil(pending?.resendAvailableAt ?? null);
 
   async function send(value: string) {
-    const dest = channel === OtpChannel.SMS ? normalizePhoneInput(value) : value.trim();
-    if (!isValidDestination(channel, dest)) {
+    const dest = normalizeContact(channel, value);
+    if (!isValidContact(channel, dest)) {
       return setError(
         channel === OtpChannel.SMS
           ? "Số điện thoại di động không hợp lệ (10 số, đầu 03/05/07/08/09)"

@@ -45,6 +45,10 @@ export const ActivityType = {
   PASSWORD_CHANGED: "PASSWORD_CHANGED",
   PASSWORD_RESET_REQUESTED: "PASSWORD_RESET_REQUESTED",
   PASSWORD_RESET: "PASSWORD_RESET",
+  IDENTITY_MERGED: "IDENTITY_MERGED",
+  CONTACT_ADDED: "CONTACT_ADDED",
+  CONTACT_CHANGED: "CONTACT_CHANGED",
+  CONTACT_REMOVED: "CONTACT_REMOVED",
 } as const;
 export type ActivityType = (typeof ActivityType)[keyof typeof ActivityType];
 export const activityTypeZod = z.enum(
@@ -66,6 +70,10 @@ export const ACTIVITY_TYPE_LABEL: Record<ActivityType, string> = {
   [ActivityType.PASSWORD_CHANGED]: "Đổi mật khẩu",
   [ActivityType.PASSWORD_RESET_REQUESTED]: "Yêu cầu lấy lại mật khẩu",
   [ActivityType.PASSWORD_RESET]: "Đặt lại mật khẩu",
+  [ActivityType.IDENTITY_MERGED]: "Gộp tài khoản",
+  [ActivityType.CONTACT_ADDED]: "Thêm kênh liên lạc",
+  [ActivityType.CONTACT_CHANGED]: "Đổi kênh liên lạc",
+  [ActivityType.CONTACT_REMOVED]: "Gỡ kênh liên lạc",
 };
 export const ACTIVITY_TYPE_OPTIONS = Object.values(ActivityType).map((value) => ({
   value,
@@ -86,6 +94,8 @@ export const activitySchema = z.object({
   // null khi sự kiện không đến từ trình duyệt nào (vd. phiên tự hết hạn).
   ip: z.string().nullable(),
   deviceLabel: z.string().nullable(),
+  // Chuỗi hiển thị, đã che (GĐ C): IDENTITY_MERGED → định danh tài khoản bị gộp; CONTACT_* → kênh.
+  detail: z.string().nullable(),
 });
 export type Activity = z.infer<typeof activitySchema>;
 
@@ -102,7 +112,17 @@ export const pagedSchema = <T extends z.ZodType>(item: T) =>
     }),
   });
 
-/** D20a — contacts chỉ gồm kênh đã xác minh, đã che. */
+/** D24 gửi mã / pendingContacts của D20a — mã đang chờ xác minh của một kênh. */
+export const pendingContactSchema = z.object({
+  channel: otpChannelZod,
+  maskedDestination: z.string(),
+  expiresAt: commonZod.datetime,
+  resendAvailableAt: commonZod.datetime,
+  sendsRemaining: z.int(),
+});
+export type PendingContact = z.infer<typeof pendingContactSchema>;
+
+/** D20a — contacts chỉ gồm kênh đã xác minh, đã che; tối đa 1 SĐT + 1 email (TASK-005 Q4). */
 export const accountSecuritySchema = z.object({
   username: z.string(),
   contacts: z.array(
@@ -113,6 +133,7 @@ export const accountSecuritySchema = z.object({
     }),
   ),
   passwordChangedAt: commonZod.datetime,
+  pendingContacts: z.array(pendingContactSchema),
 });
 export type AccountSecurity = z.infer<typeof accountSecuritySchema>;
 

@@ -18,6 +18,7 @@ import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthSessionChangedRouteImport } from './routes/_auth/session-changed'
 import { Route as AuthSessionEndedRouteImport } from './routes/_auth/session-ended'
 import { Route as AuthSsoErrorRouteImport } from './routes/_auth/sso-error'
+import { Route as MergeTxIdRouteImport } from './routes/merge/$txId'
 import { Route as AppAccountActivityRouteImport } from './routes/_app/account/activity'
 import { Route as AppAccountConnectionsRouteImport } from './routes/_app/account/connections'
 import { Route as AppAccountSecurityRouteImport } from './routes/_app/account/security'
@@ -67,6 +68,11 @@ const AuthSsoErrorRoute = AuthSsoErrorRouteImport.update({
   path: '/sso-error',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const MergeTxIdRoute = MergeTxIdRouteImport.update({
+  id: '/merge/$txId',
+  path: '/merge/$txId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppAccountActivityRoute = AppAccountActivityRouteImport.update({
   id: '/account/activity',
   path: '/account/activity',
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/session-changed': typeof AuthSessionChangedRoute
   '/session-ended': typeof AuthSessionEndedRoute
   '/sso-error': typeof AuthSsoErrorRoute
+  '/merge/$txId': typeof MergeTxIdRoute
   '/account/activity': typeof AppAccountActivityRoute
   '/account/connections': typeof AppAccountConnectionsRoute
   '/account/security': typeof AppAccountSecurityRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/session-changed': typeof AuthSessionChangedRoute
   '/session-ended': typeof AuthSessionEndedRoute
   '/sso-error': typeof AuthSsoErrorRoute
+  '/merge/$txId': typeof MergeTxIdRoute
   '/account/activity': typeof AppAccountActivityRoute
   '/account/connections': typeof AppAccountConnectionsRoute
   '/account/security': typeof AppAccountSecurityRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/_auth/session-changed': typeof AuthSessionChangedRoute
   '/_auth/session-ended': typeof AuthSessionEndedRoute
   '/_auth/sso-error': typeof AuthSsoErrorRoute
+  '/merge/$txId': typeof MergeTxIdRoute
   '/_app/': typeof AppIndexRoute
   '/_app/account/activity': typeof AppAccountActivityRoute
   '/_app/account/connections': typeof AppAccountConnectionsRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/session-changed'
     | '/session-ended'
     | '/sso-error'
+    | '/merge/$txId'
     | '/account/activity'
     | '/account/connections'
     | '/account/security'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/session-changed'
     | '/session-ended'
     | '/sso-error'
+    | '/merge/$txId'
     | '/account/activity'
     | '/account/connections'
     | '/account/security'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/_auth/session-changed'
     | '/_auth/session-ended'
     | '/_auth/sso-error'
+    | '/merge/$txId'
     | '/_app/'
     | '/_app/account/activity'
     | '/_app/account/connections'
@@ -188,6 +200,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
+  MergeTxIdRoute: typeof MergeTxIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -254,6 +267,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/sso-error'
       preLoaderRoute: typeof AuthSsoErrorRouteImport
       parentRoute: typeof AuthRouteRoute
+    }
+    '/merge/$txId': {
+      id: '/merge/$txId'
+      path: '/merge/$txId'
+      fullPath: '/merge/$txId'
+      preLoaderRoute: typeof MergeTxIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_app/account/activity': {
       id: '/_app/account/activity'
@@ -340,6 +360,7 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AppRouteRoute: AppRouteRouteWithChildren,
   AuthRouteRoute: AuthRouteRouteWithChildren,
+  MergeTxIdRoute: MergeTxIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -70,11 +70,12 @@ const SESSION_LOST_CODES: string[] = [
   ErrorCode.Unauthenticated,
 ];
 
-// F6: giao dịch gắn với phiên đã tạo nó. Phiên hết / đổi người giữa chừng thì giao dịch FAILED và
-// wizard /link/:txId tự đọc lại D9 để hiện màn thất bại + [Làm lại] — không để bộ xử lý chung đá
-// sang S4 / "phiên đã thay đổi" (TASK-004). CSRF_INVALID vẫn đi đường chung để lấy token mới.
-const isHandledByLinkWizard = (path: string, errorCode: string) =>
-  path.includes("/api/link-transactions/") &&
+// F6 (liên kết) và gộp tài khoản: giao dịch gắn với phiên đã tạo nó. Phiên hết / đổi người giữa
+// chừng thì giao dịch FAILED và trang /link/:txId, /merge/:txId tự đọc lại giao dịch để hiện màn
+// thất bại — không để bộ xử lý chung đá sang S4 / "phiên đã thay đổi" (TASK-004, TASK-005).
+// CSRF_INVALID vẫn đi đường chung để lấy token mới.
+const isHandledByTxPage = (path: string, errorCode: string) =>
+  (path.includes("/api/link-transactions/") || path.includes("/api/merge-transactions/")) &&
   (errorCode === ErrorCode.SessionExpired || errorCode === ErrorCode.SessionChanged);
 
 export const clientAPI = customInitClientType(
@@ -130,7 +131,7 @@ export const clientAPI = customInitClientType(
       if (
         !res.success &&
         SESSION_LOST_CODES.includes(res.errorCode) &&
-        !isHandledByLinkWizard(args.path, res.errorCode)
+        !isHandledByTxPage(args.path, res.errorCode)
       ) {
         sessionHooks.onSessionLost();
       }

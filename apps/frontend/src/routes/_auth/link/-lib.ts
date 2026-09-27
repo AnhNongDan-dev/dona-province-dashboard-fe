@@ -49,6 +49,4 @@ export type Wizard = {
   setNotice: (notice: string | null) => void;
 };
 
-// Số di động VN 10 số, đầu 03/05/07/08/09; nhận 0… hoặc +84… (TASK-003 câu 7). BE kiểm lại.
-export const VN_MOBILE = /^(0|\+84)(3|5|7|8|9)\d{8}$/;
-export const normalizePhoneInput = (v: string) => v.replace(/[\s.-]/g, "");
+export { normalizePhoneInput, VN_MOBILE } from "@/lib/contact-validation";

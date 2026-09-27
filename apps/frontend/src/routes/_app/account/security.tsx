@@ -1,6 +1,5 @@
 import { ErrorCode } from "@repo/zod-schemas/src/api/error.schema";
 import { passwordUpdateResultSchema } from "@repo/zod-schemas/src/entity/account-center-schema";
-import { OtpChannel } from "@repo/zod-schemas/src/entity/link-transaction-schema";
 import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { type FormEvent, useState } from "react";
@@ -18,16 +17,17 @@ import {
   credentialPolicyRepository,
 } from "@/repositories/credentialPolicy.repository";
 import { mySecurityRepository } from "@/repositories/mySecurity.repository";
+import { ContactsCard } from "./-components/contacts-card";
+import { MergeCard } from "./-components/merge-card";
 
-// S12 — Bảo mật: xem thông tin (D20a) + đổi mật khẩu (D20b, cần xác thực lại).
-// Thêm / đổi / gỡ kênh liên lạc thuộc GĐ C.
+// S12 — Bảo mật: thông tin (D20a), kênh liên lạc (D24 / D20c), đổi mật khẩu (D20b), gộp tài
+// khoản (D22). Các thao tác ghi cần xác thực lại (S2 tự mở).
 export const Route = createFileRoute("/_app/account/security")({
   loader: () =>
     Promise.all([mySecurityRepository().loader(), credentialPolicyRepository().loader()]),
   component: SecurityPage,
 });
 
-const CHANNEL_LABEL = { [OtpChannel.SMS]: "Số điện thoại", [OtpChannel.EMAIL]: "Email" } as const;
 const fmt = (d: Date) => format(d, "dd/MM/yyyy HH:mm");
 
 function SecurityPage() {
@@ -55,17 +55,6 @@ function SecurityPage() {
             <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2">
               <dt className="text-muted-foreground">Tên đăng nhập</dt>
               <dd className="font-medium">{security.data.username}</dd>
-              {security.data.contacts.map((c) => (
-                <div key={c.channel} className="contents">
-                  <dt className="text-muted-foreground">{CHANNEL_LABEL[c.channel]}</dt>
-                  <dd>
-                    {c.maskedDestination}{" "}
-                    <span className="text-muted-foreground">
-                      (đã xác minh {format(c.verifiedAt, "dd/MM/yyyy")})
-                    </span>
-                  </dd>
-                </div>
-              ))}
               <dt className="text-muted-foreground">Đổi mật khẩu gần nhất</dt>
               <dd>{fmt(security.data.passwordChangedAt)}</dd>
             </dl>
@@ -73,7 +62,11 @@ function SecurityPage() {
         </CardContent>
       </Card>
       {!security.isLoading && !security.isError && (
-        <ChangePasswordCard username={security.data.username} policy={policy} />
+        <>
+          <ContactsCard security={security.data} />
+          <ChangePasswordCard username={security.data.username} policy={policy} />
+          <MergeCard />
+        </>
       )}
     </div>
   );

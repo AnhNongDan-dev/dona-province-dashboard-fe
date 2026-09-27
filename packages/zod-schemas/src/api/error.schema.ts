@@ -111,6 +111,14 @@ export const ErrorCode = {
   UnlinkNotAllowed: "UNLINK_NOT_ALLOWED",
   ConnectionNotFound: "CONNECTION_NOT_FOUND",
   SessionNotFound: "SESSION_NOT_FOUND",
+  // Central Auth GĐ C — gộp tài khoản, kênh liên lạc (TASK-005)
+  MergeTxNotFound: "MERGE_TX_NOT_FOUND",
+  MergeTxExpired: "MERGE_TX_EXPIRED",
+  MergeTxInvalidState: "MERGE_TX_INVALID_STATE",
+  MergeSameIdentity: "MERGE_SAME_IDENTITY",
+  MergeConflictUnresolved: "MERGE_CONFLICT_UNRESOLVED",
+  MergeRequiresAdmin: "MERGE_REQUIRES_ADMIN",
+  LastAuthMethod: "LAST_AUTH_METHOD",
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
@@ -342,6 +350,34 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   [ErrorCode.SessionNotFound]: {
     statusCode: StatusCode.NotFound,
     message: "Phiên đăng nhập này không còn.",
+  },
+  [ErrorCode.MergeTxNotFound]: {
+    statusCode: StatusCode.NotFound,
+    message: "Phiên gộp tài khoản đã hết hạn hoặc không thuộc trình duyệt này.",
+  },
+  [ErrorCode.MergeTxExpired]: {
+    statusCode: StatusCode.Gone,
+    message: "Phiên gộp tài khoản đã hết hạn hoặc không thuộc trình duyệt này.",
+  },
+  [ErrorCode.MergeTxInvalidState]: {
+    statusCode: StatusCode.Conflict,
+    message: "Bước này không còn hợp lệ. Trang đã được cập nhật theo trạng thái mới nhất.",
+  },
+  [ErrorCode.MergeSameIdentity]: {
+    statusCode: StatusCode.Conflict,
+    message: "Đây chính là tài khoản đang đăng nhập. Hãy đăng nhập tài khoản SSO khác của bạn.",
+  },
+  [ErrorCode.MergeConflictUnresolved]: {
+    statusCode: StatusCode.Conflict,
+    message: "Hãy chọn tài khoản giữ lại cho mọi hệ thống bị trùng.",
+  },
+  [ErrorCode.MergeRequiresAdmin]: {
+    statusCode: StatusCode.Conflict,
+    message: "Không thể tự gộp hai tài khoản này. Liên hệ quản trị để được hỗ trợ.",
+  },
+  [ErrorCode.LastAuthMethod]: {
+    statusCode: StatusCode.Conflict,
+    message: "Không thể gỡ kênh liên lạc này — tài khoản cần ít nhất một kênh để lấy lại mật khẩu.",
   },
 };
 

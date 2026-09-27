@@ -14,6 +14,6 @@ export const mySecurityRepository = createQueryRepository<MySecurityDTO>({
     throw Error(res.message, { cause: res });
   },
   // Chỉ dùng khi chưa tải xong / lỗi — trang S12 hiện skeleton / lỗi thay vì đọc giá trị này.
-  defaultData: { username: "", contacts: [], passwordChangedAt: new Date(0) },
+  defaultData: { username: "", contacts: [], passwordChangedAt: new Date(0), pendingContacts: [] },
   queryOptions: { staleTime: 0 },
 });

@@ -185,6 +185,7 @@ function ActivityPage() {
                       {a.providerName && (
                         <span className="text-muted-foreground"> · {a.providerName}</span>
                       )}
+                      {a.detail && <span className="text-muted-foreground"> · {a.detail}</span>}
                     </TableCell>
                     <TableCell>
                       {a.result === ActivityResult.FAILURE ? (
