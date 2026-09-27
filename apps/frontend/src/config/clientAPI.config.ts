@@ -62,7 +62,7 @@ const customInitClientType = <T>(a: T): CustomType<T> => a as CustomType<T>;
 const customResponseType = (data: IResponse): ReturnType<ApiFetcher> =>
   data as unknown as ReturnType<ApiFetcher>;
 
-// Tab tin là đang đăng nhập mà nhận một trong các mã này → phiên đã đổi/hết → đối chiếu lại D1.
+// Nhận một trong các mã này → phiên / token của tab đã cũ → đối chiếu lại D1.
 const SESSION_LOST_CODES: string[] = [
   ErrorCode.SessionChanged,
   ErrorCode.SessionExpired,
@@ -117,12 +117,10 @@ export const clientAPI = customInitClientType(
       if (!res.success && res.errorCode === ErrorCode.ReauthRequired) {
         if (await sessionHooks.onReauthRequired()) res = await send();
       }
-      // Không bao giờ tự gửi lại request ghi khi phiên đổi — chỉ đối chiếu lại phiên.
-      if (
-        !res.success &&
-        SESSION_LOST_CODES.includes(res.errorCode) &&
-        sessionStore.get()?.authenticated
-      ) {
+      // Không bao giờ tự gửi lại request ghi khi phiên đổi — chỉ đối chiếu lại phiên (D1).
+      // Tab đang đăng nhập: chuyển S3/S4/"phiên đã thay đổi". Tab chưa đăng nhập (login, wizard
+      // liên kết): chỉ lấy token mới, user bấm lại là được.
+      if (!res.success && SESSION_LOST_CODES.includes(res.errorCode)) {
         sessionHooks.onSessionLost();
       }
       return customResponseType(res);

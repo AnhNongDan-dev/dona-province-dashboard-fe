@@ -13,7 +13,7 @@ function AuthLayout() {
         <img src="/app-icon.svg" alt="" className="size-8" />
         <span className="text-lg font-semibold">{APP_CONFIG.NAME}</span>
       </div>
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-md">
         <Outlet />
       </div>
     </div>

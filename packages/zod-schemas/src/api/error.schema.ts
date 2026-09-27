@@ -87,6 +87,26 @@ export const ErrorCode = {
   LoginRequestExpired: "LOGIN_REQUEST_EXPIRED",
   ValidationError: "VALIDATION_ERROR",
   InternalError: "INTERNAL_ERROR",
+  // Central Auth GĐ A — giao dịch liên kết / tạo mới (TASK-003)
+  LinkTxNotFound: "LINK_TX_NOT_FOUND",
+  LinkTxExpired: "LINK_TX_EXPIRED",
+  LinkTxInvalidState: "LINK_TX_INVALID_STATE",
+  LegacyAuthTooOld: "LEGACY_AUTH_TOO_OLD",
+  ExternalAlreadyLinked: "EXTERNAL_ALREADY_LINKED",
+  ExternalSharedAccount: "EXTERNAL_SHARED_ACCOUNT",
+  ExternalAccountDisabled: "EXTERNAL_ACCOUNT_DISABLED",
+  ProviderAlreadyLinked: "PROVIDER_ALREADY_LINKED",
+  ProviderUnavailable: "PROVIDER_UNAVAILABLE",
+  ProviderVerificationFailed: "PROVIDER_VERIFICATION_FAILED",
+  InvalidReturnUrl: "INVALID_RETURN_URL",
+  ContactAlreadyUsed: "CONTACT_ALREADY_USED",
+  OtpInvalid: "OTP_INVALID",
+  OtpExpired: "OTP_EXPIRED",
+  OtpTooManyAttempts: "OTP_TOO_MANY_ATTEMPTS",
+  PasswordPolicyViolation: "PASSWORD_POLICY_VIOLATION",
+  UsernameTaken: "USERNAME_TAKEN",
+  UsernamePolicyViolation: "USERNAME_POLICY_VIOLATION",
+  PhoneVerificationRequired: "PHONE_VERIFICATION_REQUIRED",
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
@@ -193,7 +213,7 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   },
   [ErrorCode.CsrfInvalid]: {
     statusCode: StatusCode.Forbidden,
-    message: "Phiên làm việc của trang đã cũ. Vui lòng tải lại trang.",
+    message: "Phiên làm việc của trang vừa được làm mới. Vui lòng thử lại.",
   },
   [ErrorCode.ReauthRequired]: {
     statusCode: StatusCode.Forbidden,
@@ -226,6 +246,86 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   [ErrorCode.InternalError]: {
     statusCode: StatusCode.InternalServerError,
     message: "Lỗi hệ thống. Vui lòng thử lại sau.",
+  },
+  [ErrorCode.LinkTxNotFound]: {
+    statusCode: StatusCode.NotFound,
+    message: "Phiên liên kết đã hết hạn hoặc không thuộc trình duyệt này.",
+  },
+  [ErrorCode.LinkTxExpired]: {
+    statusCode: StatusCode.Gone,
+    message: "Phiên liên kết đã hết hạn hoặc không thuộc trình duyệt này.",
+  },
+  [ErrorCode.LinkTxInvalidState]: {
+    statusCode: StatusCode.Conflict,
+    message: "Bước này không còn hợp lệ. Trang đã được cập nhật theo trạng thái mới nhất.",
+  },
+  [ErrorCode.LegacyAuthTooOld]: {
+    statusCode: StatusCode.Conflict,
+    message: "Lần xác minh tài khoản ở hệ thống cũ đã quá lâu. Hãy xác minh lại.",
+  },
+  [ErrorCode.ExternalAlreadyLinked]: {
+    statusCode: StatusCode.Conflict,
+    message:
+      "Tài khoản này đã được liên kết với một tài khoản SSO khác. Nếu đó cũng là tài khoản của bạn, hãy đăng nhập bằng tài khoản đó; nếu không, liên hệ quản trị.",
+  },
+  [ErrorCode.ExternalSharedAccount]: {
+    statusCode: StatusCode.Conflict,
+    message:
+      "Tài khoản này được đánh dấu dùng chung, không thể liên kết với tài khoản cá nhân. Liên hệ đơn vị để được cấp tài khoản riêng.",
+  },
+  [ErrorCode.ExternalAccountDisabled]: {
+    statusCode: StatusCode.Conflict,
+    message: "Tài khoản ở hệ thống cũ đang bị khóa. Liên hệ quản trị hệ thống đó.",
+  },
+  [ErrorCode.ProviderAlreadyLinked]: {
+    statusCode: StatusCode.Conflict,
+    message:
+      "Tài khoản SSO này đã liên kết một tài khoản khác của cùng hệ thống. Mỗi tài khoản SSO chỉ liên kết một tài khoản trên mỗi hệ thống.",
+  },
+  [ErrorCode.ProviderUnavailable]: {
+    statusCode: StatusCode.ServiceUnavailable,
+    message: "Hệ thống không phản hồi hoặc đang tạm tắt liên kết. Vui lòng thử lại sau.",
+  },
+  [ErrorCode.ProviderVerificationFailed]: {
+    statusCode: StatusCode.BadRequest,
+    message: "Không xác minh được tài khoản ở hệ thống cũ (có thể bạn đã bấm hủy).",
+  },
+  [ErrorCode.InvalidReturnUrl]: {
+    statusCode: StatusCode.BadRequest,
+    message: "Địa chỉ quay về không hợp lệ.",
+  },
+  [ErrorCode.ContactAlreadyUsed]: {
+    statusCode: StatusCode.Conflict,
+    message:
+      "Số điện thoại / email này đã gắn với một tài khoản SSO khác. Hãy dùng số / email khác.",
+  },
+  [ErrorCode.OtpInvalid]: {
+    statusCode: StatusCode.BadRequest,
+    message: "Mã xác minh không đúng.",
+  },
+  [ErrorCode.OtpExpired]: {
+    statusCode: StatusCode.Gone,
+    message: "Mã xác minh đã hết hạn. Hãy gửi mã mới.",
+  },
+  [ErrorCode.OtpTooManyAttempts]: {
+    statusCode: StatusCode.TooManyRequests,
+    message: "Đã vượt quá số lần cho phép. Hãy dùng số / email khác hoặc bắt đầu lại.",
+  },
+  [ErrorCode.PasswordPolicyViolation]: {
+    statusCode: StatusCode.BadRequest,
+    message: "Mật khẩu chưa đạt yêu cầu.",
+  },
+  [ErrorCode.UsernameTaken]: {
+    statusCode: StatusCode.Conflict,
+    message: "Tên đăng nhập đã có người dùng.",
+  },
+  [ErrorCode.UsernamePolicyViolation]: {
+    statusCode: StatusCode.BadRequest,
+    message: "Tên đăng nhập không hợp lệ.",
+  },
+  [ErrorCode.PhoneVerificationRequired]: {
+    statusCode: StatusCode.Conflict,
+    message: "Cần xác minh số điện thoại trước khi tạo tài khoản.",
   },
 };
 

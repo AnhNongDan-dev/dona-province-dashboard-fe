@@ -16,6 +16,9 @@ import { Route as AuthLoggedOutRouteImport } from './routes/_auth/logged-out'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthSessionChangedRouteImport } from './routes/_auth/session-changed'
 import { Route as AuthSessionEndedRouteImport } from './routes/_auth/session-ended'
+import { Route as AuthSsoErrorRouteImport } from './routes/_auth/sso-error'
+import { Route as AppAccountConnectionsRouteImport } from './routes/_app/account/connections'
+import { Route as AuthLinkTxIdRouteImport } from './routes/_auth/link/$txId'
 
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
@@ -50,6 +53,21 @@ const AuthSessionEndedRoute = AuthSessionEndedRouteImport.update({
   path: '/session-ended',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const AuthSsoErrorRoute = AuthSsoErrorRouteImport.update({
+  id: '/sso-error',
+  path: '/sso-error',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AppAccountConnectionsRoute = AppAccountConnectionsRouteImport.update({
+  id: '/account/connections',
+  path: '/account/connections',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AuthLinkTxIdRoute = AuthLinkTxIdRouteImport.update({
+  id: '/link/$txId',
+  path: '/link/$txId',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -57,6 +75,9 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/session-changed': typeof AuthSessionChangedRoute
   '/session-ended': typeof AuthSessionEndedRoute
+  '/sso-error': typeof AuthSsoErrorRoute
+  '/account/connections': typeof AppAccountConnectionsRoute
+  '/link/$txId': typeof AuthLinkTxIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
@@ -64,6 +85,9 @@ export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/session-changed': typeof AuthSessionChangedRoute
   '/session-ended': typeof AuthSessionEndedRoute
+  '/sso-error': typeof AuthSsoErrorRoute
+  '/account/connections': typeof AppAccountConnectionsRoute
+  '/link/$txId': typeof AuthLinkTxIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -73,14 +97,32 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/session-changed': typeof AuthSessionChangedRoute
   '/_auth/session-ended': typeof AuthSessionEndedRoute
+  '/_auth/sso-error': typeof AuthSsoErrorRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/account/connections': typeof AppAccountConnectionsRoute
+  '/_auth/link/$txId': typeof AuthLinkTxIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/logged-out' | '/login' | '/session-changed' | '/session-ended'
+    | '/'
+    | '/logged-out'
+    | '/login'
+    | '/session-changed'
+    | '/session-ended'
+    | '/sso-error'
+    | '/account/connections'
+    | '/link/$txId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/logged-out' | '/login' | '/session-changed' | '/session-ended'
+  to:
+    | '/'
+    | '/logged-out'
+    | '/login'
+    | '/session-changed'
+    | '/session-ended'
+    | '/sso-error'
+    | '/account/connections'
+    | '/link/$txId'
   id:
     | '__root__'
     | '/_app'
@@ -89,7 +131,10 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_auth/session-changed'
     | '/_auth/session-ended'
+    | '/_auth/sso-error'
     | '/_app/'
+    | '/_app/account/connections'
+    | '/_auth/link/$txId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -148,15 +193,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSessionEndedRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_auth/sso-error': {
+      id: '/_auth/sso-error'
+      path: '/sso-error'
+      fullPath: '/sso-error'
+      preLoaderRoute: typeof AuthSsoErrorRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_app/account/connections': {
+      id: '/_app/account/connections'
+      path: '/account/connections'
+      fullPath: '/account/connections'
+      preLoaderRoute: typeof AppAccountConnectionsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_auth/link/$txId': {
+      id: '/_auth/link/$txId'
+      path: '/link/$txId'
+      fullPath: '/link/$txId'
+      preLoaderRoute: typeof AuthLinkTxIdRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
   }
 }
 
 interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
+  AppAccountConnectionsRoute: typeof AppAccountConnectionsRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
+  AppAccountConnectionsRoute: AppAccountConnectionsRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
@@ -168,6 +236,8 @@ interface AuthRouteRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSessionChangedRoute: typeof AuthSessionChangedRoute
   AuthSessionEndedRoute: typeof AuthSessionEndedRoute
+  AuthSsoErrorRoute: typeof AuthSsoErrorRoute
+  AuthLinkTxIdRoute: typeof AuthLinkTxIdRoute
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
@@ -175,6 +245,8 @@ const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
   AuthSessionChangedRoute: AuthSessionChangedRoute,
   AuthSessionEndedRoute: AuthSessionEndedRoute,
+  AuthSsoErrorRoute: AuthSsoErrorRoute,
+  AuthLinkTxIdRoute: AuthLinkTxIdRoute,
 }
 
 const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(

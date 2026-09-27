@@ -1,0 +1,111 @@
+import z from "zod";
+import { commonZod } from "../common";
+
+// Mirror DTO giao dịch liên kết / tạo mới của BE (TASK-001 D9–D15, D23; TASK-003).
+// Enum ở đây chỉ dùng để rẽ nhánh wizard, không hiển thị ra UI → không có LABEL/OPTIONS.
+
+export const LinkState = {
+  AWAITING_LEGACY_VERIFICATION: "AWAITING_LEGACY_VERIFICATION",
+  LEGACY_VERIFIED: "LEGACY_VERIFIED",
+  CONTACT_VERIFIED: "CONTACT_VERIFIED",
+  CENTRAL_VERIFIED: "CENTRAL_VERIFIED",
+  COMPLETED: "COMPLETED",
+  EXPIRED: "EXPIRED",
+  CANCELLED: "CANCELLED",
+  FAILED: "FAILED",
+} as const;
+export type LinkState = (typeof LinkState)[keyof typeof LinkState];
+export const linkStateZod = z.enum(Object.values(LinkState) as [LinkState, ...LinkState[]]);
+
+export const LinkIntent = { LINK: "LINK", CREATE: "CREATE" } as const;
+export type LinkIntent = (typeof LinkIntent)[keyof typeof LinkIntent];
+export const linkIntentZod = z.enum([LinkIntent.LINK, LinkIntent.CREATE]);
+
+export const LinkAction = {
+  RETRY_LEGACY_VERIFICATION: "RETRY_LEGACY_VERIFICATION",
+  CENTRAL_LOGIN: "CENTRAL_LOGIN",
+  SWITCH_TO_LINK: "SWITCH_TO_LINK",
+  SWITCH_TO_CREATE: "SWITCH_TO_CREATE",
+  SEND_OTP: "SEND_OTP",
+  VERIFY_OTP: "VERIFY_OTP",
+  CREATE_IDENTITY: "CREATE_IDENTITY",
+  CONFIRM: "CONFIRM",
+  CANCEL: "CANCEL",
+} as const;
+export type LinkAction = (typeof LinkAction)[keyof typeof LinkAction];
+export const linkActionZod = z.enum(Object.values(LinkAction) as [LinkAction, ...LinkAction[]]);
+
+export const OtpChannel = { SMS: "SMS", EMAIL: "EMAIL" } as const;
+export type OtpChannel = (typeof OtpChannel)[keyof typeof OtpChannel];
+export const otpChannelZod = z.enum([OtpChannel.SMS, OtpChannel.EMAIL]);
+
+const legacyAccountSchema = z.object({
+  username: z.string(),
+  displayName: commonZod.fullNameResponse,
+  // Mã đơn vị của hệ thống cũ (chuỗi), không phải id của Central.
+  tenantId: z.string().nullable(),
+  tenantName: z.string().nullable(),
+});
+
+const centralIdentitySchema = z.object({
+  displayName: commonZod.fullNameResponse,
+  maskedLoginId: z.string(),
+  tenantId: z.string().nullable(),
+  tenantName: z.string().nullable(),
+});
+
+export const pendingOtpSchema = z.object({
+  channel: otpChannelZod,
+  maskedDestination: z.string(),
+  expiresAt: commonZod.datetime,
+  resendAvailableAt: commonZod.datetime,
+  sendsRemaining: z.int(),
+});
+export type PendingOtp = z.infer<typeof pendingOtpSchema>;
+
+/** D9 — wizard dựng hoàn toàn theo state / intent / allowedActions. */
+export const linkTransactionSchema = z.object({
+  txId: z.guid(),
+  state: linkStateZod,
+  intent: linkIntentZod,
+  centralStep: z.string().nullable(),
+  expiresAt: commonZod.datetime,
+  provider: z.object({ code: z.string(), name: z.string(), logoUrl: z.string().nullable() }),
+  legacyAccount: legacyAccountSchema.nullable(),
+  centralIdentity: centralIdentitySchema.nullable(),
+  allowedActions: z.array(linkActionZod),
+  legacyVerifyUrl: z.string().nullable(),
+  returnUrl: z.string().nullable(),
+  lastErrorCode: z.string().nullable(),
+  failureCode: z.string().nullable(),
+  suggestedLoginId: z.string().nullable(),
+  suggestedUsername: z.string().nullable(),
+  verifiedContacts: z
+    .array(z.object({ channel: otpChannelZod, maskedDestination: z.string() }))
+    .nullable(),
+  pendingOtps: z.array(pendingOtpSchema).nullable(),
+});
+export type LinkTransaction = z.infer<typeof linkTransactionSchema>;
+
+/** D14 gửi mã */
+export const otpSendResultSchema = pendingOtpSchema.extend({ attemptsRemaining: z.int() });
+
+/** D14 xác minh — contactBelongsToExistingIdentity=true: giao dịch đã tự chuyển sang LINK. */
+export const otpVerifyResultSchema = z.object({
+  contactBelongsToExistingIdentity: z.boolean(),
+  transaction: linkTransactionSchema,
+});
+
+/** D15 */
+export const identityCreateResultSchema = z.object({
+  username: z.string(),
+  returnUrl: z.string().nullable(),
+  csrfToken: z.string(),
+  sessionId: z.guid(),
+});
+
+/** D23 — reason chỉ có khi available=false. */
+export const usernameAvailabilitySchema = z.object({
+  available: z.boolean(),
+  reason: z.enum(["TAKEN", "RESERVED", "INVALID"]).nullable(),
+});

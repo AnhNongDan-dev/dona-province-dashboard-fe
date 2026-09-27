@@ -81,4 +81,16 @@ export const logoutResultSchema = sessionTokensSchema.extend({
   notifiedClients: z.array(notifiedClientSchema),
 });
 
-// ponytail: D7 credential-policy chưa có màn nào dùng ở GĐ 0 — thêm schema khi làm F7 (GĐ A).
+/** D7 — luật công khai; mã trong `password.rules` = `errors[].code` của PASSWORD_POLICY_VIOLATION. */
+export const credentialPolicySchema = z.object({
+  password: z.object({ minLength: z.int(), maxLength: z.int(), rules: z.array(z.string()) }),
+  username: z.object({
+    minLength: z.int(),
+    maxLength: z.int(),
+    allowedChars: z.string(),
+    mustStartWithLetter: z.boolean(),
+    /** Biểu thức chính quy dùng được ở trình duyệt. */
+    pattern: z.string(),
+  }),
+});
+export type CredentialPolicy = z.infer<typeof credentialPolicySchema>;

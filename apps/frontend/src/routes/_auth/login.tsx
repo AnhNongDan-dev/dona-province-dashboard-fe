@@ -4,6 +4,7 @@ import { type LoginContext, LogoutMode } from "@repo/zod-schemas/src/entity/cent
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
 import z from "zod";
+import { SystemLogo } from "@/components/auth/system-logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -179,7 +180,7 @@ function LoginForm({
         <CardTitle>Đăng nhập</CardTitle>
         {ctx && (
           <CardDescription className="flex items-center gap-2">
-            <ClientLogo ctx={ctx} />
+            <SystemLogo name={ctx.clientName} logoUrl={ctx.clientLogoUrl} />
             <span>
               để tiếp tục vào <span className="font-medium text-foreground">{ctx.clientName}</span>
             </span>
@@ -250,16 +251,5 @@ function LoginForm({
         </p>
       </CardContent>
     </Card>
-  );
-}
-
-function ClientLogo({ ctx }: { ctx: LoginContext }) {
-  // Logo là đường dẫn cùng origin (/client-logos/…); không có thì hiện chữ cái đầu.
-  return ctx.clientLogoUrl ? (
-    <img src={ctx.clientLogoUrl} alt="" className="size-5 rounded" />
-  ) : (
-    <span className="flex size-5 items-center justify-center rounded bg-primary text-xs font-semibold text-primary-foreground">
-      {ctx.clientName.charAt(0).toUpperCase()}
-    </span>
   );
 }

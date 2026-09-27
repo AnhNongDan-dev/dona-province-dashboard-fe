@@ -3,6 +3,7 @@ import z from "zod";
 import { ErrorCode } from "../api/error.schema";
 import { successResponseSchema } from "../api/response";
 import {
+  credentialPolicySchema,
   loginContextSchema,
   loginResultSchema,
   logoutModeZod,
@@ -38,6 +39,14 @@ export const centralAuthContract = c.router({
       ErrorCode.SessionChanged,
       ErrorCode.CsrfInvalid,
     ),
+  },
+  getCredentialPolicy: {
+    summary: "D7 — Chính sách username / password",
+    description: "Công khai; FE kiểm tra sớm khi user gõ, BE kiểm lại.",
+    method: "GET",
+    path: "/api/credential-policy",
+    responses: { 200: successResponseSchema(credentialPolicySchema) },
+    metadata: OpenAPIHelper.generateErrorCodes(),
   },
   getLoginContext: {
     summary: "D3 — Ngữ cảnh trang đăng nhập",
