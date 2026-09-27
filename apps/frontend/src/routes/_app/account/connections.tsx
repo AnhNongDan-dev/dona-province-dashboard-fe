@@ -6,9 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { findMyConnectionsRepository } from "@/repositories/findMyConnections.repository";
+import { useStartLink } from "../-components/use-start-link";
+import { UnlinkButton } from "./-components/unlink-button";
 
-// S9 — Liên kết tài khoản (GĐ A chỉ xem; liên kết / hủy liên kết từ đây thuộc GĐ B).
+// S9 — Liên kết tài khoản: xem, liên kết (F6) và hủy liên kết (D17).
 export const Route = createFileRoute("/_app/account/connections")({
   loader: () => findMyConnectionsRepository().loader(),
   component: ConnectionsPage,
@@ -18,6 +21,7 @@ const fmt = (d: Date) => format(d, "dd/MM/yyyy HH:mm");
 
 function ConnectionsPage() {
   const { data, isLoading, isError, refetch } = findMyConnectionsRepository().useQuery();
+  const { start, redirecting } = useStartLink();
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
@@ -70,13 +74,25 @@ function ConnectionsPage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="mt-1 text-muted-foreground">
-                        Chưa liên kết.
-                        {c.status === SsoStatus.AVAILABLE &&
-                          ` Đăng nhập ${c.providerName} để liên kết.`}
-                      </div>
+                      <div className="mt-1 text-muted-foreground">Chưa liên kết.</div>
                     )}
                   </div>
+                  {account ? (
+                    <UnlinkButton connection={c} account={account} />
+                  ) : (
+                    c.linkEnabled && (
+                      <Button
+                        size="sm"
+                        disabled={redirecting !== null}
+                        onClick={() => void start(c)}
+                      >
+                        {redirecting === c.providerCode && <Spinner />}
+                        {redirecting === c.providerCode
+                          ? `Đang chuyển tới ${c.providerName}…`
+                          : "Liên kết"}
+                      </Button>
+                    )
+                  )}
                 </div>
               );
             })}

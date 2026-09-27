@@ -5,6 +5,7 @@ import { successResponseSchema } from "../api/response";
 import {
   identityCreateResultSchema,
   linkIntentZod,
+  linkTransactionCreateResultSchema,
   linkTransactionSchema,
   otpChannelZod,
   otpSendResultSchema,
@@ -25,6 +26,20 @@ const TX_ERRORS = [
 ] as const;
 
 export const linkTransactionContract = c.router({
+  createLinkTransaction: {
+    summary: "D8 — Bắt đầu liên kết từ Account Center (F6)",
+    description:
+      "Cần phiên. BE đặt cookie gắn giao dịch; FE điều hướng top-level tới legacyVerifyUrl.",
+    method: "POST",
+    path: "/api/link-transactions",
+    body: z.object({ providerCode: z.string().min(1) }),
+    responses: { 200: successResponseSchema(linkTransactionCreateResultSchema) },
+    metadata: OpenAPIHelper.generateErrorCodes(
+      ErrorCode.ProviderAlreadyLinked,
+      ErrorCode.ProviderUnavailable,
+      ErrorCode.ValidationError,
+    ),
+  },
   getLinkTransaction: {
     summary: "D9 — Trạng thái giao dịch",
     description: "COMPLETED đọc được 30 phút sau khi hoàn tất; FAILED/CANCELLED tới khi hết hạn.",
@@ -46,14 +61,16 @@ export const linkTransactionContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(...TX_ERRORS),
   },
   centralLoginLinkTransaction: {
-    summary: "D10 — Đăng nhập Central trong giao dịch (FRESH_LOGIN)",
+    summary: "D10 — Đăng nhập Central trong giao dịch",
     description:
-      "Password đúng thì phiên đổi ngay. PROVIDER_ALREADY_LINKED vẫn kèm csrfToken/sessionId mới.",
+      "FRESH_LOGIN { loginId, password }: phiên đổi ngay (PROVIDER_ALREADY_LINKED vẫn kèm token mới). " +
+      "REAUTH_CURRENT { password }: chỉ xác thực lại chủ phiên, token không đổi.",
     method: "POST",
     path: "/api/link-transactions/:txId/central-login",
     pathParams: txParams,
     body: z.object({
-      loginId: z.string().trim().min(1, "Vui lòng nhập tên đăng nhập, email hoặc số điện thoại"),
+      // Bỏ trống ở REAUTH_CURRENT (BE bỏ qua).
+      loginId: z.string().trim().min(1).nullable(),
       password: z.string().min(1, "Vui lòng nhập mật khẩu"),
     }),
     responses: { 200: successResponseSchema(linkTransactionSchema) },
@@ -64,6 +81,8 @@ export const linkTransactionContract = c.router({
       ErrorCode.AccountLocked,
       ErrorCode.IdentityMerged,
       ErrorCode.ProviderAlreadyLinked,
+      ErrorCode.SessionExpired,
+      ErrorCode.SessionChanged,
     ),
   },
   confirmLinkTransaction: {

@@ -5,16 +5,15 @@ import {
   otpVerifyResultSchema,
 } from "@repo/zod-schemas/src/entity/link-transaction-schema";
 import { format } from "date-fns";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useState } from "react";
 import z from "zod";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { clientAPI } from "@/config/clientAPI.config";
-import { formatSeconds, useCountdown } from "@/hooks/use-countdown";
+import { formatSeconds, useCountdown, useSecondsUntil } from "@/hooks/use-countdown";
 import { errorParam } from "@/lib/api-error";
-import { msUntil } from "@/lib/session-store";
 import { normalizePhoneInput, VN_MOBILE, type Wizard } from "../-lib";
 
 const LABEL = { [OtpChannel.SMS]: "Số điện thoại", [OtpChannel.EMAIL]: "Email" } as const;
@@ -227,23 +226,4 @@ export function OtpChannelBlock({ w, channel }: { w: Wizard; channel: OtpChannel
       </div>
     </form>
   );
-}
-
-function useSecondsUntil(at: Date | null) {
-  const calc = () => (at ? Math.max(0, Math.ceil(msUntil(at) / 1000)) : 0);
-  const [seconds, setSeconds] = useState(calc);
-
-  useEffect(() => {
-    const left = () => (at ? Math.max(0, Math.ceil(msUntil(at) / 1000)) : 0);
-    setSeconds(left());
-    if (!at) return;
-    const timer = setInterval(() => {
-      const s = left();
-      setSeconds(s);
-      if (s === 0) clearInterval(timer);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [at]);
-
-  return seconds;
 }

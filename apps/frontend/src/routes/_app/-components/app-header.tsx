@@ -3,12 +3,23 @@ import { LogoutMode, type Session } from "@repo/zod-schemas/src/entity/central-a
 import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useLogout } from "@/hooks/use-logout";
 
-const NAV = [
-  { to: "/", label: "Các hệ thống" },
+const ACCOUNT_NAV = [
   { to: "/account/connections", label: "Liên kết tài khoản" },
+  { to: "/account/sessions", label: "Phiên & thiết bị" },
+  { to: "/account/activity", label: "Lịch sử hoạt động" },
+  { to: "/account/security", label: "Bảo mật" },
 ] as const;
+
+const NAV_LINK =
+  "text-muted-foreground hover:text-foreground data-[status=active]:font-medium data-[status=active]:text-foreground";
 
 export function AppHeader({ session }: { session: Session }) {
   const runLogout = useLogout();
@@ -24,16 +35,19 @@ export function AppHeader({ session }: { session: Session }) {
             <span className="font-semibold">{APP_CONFIG.NAME}</span>
           </Link>
           <nav className="flex items-center gap-4 text-sm">
-            {NAV.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to}
-                activeOptions={{ exact: true }}
-                className="text-muted-foreground hover:text-foreground data-[status=active]:font-medium data-[status=active]:text-foreground"
-              >
-                {item.label}
-              </Link>
-            ))}
+            <Link to="/" activeOptions={{ exact: true }} className={NAV_LINK}>
+              Các hệ thống
+            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger className={NAV_LINK}>Tài khoản ▾</DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {ACCOUNT_NAV.map((item) => (
+                  <DropdownMenuItem key={item.to} asChild>
+                    <Link to={item.to}>{item.label}</Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
         </div>
         <div className="flex items-center gap-4">

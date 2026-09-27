@@ -12,12 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AuthForgotPasswordRouteImport } from './routes/_auth/forgot-password'
 import { Route as AuthLoggedOutRouteImport } from './routes/_auth/logged-out'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthSessionChangedRouteImport } from './routes/_auth/session-changed'
 import { Route as AuthSessionEndedRouteImport } from './routes/_auth/session-ended'
 import { Route as AuthSsoErrorRouteImport } from './routes/_auth/sso-error'
+import { Route as AppAccountActivityRouteImport } from './routes/_app/account/activity'
 import { Route as AppAccountConnectionsRouteImport } from './routes/_app/account/connections'
+import { Route as AppAccountSecurityRouteImport } from './routes/_app/account/security'
+import { Route as AppAccountSessionsRouteImport } from './routes/_app/account/sessions'
 import { Route as AuthLinkTxIdRouteImport } from './routes/_auth/link/$txId'
 
 const AppRouteRoute = AppRouteRouteImport.update({
@@ -32,6 +36,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRouteRoute,
+} as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => AuthRouteRoute,
 } as any)
 const AuthLoggedOutRoute = AuthLoggedOutRouteImport.update({
   id: '/logged-out',
@@ -58,9 +67,24 @@ const AuthSsoErrorRoute = AuthSsoErrorRouteImport.update({
   path: '/sso-error',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const AppAccountActivityRoute = AppAccountActivityRouteImport.update({
+  id: '/account/activity',
+  path: '/account/activity',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppAccountConnectionsRoute = AppAccountConnectionsRouteImport.update({
   id: '/account/connections',
   path: '/account/connections',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAccountSecurityRoute = AppAccountSecurityRouteImport.update({
+  id: '/account/security',
+  path: '/account/security',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAccountSessionsRoute = AppAccountSessionsRouteImport.update({
+  id: '/account/sessions',
+  path: '/account/sessions',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AuthLinkTxIdRoute = AuthLinkTxIdRouteImport.update({
@@ -71,69 +95,93 @@ const AuthLinkTxIdRoute = AuthLinkTxIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/forgot-password': typeof AuthForgotPasswordRoute
   '/logged-out': typeof AuthLoggedOutRoute
   '/login': typeof AuthLoginRoute
   '/session-changed': typeof AuthSessionChangedRoute
   '/session-ended': typeof AuthSessionEndedRoute
   '/sso-error': typeof AuthSsoErrorRoute
+  '/account/activity': typeof AppAccountActivityRoute
   '/account/connections': typeof AppAccountConnectionsRoute
+  '/account/security': typeof AppAccountSecurityRoute
+  '/account/sessions': typeof AppAccountSessionsRoute
   '/link/$txId': typeof AuthLinkTxIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
+  '/forgot-password': typeof AuthForgotPasswordRoute
   '/logged-out': typeof AuthLoggedOutRoute
   '/login': typeof AuthLoginRoute
   '/session-changed': typeof AuthSessionChangedRoute
   '/session-ended': typeof AuthSessionEndedRoute
   '/sso-error': typeof AuthSsoErrorRoute
+  '/account/activity': typeof AppAccountActivityRoute
   '/account/connections': typeof AppAccountConnectionsRoute
+  '/account/security': typeof AppAccountSecurityRoute
+  '/account/sessions': typeof AppAccountSessionsRoute
   '/link/$txId': typeof AuthLinkTxIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteRouteWithChildren
   '/_auth': typeof AuthRouteRouteWithChildren
+  '/_auth/forgot-password': typeof AuthForgotPasswordRoute
   '/_auth/logged-out': typeof AuthLoggedOutRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/session-changed': typeof AuthSessionChangedRoute
   '/_auth/session-ended': typeof AuthSessionEndedRoute
   '/_auth/sso-error': typeof AuthSsoErrorRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/account/activity': typeof AppAccountActivityRoute
   '/_app/account/connections': typeof AppAccountConnectionsRoute
+  '/_app/account/security': typeof AppAccountSecurityRoute
+  '/_app/account/sessions': typeof AppAccountSessionsRoute
   '/_auth/link/$txId': typeof AuthLinkTxIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/forgot-password'
     | '/logged-out'
     | '/login'
     | '/session-changed'
     | '/session-ended'
     | '/sso-error'
+    | '/account/activity'
     | '/account/connections'
+    | '/account/security'
+    | '/account/sessions'
     | '/link/$txId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/forgot-password'
     | '/logged-out'
     | '/login'
     | '/session-changed'
     | '/session-ended'
     | '/sso-error'
+    | '/account/activity'
     | '/account/connections'
+    | '/account/security'
+    | '/account/sessions'
     | '/link/$txId'
   id:
     | '__root__'
     | '/_app'
     | '/_auth'
+    | '/_auth/forgot-password'
     | '/_auth/logged-out'
     | '/_auth/login'
     | '/_auth/session-changed'
     | '/_auth/session-ended'
     | '/_auth/sso-error'
     | '/_app/'
+    | '/_app/account/activity'
     | '/_app/account/connections'
+    | '/_app/account/security'
+    | '/_app/account/sessions'
     | '/_auth/link/$txId'
   fileRoutesById: FileRoutesById
 }
@@ -164,6 +212,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRouteRoute
+    }
+    '/_auth/forgot-password': {
+      id: '/_auth/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/_auth/logged-out': {
       id: '/_auth/logged-out'
@@ -200,11 +255,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSsoErrorRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_app/account/activity': {
+      id: '/_app/account/activity'
+      path: '/account/activity'
+      fullPath: '/account/activity'
+      preLoaderRoute: typeof AppAccountActivityRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/account/connections': {
       id: '/_app/account/connections'
       path: '/account/connections'
       fullPath: '/account/connections'
       preLoaderRoute: typeof AppAccountConnectionsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/account/security': {
+      id: '/_app/account/security'
+      path: '/account/security'
+      fullPath: '/account/security'
+      preLoaderRoute: typeof AppAccountSecurityRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/account/sessions': {
+      id: '/_app/account/sessions'
+      path: '/account/sessions'
+      fullPath: '/account/sessions'
+      preLoaderRoute: typeof AppAccountSessionsRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_auth/link/$txId': {
@@ -219,12 +295,18 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
+  AppAccountActivityRoute: typeof AppAccountActivityRoute
   AppAccountConnectionsRoute: typeof AppAccountConnectionsRoute
+  AppAccountSecurityRoute: typeof AppAccountSecurityRoute
+  AppAccountSessionsRoute: typeof AppAccountSessionsRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppIndexRoute: AppIndexRoute,
+  AppAccountActivityRoute: AppAccountActivityRoute,
   AppAccountConnectionsRoute: AppAccountConnectionsRoute,
+  AppAccountSecurityRoute: AppAccountSecurityRoute,
+  AppAccountSessionsRoute: AppAccountSessionsRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
@@ -232,6 +314,7 @@ const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
 )
 
 interface AuthRouteRouteChildren {
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoggedOutRoute: typeof AuthLoggedOutRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthSessionChangedRoute: typeof AuthSessionChangedRoute
@@ -241,6 +324,7 @@ interface AuthRouteRouteChildren {
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoggedOutRoute: AuthLoggedOutRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthSessionChangedRoute: AuthSessionChangedRoute,

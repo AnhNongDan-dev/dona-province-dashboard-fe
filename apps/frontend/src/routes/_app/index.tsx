@@ -5,10 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import {
   findMyConnectionsRepository,
   type MyConnectionDTO,
 } from "@/repositories/findMyConnections.repository";
+import { useStartLink } from "./-components/use-start-link";
 
 // S8 — trang mở các hệ thống. Mỗi ô một hệ thống đã đăng ký với Central (D16).
 export const Route = createFileRoute("/_app/")({
@@ -50,6 +52,7 @@ function DashboardPage() {
 
 function SystemTile({ connection: c }: { connection: MyConnectionDTO }) {
   const account = c.accounts[0]; // GĐ A–C: tối đa 1 account / hệ thống
+  const { start, redirecting } = useStartLink();
 
   return (
     <Card>
@@ -68,13 +71,20 @@ function SystemTile({ connection: c }: { connection: MyConnectionDTO }) {
         ) : (
           c.status === SsoStatus.AVAILABLE && (
             <p className="text-muted-foreground">
-              Chưa liên kết — đăng nhập {c.providerName} để liên kết.
+              {c.linkEnabled
+                ? "Chưa liên kết với tài khoản SSO của bạn."
+                : `Chưa liên kết — đăng nhập ${c.providerName} để liên kết.`}
             </p>
           )
         )}
         {c.launchUrl ? (
           <Button asChild>
             <a href={c.launchUrl}>Mở</a>
+          </Button>
+        ) : !account && c.linkEnabled ? (
+          <Button disabled={redirecting !== null} onClick={() => void start(c)}>
+            {redirecting && <Spinner />}
+            {redirecting ? `Đang chuyển tới ${c.providerName}…` : "Liên kết"}
           </Button>
         ) : (
           !account &&

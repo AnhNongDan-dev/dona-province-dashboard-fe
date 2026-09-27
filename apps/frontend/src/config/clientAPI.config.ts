@@ -70,6 +70,13 @@ const SESSION_LOST_CODES: string[] = [
   ErrorCode.Unauthenticated,
 ];
 
+// F6: giao dịch gắn với phiên đã tạo nó. Phiên hết / đổi người giữa chừng thì giao dịch FAILED và
+// wizard /link/:txId tự đọc lại D9 để hiện màn thất bại + [Làm lại] — không để bộ xử lý chung đá
+// sang S4 / "phiên đã thay đổi" (TASK-004). CSRF_INVALID vẫn đi đường chung để lấy token mới.
+const isHandledByLinkWizard = (path: string, errorCode: string) =>
+  path.includes("/api/link-transactions/") &&
+  (errorCode === ErrorCode.SessionExpired || errorCode === ErrorCode.SessionChanged);
+
 export const clientAPI = customInitClientType(
   initClient(appContract, {
     // Cùng origin với BE (dev: Vite proxy; prod: reverse proxy) — cookie phiên HttpOnly đi kèm tự nhiên.
@@ -120,7 +127,11 @@ export const clientAPI = customInitClientType(
       // Không bao giờ tự gửi lại request ghi khi phiên đổi — chỉ đối chiếu lại phiên (D1).
       // Tab đang đăng nhập: chuyển S3/S4/"phiên đã thay đổi". Tab chưa đăng nhập (login, wizard
       // liên kết): chỉ lấy token mới, user bấm lại là được.
-      if (!res.success && SESSION_LOST_CODES.includes(res.errorCode)) {
+      if (
+        !res.success &&
+        SESSION_LOST_CODES.includes(res.errorCode) &&
+        !isHandledByLinkWizard(args.path, res.errorCode)
+      ) {
         sessionHooks.onSessionLost();
       }
       return customResponseType(res);

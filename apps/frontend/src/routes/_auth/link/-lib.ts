@@ -26,6 +26,7 @@ export const TX_RELOAD_CODES: string[] = [
   ErrorCode.ProviderAlreadyLinked,
   ErrorCode.ExternalAlreadyLinked,
   ErrorCode.SessionChanged,
+  ErrorCode.SessionExpired,
   ErrorCode.LinkTxNotFound,
   ErrorCode.LinkTxExpired,
   ErrorCode.LinkTxInvalidState,

@@ -4,6 +4,7 @@ import { LogoutMode } from "@repo/zod-schemas/src/entity/central-auth-schema";
 import {
   LinkAction,
   LinkIntent,
+  LinkOrigin,
   type LinkTransaction,
 } from "@repo/zod-schemas/src/entity/link-transaction-schema";
 import { type ReactNode, useEffect, useState } from "react";
@@ -112,9 +113,14 @@ export function ErrorAlert({ message }: { message: string | null }) {
 }
 
 function BackToProvider({ tx, variant }: { tx: LinkTransaction; variant?: "outline" }) {
+  // F6 (từ Account Center): returnUrl luôn là /account/connections của chính Central.
+  const label =
+    tx.origin === LinkOrigin.ACCOUNT_CENTER
+      ? "Về Liên kết tài khoản"
+      : `Quay lại ${tx.provider.name}`;
   return tx.returnUrl ? (
     <Button asChild variant={variant}>
-      <a href={tx.returnUrl}>Quay lại {tx.provider.name}</a>
+      <a href={tx.returnUrl}>{label}</a>
     </Button>
   ) : (
     <Button asChild variant={variant}>
@@ -228,9 +234,11 @@ export function Completed({ tx }: { tx: LinkTransaction }) {
         </>
       )}
       <BackToProvider tx={tx} />
-      <Button asChild variant="outline">
-        <a href="/">Mở trang tổng hợp</a>
-      </Button>
+      {tx.origin !== LinkOrigin.ACCOUNT_CENTER && (
+        <Button asChild variant="outline">
+          <a href="/">Mở trang tổng hợp</a>
+        </Button>
+      )}
     </TxShell>
   );
 }

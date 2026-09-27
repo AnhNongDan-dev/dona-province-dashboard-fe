@@ -107,6 +107,10 @@ export const ErrorCode = {
   UsernameTaken: "USERNAME_TAKEN",
   UsernamePolicyViolation: "USERNAME_POLICY_VIOLATION",
   PhoneVerificationRequired: "PHONE_VERIFICATION_REQUIRED",
+  // Central Auth GĐ B — Account Center (TASK-004)
+  UnlinkNotAllowed: "UNLINK_NOT_ALLOWED",
+  ConnectionNotFound: "CONNECTION_NOT_FOUND",
+  SessionNotFound: "SESSION_NOT_FOUND",
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
@@ -326,6 +330,18 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   [ErrorCode.PhoneVerificationRequired]: {
     statusCode: StatusCode.Conflict,
     message: "Cần xác minh số điện thoại trước khi tạo tài khoản.",
+  },
+  [ErrorCode.UnlinkNotAllowed]: {
+    statusCode: StatusCode.Conflict,
+    message: "Không thể hủy liên kết hệ thống này. Liên hệ quản trị nếu cần.",
+  },
+  [ErrorCode.ConnectionNotFound]: {
+    statusCode: StatusCode.NotFound,
+    message: "Liên kết này không còn (có thể đã được hủy ở nơi khác).",
+  },
+  [ErrorCode.SessionNotFound]: {
+    statusCode: StatusCode.NotFound,
+    message: "Phiên đăng nhập này không còn.",
   },
 };
 

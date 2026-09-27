@@ -1,7 +1,7 @@
 import { ErrorCode } from "@repo/zod-schemas/src/api/error.schema";
 import type { ErrorResponse } from "@repo/zod-schemas/src/api/response";
 import { type LoginContext, LogoutMode } from "@repo/zod-schemas/src/entity/central-auth-schema";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
 import z from "zod";
 import { SystemLogo } from "@/components/auth/system-logo";
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/_auth/login")({
   validateSearch: z.object({
     req: z.string().optional().catch(undefined),
     switched: z.boolean().optional().catch(undefined),
+    reset: z.boolean().optional().catch(undefined),
   }),
   beforeLoad: ({ search }) => {
     if (!search.req && sessionStore.get()?.authenticated) throw redirect({ to: "/" });
@@ -42,7 +43,7 @@ const STALE_TOKEN_CODES: string[] = [
 ];
 
 function LoginPage() {
-  const { req, switched } = Route.useSearch();
+  const { req, switched, reset } = Route.useSearch();
   const context = Route.useLoaderData();
   const session = useSession();
 
@@ -72,7 +73,7 @@ function LoginPage() {
     );
   }
 
-  return <LoginForm req={req ?? null} ctx={ctx} switched={!!switched} />;
+  return <LoginForm req={req ?? null} ctx={ctx} switched={!!switched} reset={!!reset} />;
 }
 
 function LoginRequestError({ res }: { res: ErrorResponse }) {
@@ -117,10 +118,12 @@ function LoginForm({
   req,
   ctx,
   switched,
+  reset,
 }: {
   req: string | null;
   ctx: LoginContext | null;
   switched: boolean;
+  reset: boolean;
 }) {
   const [personalDevice, setPersonalDevice] = useState(false);
   const [pending, setPending] = useState(false);
@@ -188,6 +191,13 @@ function LoginForm({
         )}
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        {reset && (
+          <Alert>
+            <AlertDescription>
+              Đã đặt lại mật khẩu. Hãy đăng nhập bằng mật khẩu mới.
+            </AlertDescription>
+          </Alert>
+        )}
         {switched && (
           <Alert>
             <AlertDescription>Phiên của người dùng trước đã kết thúc.</AlertDescription>
@@ -246,9 +256,9 @@ function LoginForm({
             </Button>
           </FieldGroup>
         </form>
-        <p className="text-sm text-muted-foreground">
-          Quên mật khẩu? Liên hệ quản trị đơn vị để được cấp lại mật khẩu.
-        </p>
+        <Button asChild variant="link" className="h-auto self-start p-0">
+          <Link to="/forgot-password">Quên mật khẩu?</Link>
+        </Button>
       </CardContent>
     </Card>
   );

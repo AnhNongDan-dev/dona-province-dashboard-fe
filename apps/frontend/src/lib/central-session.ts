@@ -88,10 +88,16 @@ export async function logout(mode: LogoutMode): Promise<NotifiedClient[] | null>
     toast.error(errorMessage(res));
     return null;
   }
-  sessionStore.setAnonymous(res.data.csrfToken, res.data.sessionId);
+  applyLoggedOut(res.data.csrfToken, res.data.sessionId);
+  return res.data.notifiedClients;
+}
+
+/** Phiên hiện tại vừa kết thúc (D6, revoke-all kể cả phiên này): dùng luôn phiên ẩn danh mới BE
+ * trả, xóa cache, báo các tab khác. */
+export function applyLoggedOut(csrfToken: string, sessionId: string) {
+  sessionStore.setAnonymous(csrfToken, sessionId);
   queryClient.clear();
   broadcast("logged-out");
-  return res.data.notifiedClients;
 }
 
 // ---- S2: step-up theo yêu cầu (REAUTH_REQUIRED) ----

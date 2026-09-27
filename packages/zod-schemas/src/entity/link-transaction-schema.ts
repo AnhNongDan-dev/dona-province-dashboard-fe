@@ -35,6 +35,17 @@ export const LinkAction = {
 export type LinkAction = (typeof LinkAction)[keyof typeof LinkAction];
 export const linkActionZod = z.enum(Object.values(LinkAction) as [LinkAction, ...LinkAction[]]);
 
+/** LEGACY = F5 (từ hệ thống cũ); ACCOUNT_CENTER = F6 (từ Liên kết tài khoản, GĐ B). */
+export const LinkOrigin = { LEGACY: "LEGACY", ACCOUNT_CENTER: "ACCOUNT_CENTER" } as const;
+export type LinkOrigin = (typeof LinkOrigin)[keyof typeof LinkOrigin];
+export const linkOriginZod = z.enum([LinkOrigin.LEGACY, LinkOrigin.ACCOUNT_CENTER]);
+
+export const CentralStep = {
+  FRESH_LOGIN: "FRESH_LOGIN",
+  REAUTH_CURRENT: "REAUTH_CURRENT",
+} as const;
+export type CentralStep = (typeof CentralStep)[keyof typeof CentralStep];
+
 export const OtpChannel = { SMS: "SMS", EMAIL: "EMAIL" } as const;
 export type OtpChannel = (typeof OtpChannel)[keyof typeof OtpChannel];
 export const otpChannelZod = z.enum([OtpChannel.SMS, OtpChannel.EMAIL]);
@@ -68,6 +79,7 @@ export const linkTransactionSchema = z.object({
   txId: z.guid(),
   state: linkStateZod,
   intent: linkIntentZod,
+  origin: linkOriginZod,
   centralStep: z.string().nullable(),
   expiresAt: commonZod.datetime,
   provider: z.object({ code: z.string(), name: z.string(), logoUrl: z.string().nullable() }),
@@ -86,6 +98,12 @@ export const linkTransactionSchema = z.object({
   pendingOtps: z.array(pendingOtpSchema).nullable(),
 });
 export type LinkTransaction = z.infer<typeof linkTransactionSchema>;
+
+/** D8 (F6) — FE điều hướng top-level tới legacyVerifyUrl. */
+export const linkTransactionCreateResultSchema = z.object({
+  txId: z.guid(),
+  legacyVerifyUrl: z.string(),
+});
 
 /** D14 gửi mã */
 export const otpSendResultSchema = pendingOtpSchema.extend({ attemptsRemaining: z.int() });
