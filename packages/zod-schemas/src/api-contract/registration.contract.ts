@@ -110,7 +110,7 @@ export const registrationContract = c.router({
     responses: { 200: successResponseSchema(registrationCompleteResultSchema) },
     metadata: OpenAPIHelper.generateErrorCodes(
       ...REG_ERRORS,
-      ErrorCode.PhoneVerificationRequired,
+      ErrorCode.EmailVerificationRequired,
       ErrorCode.RateLimited,
       ErrorCode.UsernameTaken,
       ErrorCode.UsernamePolicyViolation,

@@ -14,12 +14,15 @@ export const LoginNext = {
   REDIRECT: "REDIRECT",
   PASSWORD_CHANGE_REQUIRED: "PASSWORD_CHANGE_REQUIRED",
   MFA_REQUIRED: "MFA_REQUIRED",
+  /** Tài khoản chưa có email đã xác minh (TASK-008): phiên đã cấp, phải thêm email trước. */
+  EMAIL_SETUP_REQUIRED: "EMAIL_SETUP_REQUIRED",
 } as const;
 export type LoginNext = (typeof LoginNext)[keyof typeof LoginNext];
 export const loginNextZod = z.enum([
   LoginNext.REDIRECT,
   LoginNext.PASSWORD_CHANGE_REQUIRED,
   LoginNext.MFA_REQUIRED,
+  LoginNext.EMAIL_SETUP_REQUIRED,
 ]);
 
 export const sessionIdentitySchema = z.object({
@@ -29,6 +32,8 @@ export const sessionIdentitySchema = z.object({
   displayName: commonZod.fullNameResponse,
   maskedLoginId: z.string(),
   hasVerifiedContact: z.boolean(),
+  /** Chưa có email đã xác minh → mọi API cần đăng nhập (trừ vài API) trả EMAIL_SETUP_REQUIRED. */
+  emailSetupRequired: z.boolean(),
   tenantId: z.int().nullable(),
   tenantName: z.string().nullable(),
 });

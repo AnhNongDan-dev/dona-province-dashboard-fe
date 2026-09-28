@@ -29,7 +29,8 @@ import { type MySecurityDTO, mySecurityRepository } from "@/repositories/mySecur
 import { useStartMerge } from "./merge-card";
 
 // S12a / S12c — kênh liên lạc (D24 / D20c). Mỗi tài khoản tối đa 1 SĐT + 1 email (TASK-005 Q4).
-// SĐT chỉ đổi, không gỡ (Q9); email gỡ được khi còn SĐT. Gửi mã / gỡ cần xác thực lại (S2 tự mở).
+// Email là định danh chính (TASK-008): chỉ đổi, không gỡ; SĐT tùy chọn, gỡ được.
+// Gửi mã / gỡ cần xác thực lại (S2 tự mở).
 const LABEL = { [OtpChannel.SMS]: "Số điện thoại", [OtpChannel.EMAIL]: "Email" } as const;
 type Channel = (typeof OtpChannel)[keyof typeof OtpChannel];
 
@@ -40,32 +41,19 @@ const applySecurity = (data: unknown) =>
 export function ContactsCard({ security }: { security: MySecurityDTO }) {
   const find = (ch: Channel) => security.contacts.find((c) => c.channel === ch) ?? null;
   const pending = (ch: Channel) => security.pendingContacts.find((c) => c.channel === ch) ?? null;
-  const hasPhone = !!find(OtpChannel.SMS);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Kênh liên lạc</CardTitle>
         <CardDescription>
-          Dùng để đăng nhập và lấy lại mật khẩu. Mỗi tài khoản có tối đa một số điện thoại và một
-          email.
+          Dùng để đăng nhập và lấy lại mật khẩu. Email là định danh chính của tài khoản; số điện
+          thoại tùy chọn.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 text-sm">
-        {!hasPhone && (
-          <p className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3">
-            Tài khoản chưa có số điện thoại. Hãy thêm để tự lấy lại mật khẩu khi quên.
-          </p>
-        )}
-        {[OtpChannel.SMS, OtpChannel.EMAIL].map((ch) => (
-          <ContactRow
-            key={ch}
-            channel={ch}
-            current={find(ch)}
-            pending={pending(ch)}
-            // SĐT không có [Gỡ]; email chỉ gỡ được khi còn SĐT (BE vẫn kiểm lại).
-            removable={ch === OtpChannel.EMAIL ? (hasPhone ? true : "only") : false}
-          />
+        {[OtpChannel.EMAIL, OtpChannel.SMS].map((ch) => (
+          <ContactRow key={ch} channel={ch} current={find(ch)} pending={pending(ch)} />
         ))}
       </CardContent>
     </Card>
@@ -76,13 +64,10 @@ function ContactRow({
   channel,
   current,
   pending,
-  removable,
 }: {
   channel: Channel;
   current: MySecurityDTO["contacts"][number] | null;
   pending: PendingContact | null;
-  /** true: gỡ được; "only": là kênh duy nhất nên không gỡ được; false: loại kênh không gỡ. */
-  removable: boolean | "only";
 }) {
   const [editing, setEditing] = useState(false);
   const open = editing || !!pending;
@@ -108,17 +93,11 @@ function ContactRow({
             <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
               {current ? "Đổi" : `Thêm ${LABEL[channel].toLowerCase()}`}
             </Button>
-            {current && removable !== false && (
-              <RemoveEmailButton disabled={removable === "only"} />
-            )}
+            {/* Email là định danh chính → chỉ đổi (BE vẫn chặn gỡ bằng LAST_AUTH_METHOD). */}
+            {current && channel === OtpChannel.SMS && <RemovePhoneButton />}
           </div>
         )}
       </div>
-      {current && removable === "only" && (
-        <p className="text-xs text-muted-foreground">
-          Email đang là kênh liên lạc duy nhất nên chưa gỡ được. Thêm số điện thoại trước.
-        </p>
-      )}
       {open && (
         <ContactOtpForm
           channel={channel}
@@ -131,8 +110,11 @@ function ContactRow({
   );
 }
 
-/** Gửi mã → nhập mã. Mã đang chờ lấy từ pendingContacts (reload vẫn dựng lại được). */
-function ContactOtpForm({
+/**
+ * Gửi mã → nhập mã. Mã đang chờ lấy từ pendingContacts (reload vẫn dựng lại được).
+ * `onClose` null = bắt buộc (màn thêm email): không có nút Hủy / Đóng.
+ */
+export function ContactOtpForm({
   channel,
   pending,
   replacing,
@@ -141,7 +123,7 @@ function ContactOtpForm({
   channel: Channel;
   pending: PendingContact | null;
   replacing: boolean;
-  onClose: () => void;
+  onClose: (() => void) | null;
 }) {
   const [destination, setDestination] = useState("");
   const [enteringNew, setEnteringNew] = useState(!pending);
@@ -200,7 +182,7 @@ function ContactOtpForm({
     if (res.success) {
       applySecurity(res.data);
       toast.success(replacing ? `Đã đổi ${label}.` : `Đã thêm ${label}.`);
-      return onClose();
+      return onClose?.();
     }
     if (res.errorCode === ErrorCode.OtpInvalid) {
       const left = errorParam(res, "attemptsRemaining", "number");
@@ -265,14 +247,16 @@ function ContactOtpForm({
               ? `Gửi mã sau ${formatSeconds(lock.secondsLeft)}`
               : "Gửi mã xác minh"}
           </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            onClick={pending ? () => setEnteringNew(false) : onClose}
-          >
-            {pending ? "Thôi, nhập mã đã gửi" : "Hủy"}
-          </Button>
+          {(pending || onClose) && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={pending ? () => setEnteringNew(false) : (onClose ?? undefined)}
+            >
+              {pending ? "Thôi, nhập mã đã gửi" : "Hủy"}
+            </Button>
+          )}
         </div>
       </form>
     );
@@ -322,33 +306,35 @@ function ContactOtpForm({
         >
           Dùng {channel === OtpChannel.SMS ? "số" : "email"} khác
         </Button>
-        <Button type="button" size="sm" variant="ghost" onClick={onClose}>
-          Đóng
-        </Button>
+        {onClose && (
+          <Button type="button" size="sm" variant="ghost" onClick={onClose}>
+            Đóng
+          </Button>
+        )}
       </div>
     </form>
   );
 }
 
-/** D20c — chỉ email gỡ được (cần xác thực lại). */
-function RemoveEmailButton({ disabled }: { disabled: boolean }) {
+/** D20c — chỉ SĐT gỡ được (cần xác thực lại). */
+function RemovePhoneButton() {
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
 
   async function remove() {
     setPending(true);
     const res = await clientAPI.AccountCenter.removeMyContact({
-      params: { channel: OtpChannel.EMAIL },
+      params: { channel: OtpChannel.SMS },
     });
     setPending(false);
     setOpen(false);
     if (res.success) {
       applySecurity(res.data);
-      return toast.success("Đã gỡ email.");
+      return toast.success("Đã gỡ số điện thoại.");
     }
     toast.error(
       res.errorCode === ErrorCode.ReauthRequired
-        ? "Cần xác nhận lại mật khẩu để gỡ email."
+        ? "Cần xác nhận lại mật khẩu để gỡ số điện thoại."
         : errorMessage(res),
     );
     void mySecurityRepository().invalidate();
@@ -356,22 +342,22 @@ function RemoveEmailButton({ disabled }: { disabled: boolean }) {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <Button size="sm" variant="outline" disabled={disabled} onClick={() => setOpen(true)}>
+      <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
         Gỡ
       </Button>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Gỡ email?</AlertDialogTitle>
+          <AlertDialogTitle>Gỡ số điện thoại?</AlertDialogTitle>
           <AlertDialogDescription>
-            Bạn sẽ không đăng nhập hay lấy lại mật khẩu bằng email này được nữa. Một thông báo sẽ
-            được gửi tới email này và số điện thoại của bạn.
+            Bạn sẽ không đăng nhập hay lấy lại mật khẩu bằng số này được nữa. Một thông báo sẽ được
+            gửi tới số này và email của bạn.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>Không</AlertDialogCancel>
           <Button variant="destructive" disabled={pending} onClick={() => void remove()}>
             {pending && <Spinner />}
-            Gỡ email
+            Gỡ số điện thoại
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

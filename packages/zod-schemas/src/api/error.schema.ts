@@ -106,7 +106,9 @@ export const ErrorCode = {
   PasswordPolicyViolation: "PASSWORD_POLICY_VIOLATION",
   UsernameTaken: "USERNAME_TAKEN",
   UsernamePolicyViolation: "USERNAME_POLICY_VIOLATION",
-  PhoneVerificationRequired: "PHONE_VERIFICATION_REQUIRED",
+  EmailVerificationRequired: "EMAIL_VERIFICATION_REQUIRED",
+  // Tài khoản chưa có email đã xác minh (TASK-008) — bị giữ ở màn thêm email.
+  EmailSetupRequired: "EMAIL_SETUP_REQUIRED",
   // Central Auth GĐ B — Account Center (TASK-004)
   UnlinkNotAllowed: "UNLINK_NOT_ALLOWED",
   ConnectionNotFound: "CONNECTION_NOT_FOUND",
@@ -339,9 +341,13 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
     statusCode: StatusCode.BadRequest,
     message: "Tên đăng nhập không hợp lệ.",
   },
-  [ErrorCode.PhoneVerificationRequired]: {
+  [ErrorCode.EmailVerificationRequired]: {
     statusCode: StatusCode.Conflict,
-    message: "Cần xác minh số điện thoại trước khi tạo tài khoản.",
+    message: "Cần xác minh email trước khi đăng ký.",
+  },
+  [ErrorCode.EmailSetupRequired]: {
+    statusCode: StatusCode.Forbidden,
+    message: "Hãy thêm và xác minh email cho tài khoản để tiếp tục.",
   },
   [ErrorCode.UnlinkNotAllowed]: {
     statusCode: StatusCode.Conflict,

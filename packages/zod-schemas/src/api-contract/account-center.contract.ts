@@ -90,7 +90,7 @@ export const accountCenterContract = c.router({
   addMyContact: {
     summary: "D24 — Gửi mã thêm / đổi kênh liên lạc",
     description:
-      "Cần xác thực lại ≤ 5 phút. Gọi lại cùng channel = gửi lại mã (destination khác thì thay đích).",
+      "Cần xác thực lại ≤ 5 phút. Gọi lại cùng channel = gửi lại mã (destination khác thì thay đích). Tài khoản chưa có email: chỉ channel=EMAIL.",
     method: "POST",
     path: "/api/me/contacts",
     body: z.object({ channel: otpChannelZod, destination: z.string().trim().min(1) }),
@@ -100,6 +100,7 @@ export const accountCenterContract = c.router({
       ErrorCode.ValidationError,
       ErrorCode.RateLimited,
       ErrorCode.OtpTooManyAttempts,
+      ErrorCode.EmailSetupRequired,
     ),
   },
   verifyMyContact: {
@@ -115,12 +116,13 @@ export const accountCenterContract = c.router({
       ErrorCode.OtpExpired,
       ErrorCode.OtpTooManyAttempts,
       ErrorCode.ContactAlreadyUsed,
+      ErrorCode.EmailSetupRequired,
     ),
   },
   removeMyContact: {
     summary: "D20c — Gỡ kênh liên lạc",
     description:
-      "Cần xác thực lại ≤ 5 phút. SĐT không gỡ được; email gỡ được nếu còn SĐT. Trả D20a.",
+      "Cần xác thực lại ≤ 5 phút. Email là định danh chính — không gỡ được (LAST_AUTH_METHOD), chỉ đổi; SĐT gỡ được. Trả D20a.",
     method: "DELETE",
     path: "/api/me/contacts/:channel",
     pathParams: z.object({ channel: otpChannelZod }),

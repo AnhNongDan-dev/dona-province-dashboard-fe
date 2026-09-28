@@ -237,7 +237,7 @@ function RegisterFlow() {
     }
     if (
       res.errorCode === ErrorCode.ContactAlreadyUsed ||
-      res.errorCode === ErrorCode.PhoneVerificationRequired
+      res.errorCode === ErrorCode.EmailVerificationRequired
     ) {
       void reload();
     }
@@ -275,7 +275,7 @@ function RegisterFlow() {
   const stepName = {
     profile: "Thông tin tài khoản",
     password: "Mật khẩu",
-    contacts: "Xác minh số điện thoại (bắt buộc) và email (tùy chọn)",
+    contacts: "Xác minh email (bắt buộc) và số điện thoại (tùy chọn)",
   }[step];
 
   return (
@@ -346,9 +346,9 @@ function RegisterFlow() {
               <Alert>
                 <AlertDescription className="flex flex-col gap-2">
                   <span>
-                    Số điện thoại / email này đã gắn với một tài khoản Thành Đoàn Đồng Nai Central —
+                    Email / số điện thoại này đã gắn với một tài khoản Thành Đoàn Đồng Nai Central —
                     nhiều khả năng bạn đã có tài khoản. Hãy đăng nhập bằng tài khoản đó
-                    {lt ? " để liên kết" : ""}. Nếu không phải của bạn, hãy dùng số / email khác.
+                    {lt ? " để liên kết" : ""}. Nếu không phải của bạn, hãy dùng email / số khác.
                   </span>
                   <span className="flex gap-3">
                     <Button size="sm" onClick={goLogin}>
@@ -362,18 +362,16 @@ function RegisterFlow() {
               </Alert>
             )}
             <div className="flex flex-col gap-1">
-              <div className="text-sm font-medium">Số điện thoại di động (bắt buộc)</div>
-              <OtpChannelBlock w={w} channel={OtpChannel.SMS} />
+              <div className="text-sm font-medium">Email (bắt buộc)</div>
+              <OtpChannelBlock w={w} channel={OtpChannel.EMAIL} />
             </div>
             <div className="flex flex-col gap-1">
-              <div className="text-sm font-medium">Email (tùy chọn)</div>
-              <OtpChannelBlock w={w} channel={OtpChannel.EMAIL} />
+              <div className="text-sm font-medium">Số điện thoại di động (tùy chọn)</div>
+              <OtpChannelBlock w={w} channel={OtpChannel.SMS} />
             </div>
             <ErrorAlert message={error} />
             {!w.can(RegistrationAction.COMPLETE) && (
-              <p className="text-sm text-muted-foreground">
-                Cần xác minh số điện thoại để đăng ký.
-              </p>
+              <p className="text-sm text-muted-foreground">Cần xác minh email để đăng ký.</p>
             )}
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setStep("password")}>

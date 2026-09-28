@@ -135,6 +135,14 @@ export const clientAPI = customInitClientType(
       ) {
         sessionHooks.onSessionLost();
       }
+      // Tài khoản chưa có email đã xác minh (TASK-008): mọi trang của app → màn thêm email.
+      if (
+        !res.success &&
+        res.errorCode === ErrorCode.EmailSetupRequired &&
+        window.location.pathname !== "/email-setup"
+      ) {
+        window.location.assign("/email-setup");
+      }
       return customResponseType(res);
     },
   }),

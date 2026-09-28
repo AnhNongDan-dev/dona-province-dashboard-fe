@@ -1,6 +1,10 @@
 import { ErrorCode } from "@repo/zod-schemas/src/api/error.schema";
 import type { ErrorResponse } from "@repo/zod-schemas/src/api/response";
-import { type LoginContext, LogoutMode } from "@repo/zod-schemas/src/entity/central-auth-schema";
+import {
+  type LoginContext,
+  LoginNext,
+  LogoutMode,
+} from "@repo/zod-schemas/src/entity/central-auth-schema";
 import { createFileRoute, Link, redirect, useRouterState } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
 import z from "zod";
@@ -162,6 +166,11 @@ function LoginForm({
 
     if (res.success) {
       broadcast("changed");
+      // Chưa có email đã xác minh → thêm email trước; xong thì đi tiếp bằng req (D3 continueUrl).
+      if (res.data.next === LoginNext.EMAIL_SETUP_REQUIRED) {
+        const query = req ? `?${new URLSearchParams({ req })}` : "";
+        return window.location.assign(`/email-setup${query}`);
+      }
       window.location.assign(res.data.redirectUrl); // giữ pending tới khi rời trang
       return;
     }
