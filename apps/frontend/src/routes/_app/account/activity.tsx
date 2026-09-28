@@ -1,8 +1,9 @@
 import {
   ACTIVITY_TYPE_LABEL,
   ACTIVITY_TYPE_OPTIONS,
+  type Activity,
   ActivityResult,
-  type ActivityType,
+  ActivityType,
   activityTypeZod,
 } from "@repo/zod-schemas/src/entity/account-center-schema";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -182,10 +183,7 @@ function ActivityPage() {
                     </TableCell>
                     <TableCell>
                       {ACTIVITY_TYPE_LABEL[a.type as ActivityType] ?? "Hoạt động khác"}
-                      {a.providerName && (
-                        <span className="text-muted-foreground"> · {a.providerName}</span>
-                      )}
-                      {a.detail && <span className="text-muted-foreground"> · {a.detail}</span>}
+                      <ActivityDetail activity={a} />
                     </TableCell>
                     <TableCell>
                       {a.result === ActivityResult.FAILURE ? (
@@ -229,4 +227,24 @@ function ActivityPage() {
       </div>
     </div>
   );
+}
+
+/** Phần sau nhãn: tên hệ thống + detail (giá trị đã che do BE trả). Đăng ký: detail là nguồn. */
+function ActivityDetail({ activity: a }: { activity: Activity }) {
+  const parts =
+    a.type === ActivityType.IDENTITY_REGISTERED
+      ? [
+          a.providerName
+            ? `từ ${a.providerName}`
+            : a.detail === "CENTRAL"
+              ? "đăng ký trực tiếp"
+              : null,
+        ]
+      : [a.providerName, a.detail];
+  return parts.filter(Boolean).map((part) => (
+    <span key={part} className="text-muted-foreground">
+      {" "}
+      · {part}
+    </span>
+  ));
 }
