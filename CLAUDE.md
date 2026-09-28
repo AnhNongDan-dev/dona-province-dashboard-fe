@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-dona-province-dashboard-fe — frontend monorepo for the DONA Province Dashboard. React 19 + Vite + TanStack Router/Query/Table + ts-rest + Zod v4 + Tailwind v4 + Radix (shadcn), pnpm workspaces + Turborepo, Biome. Stack inherited from the sister project ELP-fe (`D:\DONASKY\SOURCE\ELP\ELP-fe`) — see `TECH-STACK.md`.
+dona-province-dashboard-fe — frontend monorepo for **Thành Đoàn Đồng Nai Central**, the central account / SSO portal for Thành Đoàn's existing systems (self-registration with email as primary identifier, OIDC login, link / merge accounts, sessions, contacts). React 19 + Vite + TanStack Router/Query/Table + ts-rest + Zod v4 + Tailwind v4 + Radix (shadcn), pnpm workspaces + Turborepo, Biome. Stack inherited from the sister project ELP-fe (`D:\DONASKY\SOURCE\ELP\ELP-fe`) — see `TECH-STACK.md`.
 
 ## Backend
 

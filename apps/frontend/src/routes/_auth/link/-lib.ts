@@ -44,5 +44,3 @@ export type Wizard = {
   fail: (res: ErrorResponse) => string;
   can: (action: LinkAction) => boolean;
 };
-
-export { normalizePhoneInput, VN_MOBILE } from "@/lib/contact-validation";

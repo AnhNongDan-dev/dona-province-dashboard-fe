@@ -54,7 +54,7 @@ export function isNewPasswordReady(
   );
 }
 
-/** Ô mật khẩu mới + nhập lại + danh sách điều kiện đạt / chưa đạt (F7, S12, S15). */
+/** Ô mật khẩu mới + nhập lại + danh sách điều kiện đạt / chưa đạt (đăng ký, S12, S15). */
 export function NewPasswordFields({
   policy,
   username,
