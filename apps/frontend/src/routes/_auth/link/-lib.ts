@@ -31,7 +31,6 @@ export const TX_RELOAD_CODES: string[] = [
   ErrorCode.LinkTxExpired,
   ErrorCode.LinkTxInvalidState,
   ErrorCode.LegacyAuthTooOld,
-  ErrorCode.PhoneVerificationRequired,
 ];
 
 /** Những gì mỗi bước của wizard cần — truyền xuống từ trang /link/$txId. */
@@ -44,9 +43,6 @@ export type Wizard = {
   /** Hiện lỗi của một request; mã trong TX_RELOAD_CODES thì đọc lại D9. Trả câu để hiển thị. */
   fail: (res: ErrorResponse) => string;
   can: (action: LinkAction) => boolean;
-  /** Thông báo khi giao dịch tự chuyển sang LINK (OTP đúng mà SĐT/email đã có chủ). */
-  notice: string | null;
-  setNotice: (notice: string | null) => void;
 };
 
 export { normalizePhoneInput, VN_MOBILE } from "@/lib/contact-validation";

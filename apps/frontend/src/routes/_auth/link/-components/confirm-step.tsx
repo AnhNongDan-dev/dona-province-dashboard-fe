@@ -37,7 +37,7 @@ export function ConfirmStep({ w, onCancel }: { w: Wizard; onCancel: () => void }
     >
       {tx.centralIdentity && (
         <AccountCard
-          label="Tài khoản SSO"
+          label="Tài khoản Thành Đoàn Đồng Nai Central"
           primary={tx.centralIdentity.displayName}
           secondary={tx.centralIdentity.maskedLoginId}
           tenantName={tx.centralIdentity.tenantName}

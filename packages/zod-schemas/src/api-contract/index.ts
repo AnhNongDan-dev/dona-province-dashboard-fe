@@ -5,6 +5,7 @@ import { connectionContract } from "./connection.contract";
 import { linkTransactionContract } from "./link-transaction.contract";
 import { mergeTransactionContract } from "./merge-transaction.contract";
 import { passwordResetContract } from "./password-reset.contract";
+import { registrationContract } from "./registration.contract";
 
 const c = initContract();
 
@@ -16,4 +17,5 @@ export const appContract = c.router({
   AccountCenter: accountCenterContract,
   PasswordReset: passwordResetContract,
   MergeTransaction: mergeTransactionContract,
+  Registration: registrationContract,
 });

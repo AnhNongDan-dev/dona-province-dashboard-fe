@@ -82,8 +82,8 @@ function ActivityPage() {
       <div>
         <h1 className="text-xl font-semibold">Lịch sử hoạt động</h1>
         <p className="text-sm text-muted-foreground">
-          Toàn bộ hoạt động của tài khoản SSO này, kể cả lần đăng nhập sai mật khẩu. Thấy hoạt động
-          lạ, hãy đổi mật khẩu ngay.
+          Toàn bộ hoạt động của tài khoản này, kể cả lần đăng nhập sai mật khẩu. Thấy hoạt động lạ,
+          hãy đổi mật khẩu ngay.
         </p>
       </div>
 

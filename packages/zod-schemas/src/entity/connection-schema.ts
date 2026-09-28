@@ -17,7 +17,7 @@ export const ssoStatusZod = z.enum([
 export const SSO_STATUS_LABEL: Record<SsoStatus, string> = {
   [SsoStatus.AVAILABLE]: "Hoạt động",
   [SsoStatus.MAINTENANCE]: "Đang bảo trì",
-  [SsoStatus.SSO_NOT_SUPPORTED]: "Chưa hỗ trợ đăng nhập SSO",
+  [SsoStatus.SSO_NOT_SUPPORTED]: "Chưa hỗ trợ đăng nhập bằng Thành Đoàn Đồng Nai Central",
 };
 
 export const connectionAccountSchema = z.object({

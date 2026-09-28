@@ -1,9 +1,9 @@
 import { ErrorCode } from "@repo/zod-schemas/src/api/error.schema";
+import { OtpChannel } from "@repo/zod-schemas/src/entity/link-transaction-schema";
 import {
-  LinkAction,
-  OtpChannel,
   otpVerifyResultSchema,
-} from "@repo/zod-schemas/src/entity/link-transaction-schema";
+  RegistrationAction,
+} from "@repo/zod-schemas/src/entity/registration-schema";
 import { format } from "date-fns";
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,27 +14,21 @@ import { clientAPI } from "@/config/clientAPI.config";
 import { formatSeconds, useCountdown, useSecondsUntil } from "@/hooks/use-countdown";
 import { errorParam } from "@/lib/api-error";
 import { isValidContact, normalizeContact } from "@/lib/contact-validation";
-import type { Wizard } from "../-lib";
+import { type RegWizard, shortRetry } from "../-lib";
 
 const LABEL = { [OtpChannel.SMS]: "Số điện thoại", [OtpChannel.EMAIL]: "Email" } as const;
 
-const SWITCHED_NOTICE = {
-  [OtpChannel.SMS]:
-    'Số điện thoại này đã gắn với một tài khoản SSO — nhiều khả năng bạn đã có tài khoản. Hãy đăng nhập tài khoản đó để liên kết. Nếu số này không phải của bạn, chọn "Tôi chưa có tài khoản SSO — tạo mới" và dùng số khác.',
-  [OtpChannel.EMAIL]:
-    'Email này đã gắn với một tài khoản SSO — nhiều khả năng bạn đã có tài khoản. Hãy đăng nhập tài khoản đó để liên kết. Nếu email này không phải của bạn, chọn "Tôi chưa có tài khoản SSO — tạo mới" và dùng email khác.',
-} as const;
-
 /**
- * Một kênh liên lạc trong F7: nhập → gửi mã → nhập mã. Trạng thái (đã xác minh / mã đang chờ)
- * lấy từ D9 nên reload vẫn dựng lại được; riêng giá trị chưa che chỉ nằm trong bộ nhớ tab —
- * mất thì muốn gửi lại phải nhập lại.
+ * Một kênh liên lạc khi đăng ký: nhập → gửi mã → nhập mã. Trạng thái (đã xác minh / mã đang chờ)
+ * lấy từ phiên đăng ký nên reload vẫn dựng lại được; riêng giá trị chưa che chỉ nằm trong bộ nhớ
+ * tab — mất thì muốn gửi lại phải nhập lại.
  */
-export function OtpChannelBlock({ w, channel }: { w: Wizard; channel: OtpChannel }) {
-  const { tx } = w;
+export function OtpChannelBlock({ w, channel }: { w: RegWizard; channel: OtpChannel }) {
+  const { reg } = w;
+  const regId = reg.regId;
   const label = LABEL[channel];
-  const verified = tx.verifiedContacts?.find((c) => c.channel === channel);
-  const pending = tx.pendingOtps?.find((c) => c.channel === channel);
+  const verified = channel === OtpChannel.SMS ? reg.verifiedPhone : reg.verifiedEmail;
+  const pending = reg.pendingOtps.find((c) => c.channel === channel);
 
   const [editing, setEditing] = useState(!verified && !pending);
   const [destination, setDestination] = useState("");
@@ -55,8 +49,8 @@ export function OtpChannelBlock({ w, channel }: { w: Wizard; channel: OtpChannel
     }
     setBusy(true);
     setError(null);
-    const res = await clientAPI.LinkTransaction.sendLinkOtp({
-      params: { txId: w.txId },
+    const res = await clientAPI.Registration.sendRegistrationOtp({
+      params: { regId },
       body: { channel, destination: dest },
     });
     setBusy(false);
@@ -67,7 +61,8 @@ export function OtpChannelBlock({ w, channel }: { w: Wizard; channel: OtpChannel
       return w.reload(); // pendingOtps + allowedActions mới
     }
     if (res.errorCode === ErrorCode.RateLimited) {
-      lock.start(errorParam(res, "retryAfterSeconds", "number") ?? 60);
+      const wait = shortRetry(errorParam(res, "retryAfterSeconds", "number"));
+      if (wait) lock.start(wait);
     }
     setError(res.errorCode === ErrorCode.ValidationError ? `${label} không hợp lệ` : w.fail(res));
   }
@@ -77,16 +72,19 @@ export function OtpChannelBlock({ w, channel }: { w: Wizard; channel: OtpChannel
     if (!code.trim()) return setError("Vui lòng nhập mã xác minh");
     setBusy(true);
     setError(null);
-    const res = await clientAPI.LinkTransaction.verifyLinkOtp({
-      params: { txId: w.txId },
+    const res = await clientAPI.Registration.verifyRegistrationOtp({
+      params: { regId },
       body: { channel, code: code.trim() },
     });
     setBusy(false);
     if (res.success) {
       const result = otpVerifyResultSchema.parse(res.data);
       setCode("");
-      if (result.contactBelongsToExistingIdentity) w.setNotice(SWITCHED_NOTICE[channel]);
-      return w.setTx(result.transaction);
+      if (result.contactBelongsToExistingIdentity) {
+        setEditing(true);
+        w.onExistingIdentity(result.suggestedLoginId);
+      }
+      return w.setReg(result.registration);
     }
     if (res.errorCode === ErrorCode.OtpInvalid) {
       const left = errorParam(res, "attemptsRemaining", "number");
@@ -101,7 +99,7 @@ export function OtpChannelBlock({ w, channel }: { w: Wizard; channel: OtpChannel
     }
   }
 
-  const canSend = w.can(LinkAction.SEND_OTP);
+  const canSend = w.can(RegistrationAction.SEND_OTP);
   const lockedFor = Math.max(lock.secondsLeft, resendIn);
 
   // Đã xác minh, không đang đổi.
@@ -109,7 +107,7 @@ export function OtpChannelBlock({ w, channel }: { w: Wizard; channel: OtpChannel
     return (
       <div className="flex items-center justify-between gap-2 rounded-md border p-3 text-sm">
         <span>
-          ✓ {label}: <span className="font-medium">{verified.maskedDestination}</span> đã xác minh
+          ✓ {label}: <span className="font-medium">{verified}</span> đã xác minh
         </span>
         {canSend && (
           <Button variant="link" className="h-auto p-0" onClick={() => setEditing(true)}>
@@ -140,7 +138,7 @@ export function OtpChannelBlock({ w, channel }: { w: Wizard; channel: OtpChannel
           {error && <FieldError>{error}</FieldError>}
         </Field>
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="submit" size="sm" disabled={busy || !w.can(LinkAction.VERIFY_OTP)}>
+          <Button type="submit" size="sm" disabled={busy || !w.can(RegistrationAction.VERIFY_OTP)}>
             {busy && <Spinner />}
             Xác minh
           </Button>
@@ -214,7 +212,7 @@ export function OtpChannelBlock({ w, channel }: { w: Wizard; channel: OtpChannel
               setError(null);
             }}
           >
-            Thôi, giữ {pending ? "mã đã gửi" : verified?.maskedDestination}
+            Thôi, giữ {pending ? "mã đã gửi" : verified}
           </Button>
         )}
       </div>

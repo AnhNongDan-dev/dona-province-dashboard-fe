@@ -1,6 +1,7 @@
 import { SSO_STATUS_LABEL, SsoStatus } from "@repo/zod-schemas/src/entity/connection-schema";
 import { createFileRoute } from "@tanstack/react-router";
 import { SystemLogo } from "@/components/auth/system-logo";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,11 +41,27 @@ function DashboardPage() {
       ) : data.length === 0 ? (
         <p className="text-muted-foreground">Chưa có hệ thống nào được đăng ký.</p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {data.map((c) => (
-            <SystemTile key={c.providerCode} connection={c} />
-          ))}
-        </div>
+        <>
+          {/* Tài khoản mới đăng ký chưa có quyền gì ở hệ thống nào — mời liên kết (TASK-007). */}
+          {data.every((c) => c.accounts.length === 0) && (
+            <Alert>
+              <AlertDescription>
+                <span>
+                  <span className="font-medium text-foreground">
+                    Liên kết các tài khoản hệ thống của bạn.
+                  </span>{" "}
+                  Bấm [Liên kết] ở hệ thống bạn đang có tài khoản để từ nay vào hệ thống đó bằng tài
+                  khoản Thành Đoàn Đồng Nai Central.
+                </span>
+              </AlertDescription>
+            </Alert>
+          )}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {data.map((c) => (
+              <SystemTile key={c.providerCode} connection={c} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
@@ -72,7 +89,7 @@ function SystemTile({ connection: c }: { connection: MyConnectionDTO }) {
           c.status === SsoStatus.AVAILABLE && (
             <p className="text-muted-foreground">
               {c.linkEnabled
-                ? "Chưa liên kết với tài khoản SSO của bạn."
+                ? "Chưa liên kết với tài khoản Thành Đoàn Đồng Nai Central của bạn."
                 : `Chưa liên kết — đăng nhập ${c.providerName} để liên kết.`}
             </p>
           )

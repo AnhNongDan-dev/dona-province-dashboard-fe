@@ -188,7 +188,7 @@ function SourceLoginStep({ step }: { step: Step }) {
 
   return (
     <StepCard
-      title="Đăng nhập tài khoản SSO muốn gộp vào"
+      title="Đăng nhập tài khoản muốn gộp vào"
       description={
         <>
           Tài khoản đang đăng nhập (<strong>{tx.target.displayName}</strong> ·{" "}
@@ -355,7 +355,7 @@ function ConfirmStep({ step }: { step: Step }) {
 
       {blocked.length > 0 || !step.can(LinkAction.CONFIRM) ? (
         <ErrorAlert
-          message={`Không thể tự gộp: ${blocked.map((c) => c.providerName).join(", ")} chỉ còn đăng nhập bằng SSO và hai tài khoản đang liên kết hai account khác nhau. Liên hệ quản trị để được hỗ trợ.`}
+          message={`Không thể tự gộp: ${blocked.map((c) => c.providerName).join(", ")} chỉ còn đăng nhập bằng Thành Đoàn Đồng Nai Central và hai tài khoản đang liên kết hai account khác nhau. Liên hệ quản trị để được hỗ trợ.`}
         />
       ) : (
         <>

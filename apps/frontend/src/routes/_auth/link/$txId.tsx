@@ -3,10 +3,11 @@ import type { ErrorResponse } from "@repo/zod-schemas/src/api/response";
 import { credentialPolicySchema } from "@repo/zod-schemas/src/entity/central-auth-schema";
 import {
   CentralStep,
+  LinkAction,
   LinkIntent,
   LinkState,
 } from "@repo/zod-schemas/src/entity/link-transaction-schema";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate, useRouterState } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { clientAPI } from "@/config/clientAPI.config";
@@ -14,12 +15,11 @@ import { errorMessage } from "@/lib/api-error";
 import { loadSession } from "@/lib/central-session";
 import { CentralLoginStep } from "./-components/central-login-step";
 import { ConfirmStep } from "./-components/confirm-step";
-import { CreateFlow } from "./-components/create-flow";
 import { ReauthCurrentStep } from "./-components/reauth-current-step";
 import { AwaitingLegacy, Completed, Ended, TxLoadError } from "./-components/tx-parts";
 import { fetchTx, parseTx, TX_RELOAD_CODES, type TxResult, type Wizard } from "./-lib";
 
-// S5/S6/S7 — wizard liên kết / tạo mới. BE chuyển trình duyệt tới đây sau khi xác minh tài khoản
+// S5/S6/S7 — wizard liên kết. BE chuyển trình duyệt tới đây sau khi xác minh tài khoản
 // ở hệ thống cũ. Giao dịch gắn với trình duyệt bằng cookie của BE; FE dựng hoàn toàn theo D9 và
 // chỉ hiện nút có trong allowedActions. Cố ý không cache (React Query): mỗi bước là một thao tác
 // trên giao dịch, dữ liệu cũ vô nghĩa.
@@ -41,7 +41,8 @@ function LinkPage() {
   const { txId } = Route.useParams();
   const loaded = Route.useLoaderData();
   const [result, setResult] = useState<TxResult>(loaded.tx);
-  const [notice, setNotice] = useState<string | null>(null);
+  // Từ trang đăng ký bấm "Đăng nhập" → ở lại form đăng nhập dù giao dịch mở với intent=CREATE.
+  const preferLogin = useRouterState({ select: (s) => !!s.location.state.preferLogin });
 
   const reload = useCallback(async () => setResult(await fetchTx(txId)), [txId]);
 
@@ -66,8 +67,6 @@ function LinkPage() {
       return errorMessage(res);
     },
     can: (action) => tx.allowedActions.includes(action),
-    notice,
-    setNotice,
   };
 
   const cancel = async () => {
@@ -88,11 +87,11 @@ function LinkPage() {
     case LinkState.CENTRAL_VERIFIED:
       return <ConfirmStep w={w} onCancel={() => void cancel()} />;
     default:
-      // LEGACY_VERIFIED / CONTACT_VERIFIED — rẽ theo nhánh. key: đổi nhánh thì dựng lại từ đầu.
-      if (tx.intent === LinkIntent.CREATE) {
-        return <CreateFlow key="create" w={w} onCancel={() => void cancel()} />;
+      // LEGACY_VERIFIED. "Chưa — đăng ký" ở hệ thống cũ → trang đăng ký chung, mang theo giao dịch.
+      if (tx.intent === LinkIntent.CREATE && w.can(LinkAction.REGISTER) && !preferLogin) {
+        return <Navigate to="/register/{-$regId}" search={{ linkTx: txId }} replace />;
       }
-      // F6 (từ Account Center): chỉ xác thực lại chủ phiên; F5: đăng nhập tài khoản SSO muốn liên kết.
+      // F6 (từ Account Center): chỉ xác thực lại chủ phiên; F5: đăng nhập tài khoản Central muốn liên kết.
       return tx.centralStep === CentralStep.REAUTH_CURRENT ? (
         <ReauthCurrentStep key="reauth" w={w} onCancel={() => void cancel()} />
       ) : (

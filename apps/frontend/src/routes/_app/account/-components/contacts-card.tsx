@@ -216,7 +216,7 @@ function ContactOtpForm({
 
   const hint = usedByOther && (
     <p className="text-sm">
-      Có thể bạn có một tài khoản SSO khác dùng {label} này.{" "}
+      Có thể bạn có một tài khoản Thành Đoàn Đồng Nai Central khác dùng {label} này.{" "}
       <Button
         variant="link"
         className="h-auto p-0"

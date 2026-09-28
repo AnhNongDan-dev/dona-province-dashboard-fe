@@ -85,8 +85,8 @@ function SessionsPage() {
       <div>
         <h1 className="text-xl font-semibold">Phiên & thiết bị</h1>
         <p className="text-sm text-muted-foreground">
-          Các nơi đang đăng nhập bằng tài khoản SSO của bạn. Thấy thiết bị lạ, hãy đăng xuất phiên
-          đó và đổi mật khẩu.
+          Các nơi đang đăng nhập bằng tài khoản Thành Đoàn Đồng Nai Central của bạn. Thấy thiết bị
+          lạ, hãy đăng xuất phiên đó và đổi mật khẩu.
         </p>
       </div>
       {isError ? (
@@ -150,7 +150,7 @@ function SessionsPage() {
             <AlertDialogTitle>Đăng xuất tất cả?</AlertDialogTitle>
             <AlertDialogDescription>
               Mọi phiên đăng nhập, kể cả phiên bạn đang dùng, sẽ kết thúc. Các hệ thống đã vào bằng
-              SSO sẽ được yêu cầu đăng xuất.
+              tài khoản này sẽ được yêu cầu đăng xuất.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

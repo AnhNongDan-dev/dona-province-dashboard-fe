@@ -59,12 +59,12 @@ export function ReauthCurrentStep({ w, onCancel }: { w: Wizard; onCancel: () => 
     <TxShell
       tx={tx}
       title={`Liên kết tài khoản ${tx.provider.name}`}
-      description="Nhập mật khẩu SSO của bạn để xác nhận chính bạn đang liên kết."
+      description="Nhập mật khẩu tài khoản Central của bạn để xác nhận chính bạn đang liên kết."
       onExpire={() => void w.reload()}
     >
       {tx.centralIdentity && (
         <AccountCard
-          label="Tài khoản SSO đang đăng nhập"
+          label="Tài khoản Thành Đoàn Đồng Nai Central đang đăng nhập"
           primary={tx.centralIdentity.displayName}
           secondary={tx.centralIdentity.maskedLoginId}
         />
@@ -81,7 +81,7 @@ export function ReauthCurrentStep({ w, onCancel }: { w: Wizard; onCancel: () => 
       <form onSubmit={onSubmit} noValidate>
         <FieldGroup>
           <Field data-invalid={!!error}>
-            <FieldLabel htmlFor="password">Mật khẩu SSO</FieldLabel>
+            <FieldLabel htmlFor="password">Mật khẩu</FieldLabel>
             <Input
               id="password"
               name="password"

@@ -61,8 +61,8 @@ function RequestStep({ onRequested }: { onRequested: (r: PasswordReset) => void 
       <CardHeader>
         <CardTitle>Quên mật khẩu</CardTitle>
         <CardDescription>
-          Nhập tên đăng nhập, email hoặc số điện thoại của tài khoản SSO. Mã xác minh sẽ được gửi
-          tới số điện thoại / email đã xác minh của tài khoản.
+          Nhập tên đăng nhập, email hoặc số điện thoại của tài khoản Thành Đoàn Đồng Nai Central. Mã
+          xác minh sẽ được gửi tới số điện thoại / email đã xác minh của tài khoản.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

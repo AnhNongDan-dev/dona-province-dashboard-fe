@@ -1,7 +1,7 @@
 import { ErrorCode } from "@repo/zod-schemas/src/api/error.schema";
-import { LinkAction, LinkIntent } from "@repo/zod-schemas/src/entity/link-transaction-schema";
+import { LinkAction } from "@repo/zod-schemas/src/entity/link-transaction-schema";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,9 @@ import type { Wizard } from "../-lib";
 import { ErrorAlert, LegacyAccountCard, TxShell } from "./tx-parts";
 
 /**
- * F5 bước "Đăng nhập tài khoản SSO muốn liên kết" (FRESH_LOGIN). Form luôn trống, kể cả khi
- * trình duyệt đang có phiên của ai đó; chỉ điền sẵn suggestedLoginId (email/SĐT user vừa chứng
- * minh sở hữu ở nhánh tạo mới).
+ * F5 bước "Đăng nhập tài khoản Central muốn liên kết" (FRESH_LOGIN). Form luôn trống, kể cả khi
+ * trình duyệt đang có phiên của ai đó; chỉ điền sẵn SĐT / email user vừa chứng minh sở hữu ở
+ * trang đăng ký (history state, không lên URL).
  */
 export function CentralLoginStep({ w, onCancel }: { w: Wizard; onCancel: () => void }) {
   const { tx } = w;
@@ -24,6 +24,7 @@ export function CentralLoginStep({ w, onCancel }: { w: Wizard; onCancel: () => v
   const [error, setError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<string | null>(null);
   const lock = useCountdown();
+  const suggestedLoginId = useRouterState({ select: (s) => s.location.state.loginId });
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -54,30 +55,14 @@ export function CentralLoginStep({ w, onCancel }: { w: Wizard; onCancel: () => v
     setError(w.fail(res));
   }
 
-  async function switchToCreate() {
-    const res = await clientAPI.LinkTransaction.switchLinkIntent({
-      params: { txId: w.txId },
-      body: { intent: LinkIntent.CREATE },
-    });
-    if (res.success) {
-      w.setNotice(null);
-      w.setTx(res.data);
-    } else setError(w.fail(res));
-  }
-
   return (
     <TxShell
       tx={tx}
-      title="Liên kết với tài khoản SSO"
-      description="Đăng nhập tài khoản SSO bạn muốn liên kết. Hãy đăng nhập đúng tài khoản SSO của chính bạn."
+      title="Liên kết với tài khoản Thành Đoàn Đồng Nai Central"
+      description="Đăng nhập tài khoản Thành Đoàn Đồng Nai Central bạn muốn liên kết. Hãy đăng nhập đúng tài khoản của chính bạn."
       onExpire={() => void w.reload()}
     >
       <LegacyAccountCard tx={tx} />
-      {w.notice && (
-        <Alert>
-          <AlertDescription>{w.notice}</AlertDescription>
-        </Alert>
-      )}
       <ErrorAlert
         message={
           error &&
@@ -94,12 +79,12 @@ export function CentralLoginStep({ w, onCancel }: { w: Wizard; onCancel: () => v
               id="loginId"
               name="loginId"
               autoComplete="username"
-              defaultValue={tx.suggestedLoginId ?? ""}
+              defaultValue={suggestedLoginId ?? ""}
               autoFocus
             />
           </Field>
           <Field data-invalid={!!fieldError}>
-            <FieldLabel htmlFor="password">Mật khẩu SSO</FieldLabel>
+            <FieldLabel htmlFor="password">Mật khẩu</FieldLabel>
             <Input id="password" name="password" type="password" autoComplete="current-password" />
             {fieldError && <FieldError>{fieldError}</FieldError>}
           </Field>
@@ -112,10 +97,17 @@ export function CentralLoginStep({ w, onCancel }: { w: Wizard; onCancel: () => v
           </Button>
         </FieldGroup>
       </form>
-      {w.can(LinkAction.SWITCH_TO_CREATE) && (
-        <Button variant="link" className="h-auto p-0" onClick={() => void switchToCreate()}>
-          Tôi chưa có tài khoản SSO — tạo mới
-        </Button>
+      {w.can(LinkAction.REGISTER) && (
+        <p className="text-sm text-muted-foreground">
+          Chưa có tài khoản Thành Đoàn Đồng Nai Central?{" "}
+          <Link
+            to="/register/{-$regId}"
+            search={{ linkTx: w.txId }}
+            className="text-foreground underline-offset-4 hover:underline"
+          >
+            Đăng ký
+          </Link>
+        </p>
       )}
       {w.can(LinkAction.CANCEL) && (
         <Button variant="outline" onClick={onCancel}>

@@ -42,13 +42,14 @@ export function MergeCard() {
       <CardHeader>
         <CardTitle className="text-base">Gộp tài khoản</CardTitle>
         <CardDescription>
-          Bạn lỡ có hai tài khoản SSO? Gộp tài khoản kia vào tài khoản này để chỉ dùng một.
+          Bạn lỡ có hai tài khoản Thành Đoàn Đồng Nai Central? Gộp tài khoản kia vào tài khoản này
+          để chỉ dùng một.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">
         {!explained ? (
           <Button variant="outline" className="self-start" onClick={() => setExplained(true)}>
-            Tôi có một tài khoản SSO khác
+            Tôi có một tài khoản khác
           </Button>
         ) : (
           <>

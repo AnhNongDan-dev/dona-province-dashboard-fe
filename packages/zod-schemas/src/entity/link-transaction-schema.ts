@@ -1,7 +1,8 @@
 import z from "zod";
 import { commonZod } from "../common";
 
-// Mirror DTO giao dịch liên kết / tạo mới của BE (TASK-001 D9–D15, D23; TASK-003).
+// Mirror DTO giao dịch liên kết của BE (TASK-001 D8–D11; TASK-003/004). Nhánh tạo tài khoản trong
+// giao dịch đã gỡ (TASK-007) — đăng ký là phiên đăng ký riêng (registration-schema).
 // Enum ở đây chỉ dùng để rẽ nhánh wizard, không hiển thị ra UI → không có LABEL/OPTIONS.
 
 export const LinkState = {
@@ -17,6 +18,7 @@ export const LinkState = {
 export type LinkState = (typeof LinkState)[keyof typeof LinkState];
 export const linkStateZod = z.enum(Object.values(LinkState) as [LinkState, ...LinkState[]]);
 
+/** Ý định lúc hệ thống cũ mở giao dịch: CREATE chỉ còn là gợi ý "mở thẳng trang đăng ký". */
 export const LinkIntent = { LINK: "LINK", CREATE: "CREATE" } as const;
 export type LinkIntent = (typeof LinkIntent)[keyof typeof LinkIntent];
 export const linkIntentZod = z.enum([LinkIntent.LINK, LinkIntent.CREATE]);
@@ -24,11 +26,8 @@ export const linkIntentZod = z.enum([LinkIntent.LINK, LinkIntent.CREATE]);
 export const LinkAction = {
   RETRY_LEGACY_VERIFICATION: "RETRY_LEGACY_VERIFICATION",
   CENTRAL_LOGIN: "CENTRAL_LOGIN",
-  SWITCH_TO_LINK: "SWITCH_TO_LINK",
-  SWITCH_TO_CREATE: "SWITCH_TO_CREATE",
-  SEND_OTP: "SEND_OTP",
-  VERIFY_OTP: "VERIFY_OTP",
-  CREATE_IDENTITY: "CREATE_IDENTITY",
+  /** Mở trang đăng ký chung mang theo giao dịch (TASK-007). */
+  REGISTER: "REGISTER",
   CONFIRM: "CONFIRM",
   CANCEL: "CANCEL",
 } as const;
@@ -65,15 +64,6 @@ const centralIdentitySchema = z.object({
   tenantName: z.string().nullable(),
 });
 
-export const pendingOtpSchema = z.object({
-  channel: otpChannelZod,
-  maskedDestination: z.string(),
-  expiresAt: commonZod.datetime,
-  resendAvailableAt: commonZod.datetime,
-  sendsRemaining: z.int(),
-});
-export type PendingOtp = z.infer<typeof pendingOtpSchema>;
-
 /** D9 — wizard dựng hoàn toàn theo state / intent / allowedActions. */
 export const linkTransactionSchema = z.object({
   txId: z.guid(),
@@ -90,12 +80,6 @@ export const linkTransactionSchema = z.object({
   returnUrl: z.string().nullable(),
   lastErrorCode: z.string().nullable(),
   failureCode: z.string().nullable(),
-  suggestedLoginId: z.string().nullable(),
-  suggestedUsername: z.string().nullable(),
-  verifiedContacts: z
-    .array(z.object({ channel: otpChannelZod, maskedDestination: z.string() }))
-    .nullable(),
-  pendingOtps: z.array(pendingOtpSchema).nullable(),
 });
 export type LinkTransaction = z.infer<typeof linkTransactionSchema>;
 
@@ -103,27 +87,4 @@ export type LinkTransaction = z.infer<typeof linkTransactionSchema>;
 export const linkTransactionCreateResultSchema = z.object({
   txId: z.guid(),
   legacyVerifyUrl: z.string(),
-});
-
-/** D14 gửi mã */
-export const otpSendResultSchema = pendingOtpSchema.extend({ attemptsRemaining: z.int() });
-
-/** D14 xác minh — contactBelongsToExistingIdentity=true: giao dịch đã tự chuyển sang LINK. */
-export const otpVerifyResultSchema = z.object({
-  contactBelongsToExistingIdentity: z.boolean(),
-  transaction: linkTransactionSchema,
-});
-
-/** D15 */
-export const identityCreateResultSchema = z.object({
-  username: z.string(),
-  returnUrl: z.string().nullable(),
-  csrfToken: z.string(),
-  sessionId: z.guid(),
-});
-
-/** D23 — reason chỉ có khi available=false. */
-export const usernameAvailabilitySchema = z.object({
-  available: z.boolean(),
-  reason: z.enum(["TAKEN", "RESERVED", "INVALID"]).nullable(),
 });

@@ -119,6 +119,10 @@ export const ErrorCode = {
   MergeConflictUnresolved: "MERGE_CONFLICT_UNRESOLVED",
   MergeRequiresAdmin: "MERGE_REQUIRES_ADMIN",
   LastAuthMethod: "LAST_AUTH_METHOD",
+  // Tự đăng ký (TASK-007)
+  RegistrationNotFound: "REGISTRATION_NOT_FOUND",
+  RegistrationExpired: "REGISTRATION_EXPIRED",
+  RegistrationInvalidState: "REGISTRATION_INVALID_STATE",
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
@@ -278,7 +282,7 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   [ErrorCode.ExternalAlreadyLinked]: {
     statusCode: StatusCode.Conflict,
     message:
-      "Tài khoản này đã được liên kết với một tài khoản SSO khác. Nếu đó cũng là tài khoản của bạn, hãy đăng nhập bằng tài khoản đó; nếu không, liên hệ quản trị.",
+      "Tài khoản này đã được liên kết với một tài khoản Thành Đoàn Đồng Nai Central khác. Nếu đó cũng là tài khoản của bạn, hãy đăng nhập bằng tài khoản đó; nếu không, liên hệ quản trị.",
   },
   [ErrorCode.ExternalSharedAccount]: {
     statusCode: StatusCode.Conflict,
@@ -292,7 +296,7 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   [ErrorCode.ProviderAlreadyLinked]: {
     statusCode: StatusCode.Conflict,
     message:
-      "Tài khoản SSO này đã liên kết một tài khoản khác của cùng hệ thống. Mỗi tài khoản SSO chỉ liên kết một tài khoản trên mỗi hệ thống.",
+      "Tài khoản này đã liên kết một tài khoản khác của cùng hệ thống. Mỗi tài khoản chỉ liên kết một tài khoản trên mỗi hệ thống.",
   },
   [ErrorCode.ProviderUnavailable]: {
     statusCode: StatusCode.ServiceUnavailable,
@@ -309,7 +313,7 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   [ErrorCode.ContactAlreadyUsed]: {
     statusCode: StatusCode.Conflict,
     message:
-      "Số điện thoại / email này đã gắn với một tài khoản SSO khác. Hãy dùng số / email khác.",
+      "Số điện thoại / email này đã gắn với một tài khoản Thành Đoàn Đồng Nai Central khác. Hãy dùng số / email khác.",
   },
   [ErrorCode.OtpInvalid]: {
     statusCode: StatusCode.BadRequest,
@@ -365,7 +369,7 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   },
   [ErrorCode.MergeSameIdentity]: {
     statusCode: StatusCode.Conflict,
-    message: "Đây chính là tài khoản đang đăng nhập. Hãy đăng nhập tài khoản SSO khác của bạn.",
+    message: "Đây chính là tài khoản đang đăng nhập. Hãy đăng nhập tài khoản khác của bạn.",
   },
   [ErrorCode.MergeConflictUnresolved]: {
     statusCode: StatusCode.Conflict,
@@ -378,6 +382,18 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   [ErrorCode.LastAuthMethod]: {
     statusCode: StatusCode.Conflict,
     message: "Không thể gỡ kênh liên lạc này — tài khoản cần ít nhất một kênh để lấy lại mật khẩu.",
+  },
+  [ErrorCode.RegistrationNotFound]: {
+    statusCode: StatusCode.NotFound,
+    message: "Phiên đăng ký đã hết hạn hoặc không thuộc trình duyệt này.",
+  },
+  [ErrorCode.RegistrationExpired]: {
+    statusCode: StatusCode.Gone,
+    message: "Phiên đăng ký đã hết hạn.",
+  },
+  [ErrorCode.RegistrationInvalidState]: {
+    statusCode: StatusCode.Conflict,
+    message: "Bước này không còn hợp lệ. Trang đã được cập nhật theo trạng thái mới nhất.",
   },
 };
 

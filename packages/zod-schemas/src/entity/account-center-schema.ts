@@ -49,6 +49,7 @@ export const ActivityType = {
   CONTACT_ADDED: "CONTACT_ADDED",
   CONTACT_CHANGED: "CONTACT_CHANGED",
   CONTACT_REMOVED: "CONTACT_REMOVED",
+  IDENTITY_REGISTERED: "IDENTITY_REGISTERED",
 } as const;
 export type ActivityType = (typeof ActivityType)[keyof typeof ActivityType];
 export const activityTypeZod = z.enum(
@@ -62,9 +63,9 @@ export const ACTIVITY_TYPE_LABEL: Record<ActivityType, string> = {
   [ActivityType.RP_LOGOUT]: "Đăng xuất từ hệ thống",
   [ActivityType.SESSION_EXPIRED]: "Phiên hết hạn",
   [ActivityType.SESSION_REVOKED]: "Thu hồi phiên",
-  [ActivityType.SSO_LOGIN]: "Vào hệ thống bằng SSO",
+  [ActivityType.SSO_LOGIN]: "Vào hệ thống bằng Central",
   [ActivityType.LEGACY_VERIFIED]: "Xác minh tài khoản hệ thống",
-  [ActivityType.IDENTITY_CREATED]: "Tạo tài khoản SSO",
+  [ActivityType.IDENTITY_CREATED]: "Tạo tài khoản (qua liên kết)",
   [ActivityType.IDENTITY_LINKED]: "Liên kết tài khoản",
   [ActivityType.IDENTITY_UNLINKED]: "Hủy liên kết tài khoản",
   [ActivityType.PASSWORD_CHANGED]: "Đổi mật khẩu",
@@ -74,6 +75,7 @@ export const ACTIVITY_TYPE_LABEL: Record<ActivityType, string> = {
   [ActivityType.CONTACT_ADDED]: "Thêm kênh liên lạc",
   [ActivityType.CONTACT_CHANGED]: "Đổi kênh liên lạc",
   [ActivityType.CONTACT_REMOVED]: "Gỡ kênh liên lạc",
+  [ActivityType.IDENTITY_REGISTERED]: "Đăng ký tài khoản",
 };
 export const ACTIVITY_TYPE_OPTIONS = Object.values(ActivityType).map((value) => ({
   value,

@@ -1,6 +1,6 @@
 export const APP_CONFIG = {
   ID: "dona-province",
-  NAME: "DONA Province Dashboard",
+  NAME: "Thành Đoàn Đồng Nai Central",
   TIME_VALUE: {
     AUTH_TOKEN: "3d",
   },

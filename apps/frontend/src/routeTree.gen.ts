@@ -24,6 +24,7 @@ import { Route as AppAccountConnectionsRouteImport } from './routes/_app/account
 import { Route as AppAccountSecurityRouteImport } from './routes/_app/account/security'
 import { Route as AppAccountSessionsRouteImport } from './routes/_app/account/sessions'
 import { Route as AuthLinkTxIdRouteImport } from './routes/_auth/link/$txId'
+import { Route as AuthRegisterChar123RegIdChar125RouteImport } from './routes/_auth/register/{-$regId}'
 
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
@@ -98,6 +99,12 @@ const AuthLinkTxIdRoute = AuthLinkTxIdRouteImport.update({
   path: '/link/$txId',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const AuthRegisterChar123RegIdChar125Route =
+  AuthRegisterChar123RegIdChar125RouteImport.update({
+    id: '/register/{-$regId}',
+    path: '/register/{-$regId}',
+    getParentRoute: () => AuthRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/account/security': typeof AppAccountSecurityRoute
   '/account/sessions': typeof AppAccountSessionsRoute
   '/link/$txId': typeof AuthLinkTxIdRoute
+  '/register/{-$regId}': typeof AuthRegisterChar123RegIdChar125Route
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
@@ -128,6 +136,7 @@ export interface FileRoutesByTo {
   '/account/security': typeof AppAccountSecurityRoute
   '/account/sessions': typeof AppAccountSessionsRoute
   '/link/$txId': typeof AuthLinkTxIdRoute
+  '/register/{-$regId}': typeof AuthRegisterChar123RegIdChar125Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -146,6 +155,7 @@ export interface FileRoutesById {
   '/_app/account/security': typeof AppAccountSecurityRoute
   '/_app/account/sessions': typeof AppAccountSessionsRoute
   '/_auth/link/$txId': typeof AuthLinkTxIdRoute
+  '/_auth/register/{-$regId}': typeof AuthRegisterChar123RegIdChar125Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/account/security'
     | '/account/sessions'
     | '/link/$txId'
+    | '/register/{-$regId}'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/account/security'
     | '/account/sessions'
     | '/link/$txId'
+    | '/register/{-$regId}'
   id:
     | '__root__'
     | '/_app'
@@ -195,6 +207,7 @@ export interface FileRouteTypes {
     | '/_app/account/security'
     | '/_app/account/sessions'
     | '/_auth/link/$txId'
+    | '/_auth/register/{-$regId}'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -310,6 +323,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLinkTxIdRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_auth/register/{-$regId}': {
+      id: '/_auth/register/{-$regId}'
+      path: '/register/{-$regId}'
+      fullPath: '/register/{-$regId}'
+      preLoaderRoute: typeof AuthRegisterChar123RegIdChar125RouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
   }
 }
 
@@ -341,6 +361,7 @@ interface AuthRouteRouteChildren {
   AuthSessionEndedRoute: typeof AuthSessionEndedRoute
   AuthSsoErrorRoute: typeof AuthSsoErrorRoute
   AuthLinkTxIdRoute: typeof AuthLinkTxIdRoute
+  AuthRegisterChar123RegIdChar125Route: typeof AuthRegisterChar123RegIdChar125Route
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
@@ -351,6 +372,7 @@ const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthSessionEndedRoute: AuthSessionEndedRoute,
   AuthSsoErrorRoute: AuthSsoErrorRoute,
   AuthLinkTxIdRoute: AuthLinkTxIdRoute,
+  AuthRegisterChar123RegIdChar125Route: AuthRegisterChar123RegIdChar125Route,
 }
 
 const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(

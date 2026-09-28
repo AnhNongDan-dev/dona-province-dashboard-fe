@@ -17,6 +17,10 @@ declare module "@tanstack/react-router" {
   interface HistoryState {
     /** D6 → S3: hệ thống đã được gửi yêu cầu đăng xuất. */
     notifiedClients?: NotifiedClient[];
+    /** Đăng ký → đăng nhập: điền sẵn định danh (SĐT / email vừa chứng minh sở hữu), không lên URL. */
+    loginId?: string;
+    /** Đăng ký → /link/$txId: muốn đăng nhập, không tự chuyển lại trang đăng ký (intent=CREATE). */
+    preferLogin?: boolean;
   }
 }
 

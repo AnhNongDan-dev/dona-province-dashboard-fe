@@ -3,7 +3,6 @@ import type { ErrorResponse } from "@repo/zod-schemas/src/api/response";
 import { LogoutMode } from "@repo/zod-schemas/src/entity/central-auth-schema";
 import {
   LinkAction,
-  LinkIntent,
   LinkOrigin,
   type LinkTransaction,
 } from "@repo/zod-schemas/src/entity/link-transaction-schema";
@@ -69,7 +68,7 @@ function Countdown({ until, onExpire }: { until: Date; onExpire: () => void }) {
   return <span className="tabular-nums">Còn {formatSeconds(seconds)}</span>;
 }
 
-/** Thẻ một tài khoản (legacy hoặc SSO) — dòng đơn vị chỉ hiện khi có. */
+/** Thẻ một tài khoản (legacy hoặc Central) — dòng đơn vị chỉ hiện khi có. */
 export function AccountCard({
   label,
   primary,
@@ -204,39 +203,24 @@ export function AwaitingLegacy({ w, onCancel }: { w: Wizard; onCancel: () => voi
 
 /** COMPLETED — reload trong 30 phút vẫn đọc được D9 nên màn này dựng lại được. */
 export function Completed({ tx }: { tx: LinkTransaction }) {
-  const identity = useSession()?.identity;
-  const created = tx.intent === LinkIntent.CREATE;
-
   return (
-    <TxShell tx={tx} title={created ? "Đã tạo tài khoản SSO" : "Đã liên kết thành công"}>
-      {created ? (
-        <p className="text-sm">
-          Đã tạo tài khoản SSO{" "}
-          {identity && <span className="font-semibold">{identity.username}</span>} và liên kết với
-          tài khoản {tx.provider.name}. Từ nay bạn đăng nhập bằng{" "}
-          {identity ? <span className="font-semibold">{identity.username}</span> : "tên đăng nhập"}{" "}
-          hoặc số điện thoại / email đã xác minh.
-        </p>
-      ) : (
-        <>
-          <p className="text-sm">
-            Tài khoản {tx.provider.name} đã được liên kết với tài khoản SSO của bạn. Từ nay bạn vào{" "}
-            {tx.provider.name} bằng tài khoản SSO.
-          </p>
-          {tx.centralIdentity && (
-            <AccountCard
-              label="Tài khoản SSO"
-              primary={tx.centralIdentity.displayName}
-              secondary={tx.centralIdentity.maskedLoginId}
-            />
-          )}
-          <LegacyAccountCard tx={tx} />
-        </>
+    <TxShell tx={tx} title="Đã liên kết thành công">
+      <p className="text-sm">
+        Tài khoản {tx.provider.name} đã được liên kết với tài khoản Thành Đoàn Đồng Nai Central của
+        bạn. Từ nay bạn vào {tx.provider.name} bằng tài khoản này.
+      </p>
+      {tx.centralIdentity && (
+        <AccountCard
+          label="Tài khoản Thành Đoàn Đồng Nai Central"
+          primary={tx.centralIdentity.displayName}
+          secondary={tx.centralIdentity.maskedLoginId}
+        />
       )}
+      <LegacyAccountCard tx={tx} />
       <BackToProvider tx={tx} />
       {tx.origin !== LinkOrigin.ACCOUNT_CENTER && (
         <Button asChild variant="outline">
-          <a href="/">Mở trang tổng hợp</a>
+          <a href="/">Mở cổng tổng hợp</a>
         </Button>
       )}
     </TxShell>
@@ -267,7 +251,7 @@ export function Ended({ tx }: { tx: LinkTransaction }) {
       {session?.authenticated && session.identity && (
         <Alert>
           <AlertDescription>
-            Bạn đang đăng nhập SSO với tên{" "}
+            Bạn đang đăng nhập với tên{" "}
             <span className="font-medium">{session.identity.displayName}</span>. Nếu đây không phải
             bạn, hãy đăng xuất.
           </AlertDescription>

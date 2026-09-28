@@ -21,7 +21,7 @@ import {
 
 function blockedReason(reason: string | null, providerName: string) {
   return reason === "PROVIDER_SSO_ONLY"
-    ? `${providerName} chỉ còn đăng nhập bằng SSO; hủy liên kết sẽ khiến bạn mất quyền vào hệ thống này. Liên hệ quản trị nếu cần.`
+    ? `${providerName} chỉ còn đăng nhập bằng Thành Đoàn Đồng Nai Central; hủy liên kết sẽ khiến bạn mất quyền vào hệ thống này. Liên hệ quản trị nếu cần.`
     : "Không thể hủy liên kết hệ thống này. Liên hệ quản trị nếu cần.";
 }
 
@@ -82,8 +82,8 @@ export function UnlinkButton({
           <AlertDialogTitle>Hủy liên kết {c.providerName}?</AlertDialogTitle>
           <AlertDialogDescription>
             Bạn sẽ bị đăng xuất khỏi {c.providerName} trên mọi thiết bị và không vào được{" "}
-            {c.providerName} bằng SSO nữa. Bạn vẫn đăng nhập {c.providerName} bằng tài khoản cũ như
-            trước và có thể liên kết lại bất cứ lúc nào.
+            {c.providerName} bằng Thành Đoàn Đồng Nai Central nữa. Bạn vẫn đăng nhập{" "}
+            {c.providerName} bằng tài khoản cũ như trước và có thể liên kết lại bất cứ lúc nào.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

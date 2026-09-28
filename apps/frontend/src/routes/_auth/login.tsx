@@ -1,7 +1,7 @@
 import { ErrorCode } from "@repo/zod-schemas/src/api/error.schema";
 import type { ErrorResponse } from "@repo/zod-schemas/src/api/response";
 import { type LoginContext, LogoutMode } from "@repo/zod-schemas/src/entity/central-auth-schema";
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouterState } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
 import z from "zod";
 import { SystemLogo } from "@/components/auth/system-logo";
@@ -130,6 +130,8 @@ function LoginForm({
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const lock = useCountdown();
+  // Từ trang đăng ký: SĐT / email vừa chứng minh sở hữu đã thuộc một tài khoản → điền sẵn.
+  const suggestedLoginId = useRouterState({ select: (s) => s.location.state.loginId });
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -225,6 +227,7 @@ function LoginForm({
                 name="loginId"
                 autoComplete="username"
                 autoFocus
+                defaultValue={suggestedLoginId ?? ""}
                 aria-invalid={!!fieldErrors.loginId}
               />
               {fieldErrors.loginId && <FieldError>{fieldErrors.loginId}</FieldError>}
@@ -259,6 +262,16 @@ function LoginForm({
         <Button asChild variant="link" className="h-auto self-start p-0">
           <Link to="/forgot-password">Quên mật khẩu?</Link>
         </Button>
+        <p className="text-sm text-muted-foreground">
+          Chưa có tài khoản Thành Đoàn Đồng Nai Central?{" "}
+          <Link
+            to="/register/{-$regId}"
+            search={{ req: req ?? undefined }}
+            className="text-foreground underline-offset-4 hover:underline"
+          >
+            Đăng ký
+          </Link>
+        </p>
       </CardContent>
     </Card>
   );

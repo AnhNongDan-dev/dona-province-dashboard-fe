@@ -28,7 +28,8 @@ function ConnectionsPage() {
       <div>
         <h1 className="text-xl font-semibold">Liên kết tài khoản</h1>
         <p className="text-sm text-muted-foreground">
-          Các tài khoản ở hệ thống khác đã liên kết với tài khoản SSO của bạn.
+          Các tài khoản ở hệ thống khác đã liên kết với tài khoản Thành Đoàn Đồng Nai Central của
+          bạn.
         </p>
       </div>
       {isError ? (
@@ -69,8 +70,8 @@ function ConnectionsPage() {
                         <div>Liên kết lúc {fmt(account.linkedAt)}</div>
                         <div>
                           {account.lastSsoLoginAt
-                            ? `Lần đăng nhập SSO gần nhất: ${fmt(account.lastSsoLoginAt)}`
-                            : "Chưa đăng nhập SSO"}
+                            ? `Lần vào bằng Central gần nhất: ${fmt(account.lastSsoLoginAt)}`
+                            : "Chưa vào bằng Central"}
                         </div>
                       </div>
                     ) : (
