@@ -4,7 +4,6 @@ import { SystemLogo } from "@/components/auth/system-logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import {
@@ -50,8 +49,8 @@ function DashboardPage() {
                   <span className="font-medium text-foreground">
                     Liên kết các tài khoản hệ thống của bạn.
                   </span>{" "}
-                  Bấm [Liên kết] ở hệ thống bạn đang có tài khoản để từ nay vào hệ thống đó bằng tài
-                  khoản Thành Đoàn Đồng Nai Central.
+                  Bấm Liên kết ở hệ thống bạn đang có tài khoản để từ nay vào hệ thống đó bằng tài
+                  khoản này.
                 </span>
               </AlertDescription>
             </Alert>
@@ -71,48 +70,71 @@ function SystemTile({ connection: c }: { connection: MyConnectionDTO }) {
   const account = c.accounts[0]; // GĐ A–C: tối đa 1 account / hệ thống
   const { start, redirecting } = useStartLink();
 
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center gap-3">
-        <SystemLogo name={c.providerName} logoUrl={c.logoUrl} className="size-8 text-sm" />
-        <CardTitle className="flex-1 text-base">{c.providerName}</CardTitle>
-        {c.status !== SsoStatus.AVAILABLE && (
-          <Badge variant="secondary">{SSO_STATUS_LABEL[c.status]}</Badge>
-        )}
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3 text-sm">
-        {account ? (
-          <p className="text-muted-foreground">
-            Đã liên kết: <span className="font-medium text-foreground">{account.username}</span>
+  const heading = (
+    <div className="flex items-center gap-3">
+      <SystemLogo name={c.providerName} logoUrl={c.logoUrl} className="size-10 text-base" />
+      <span className="flex-1 font-semibold">{c.providerName}</span>
+      {c.status !== SsoStatus.AVAILABLE && (
+        <Badge variant="secondary">{SSO_STATUS_LABEL[c.status]}</Badge>
+      )}
+    </div>
+  );
+
+  // Mở được: cả ô là đường dẫn vào hệ thống.
+  if (c.launchUrl) {
+    return (
+      <a
+        href={c.launchUrl}
+        className="group flex flex-col gap-4 rounded-lg border border-border bg-card p-5 outline-none hover:border-primary focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {heading}
+        {account && (
+          <p className="text-sm text-muted-foreground">
+            Đăng nhập là <span className="font-medium text-foreground">{account.username}</span>
           </p>
-        ) : (
-          c.status === SsoStatus.AVAILABLE && (
-            <p className="text-muted-foreground">
-              {c.linkEnabled
-                ? "Chưa liên kết với tài khoản Thành Đoàn Đồng Nai Central của bạn."
-                : `Chưa liên kết — đăng nhập ${c.providerName} để liên kết.`}
-            </p>
-          )
         )}
-        {c.launchUrl ? (
-          <Button asChild>
-            <a href={c.launchUrl}>Mở</a>
+        <span className="mt-auto text-sm font-medium text-primary group-hover:underline">
+          Mở {c.providerName}
+        </span>
+      </a>
+    );
+  }
+
+  // Chưa vào được: ô viền đứt, việc cần làm là liên kết.
+  return (
+    <div className="flex flex-col gap-4 rounded-lg border border-dashed border-border p-5">
+      {heading}
+      {account ? (
+        <p className="text-sm text-muted-foreground">
+          Đã liên kết: <span className="font-medium text-foreground">{account.username}</span>
+        </p>
+      ) : (
+        c.status === SsoStatus.AVAILABLE && (
+          <p className="text-sm text-muted-foreground">
+            {c.linkEnabled
+              ? "Chưa liên kết với tài khoản của bạn."
+              : `Chưa liên kết. Đăng nhập ${c.providerName} để liên kết.`}
+          </p>
+        )
+      )}
+      {!account && c.linkEnabled ? (
+        <Button
+          className="mt-auto self-start"
+          disabled={redirecting !== null}
+          onClick={() => void start(c)}
+        >
+          {redirecting && <Spinner />}
+          {redirecting ? `Đang chuyển tới ${c.providerName}…` : "Liên kết"}
+        </Button>
+      ) : (
+        !account &&
+        c.status === SsoStatus.AVAILABLE &&
+        c.homeUrl && (
+          <Button asChild variant="outline" className="mt-auto self-start">
+            <a href={c.homeUrl}>Đến {c.providerName}</a>
           </Button>
-        ) : !account && c.linkEnabled ? (
-          <Button disabled={redirecting !== null} onClick={() => void start(c)}>
-            {redirecting && <Spinner />}
-            {redirecting ? `Đang chuyển tới ${c.providerName}…` : "Liên kết"}
-          </Button>
-        ) : (
-          !account &&
-          c.status === SsoStatus.AVAILABLE &&
-          c.homeUrl && (
-            <Button asChild variant="outline">
-              <a href={c.homeUrl}>Đến {c.providerName}</a>
-            </Button>
-          )
-        )}
-      </CardContent>
-    </Card>
+        )
+      )}
+    </div>
   );
 }

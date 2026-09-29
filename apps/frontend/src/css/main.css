@@ -25,10 +25,6 @@
   }
 }
 
-* {
-  border-color: var(--color-border);
-}
-
 /* Toast */
 
 @layer base {
@@ -39,7 +35,7 @@
 
 @layer base {
   input {
-    @apply bg-background;
+    @apply bg-card;
   }
 }
 

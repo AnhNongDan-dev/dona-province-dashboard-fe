@@ -35,7 +35,7 @@ function SecurityPage() {
   const { data: policy } = credentialPolicyRepository().useQuery();
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4">
+    <div className="flex max-w-3xl flex-col gap-4">
       <h1 className="text-xl font-semibold">Bảo mật</h1>
       <Card>
         <CardHeader>

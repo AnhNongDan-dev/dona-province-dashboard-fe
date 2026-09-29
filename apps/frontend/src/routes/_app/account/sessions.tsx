@@ -81,12 +81,12 @@ function SessionsPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4">
+    <div className="flex max-w-3xl flex-col gap-4">
       <div>
         <h1 className="text-xl font-semibold">Phiên & thiết bị</h1>
         <p className="text-sm text-muted-foreground">
-          Các nơi đang đăng nhập bằng tài khoản Thành Đoàn Đồng Nai Central của bạn. Thấy thiết bị
-          lạ, hãy đăng xuất phiên đó và đổi mật khẩu.
+          Các nơi đang đăng nhập bằng tài khoản của bạn. Thấy thiết bị lạ, hãy đăng xuất phiên đó và
+          đổi mật khẩu.
         </p>
       </div>
       {isError ? (

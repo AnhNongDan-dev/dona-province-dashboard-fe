@@ -372,3 +372,18 @@ input[type="password"]::-ms-clear {
   background-color: #1f2937;
   border: 1px solid #111827;
 }
+
+/* Layout auth: các trang con vẫn dùng <Card> — bỏ khung để form nằm thẳng trên nền. */
+.auth-form > [data-slot="card"] {
+  padding-block: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+.auth-form > [data-slot="card"] > [data-slot^="card-"] {
+  padding-inline: 0;
+}
+.auth-form > [data-slot="card"] [data-slot="card-title"] {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+}

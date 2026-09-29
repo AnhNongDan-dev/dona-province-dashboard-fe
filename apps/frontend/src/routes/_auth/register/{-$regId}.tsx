@@ -281,7 +281,7 @@ function RegisterFlow() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Đăng ký tài khoản Thành Đoàn Đồng Nai Central</CardTitle>
+        <CardTitle>Đăng ký tài khoản</CardTitle>
         <CardDescription>
           Bước {stepNo}/3 — {stepName}
         </CardDescription>

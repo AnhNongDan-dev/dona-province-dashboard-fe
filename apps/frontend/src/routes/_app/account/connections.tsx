@@ -24,12 +24,11 @@ function ConnectionsPage() {
   const { start, redirecting } = useStartLink();
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-4">
+    <div className="flex max-w-3xl flex-col gap-4">
       <div>
         <h1 className="text-xl font-semibold">Liên kết tài khoản</h1>
         <p className="text-sm text-muted-foreground">
-          Các tài khoản ở hệ thống khác đã liên kết với tài khoản Thành Đoàn Đồng Nai Central của
-          bạn.
+          Các tài khoản ở hệ thống khác đã liên kết với tài khoản của bạn.
         </p>
       </div>
       {isError ? (
