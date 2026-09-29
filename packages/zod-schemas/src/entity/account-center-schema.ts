@@ -28,7 +28,7 @@ export const revokeAllResultSchema = notifiedResultSchema.extend({
   sessionId: z.guid().nullable(),
 });
 
-// D19 — 15 mã sự kiện chốt cứng (TASK-004). Mã lạ → "Hoạt động khác".
+// D19 — 25 mã sự kiện chốt cứng (TASK-004 → TASK-006). Mã lạ → "Hoạt động khác".
 export const ActivityType = {
   LOGIN: "LOGIN",
   REAUTHENTICATE: "REAUTHENTICATE",
@@ -50,6 +50,12 @@ export const ActivityType = {
   CONTACT_CHANGED: "CONTACT_CHANGED",
   CONTACT_REMOVED: "CONTACT_REMOVED",
   IDENTITY_REGISTERED: "IDENTITY_REGISTERED",
+  // Quản trị viên tác động lên tài khoản (TASK-006) — không có IP / thiết bị.
+  ADMIN_LOCKED: "ADMIN_LOCKED",
+  ADMIN_UNLOCKED: "ADMIN_UNLOCKED",
+  ADMIN_PASSWORD_RESET: "ADMIN_PASSWORD_RESET",
+  ADMIN_SESSIONS_REVOKED: "ADMIN_SESSIONS_REVOKED",
+  ADMIN_UNLINKED: "ADMIN_UNLINKED",
 } as const;
 export type ActivityType = (typeof ActivityType)[keyof typeof ActivityType];
 export const activityTypeZod = z.enum(
@@ -76,6 +82,11 @@ export const ACTIVITY_TYPE_LABEL: Record<ActivityType, string> = {
   [ActivityType.CONTACT_CHANGED]: "Đổi kênh liên lạc",
   [ActivityType.CONTACT_REMOVED]: "Gỡ kênh liên lạc",
   [ActivityType.IDENTITY_REGISTERED]: "Đăng ký tài khoản",
+  [ActivityType.ADMIN_LOCKED]: "Quản trị viên đã khóa tài khoản",
+  [ActivityType.ADMIN_UNLOCKED]: "Quản trị viên đã mở khóa tài khoản",
+  [ActivityType.ADMIN_PASSWORD_RESET]: "Quản trị viên đã cấp lại mật khẩu",
+  [ActivityType.ADMIN_SESSIONS_REVOKED]: "Quản trị viên đã đăng xuất mọi phiên",
+  [ActivityType.ADMIN_UNLINKED]: "Quản trị viên đã hủy liên kết",
 };
 export const ACTIVITY_TYPE_OPTIONS = Object.values(ActivityType).map((value) => ({
   value,

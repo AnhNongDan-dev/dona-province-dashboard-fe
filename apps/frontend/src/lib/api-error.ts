@@ -16,3 +16,11 @@ export function errorParam<T extends "number" | "string">(
   const value = res.data?.[key];
   return typeof value === type ? (value as T extends "number" ? number : string) : null;
 }
+
+/** Lỗi BE gắn trong `cause` của Error mà repository ném ra (null khi lỗi khác, vd. parse). */
+export function queryError(error: unknown): ErrorResponse | null {
+  const cause = error instanceof Error ? error.cause : null;
+  return cause && typeof cause === "object" && "errorCode" in cause
+    ? (cause as ErrorResponse)
+    : null;
+}

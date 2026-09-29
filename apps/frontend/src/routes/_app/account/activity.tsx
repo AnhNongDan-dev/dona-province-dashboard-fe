@@ -1,16 +1,11 @@
 import {
-  ACTIVITY_TYPE_LABEL,
   ACTIVITY_TYPE_OPTIONS,
-  type Activity,
-  ActivityResult,
-  ActivityType,
+  type ActivityType,
   activityTypeZod,
 } from "@repo/zod-schemas/src/entity/account-center-schema";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { format } from "date-fns";
 import { useState } from "react";
 import z from "zod";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,15 +15,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { searchMyActivitiesRepository } from "@/repositories/searchMyActivities.repository";
+import { ActivityTable } from "./-components/activity-table";
 
 const PAGE_SIZE = 20;
 
@@ -79,7 +67,7 @@ function ActivityPage() {
   const hasFilter = !!(search.types?.length || search.from || search.to);
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <div>
         <h1 className="text-xl font-semibold">Lịch sử hoạt động</h1>
         <p className="text-sm text-muted-foreground">
@@ -152,53 +140,11 @@ function ActivityPage() {
         </div>
       ) : (
         <div className={isFetching && !isLoading ? "opacity-60" : undefined}>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Thời gian</TableHead>
-                <TableHead>Hoạt động</TableHead>
-                <TableHead>Kết quả</TableHead>
-                <TableHead>IP</TableHead>
-                <TableHead>Thiết bị</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
-                    Đang tải…
-                  </TableCell>
-                </TableRow>
-              ) : data.items.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
-                    {hasFilter ? "Không có hoạt động nào khớp bộ lọc." : "Chưa có hoạt động nào."}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                data.items.map((a) => (
-                  <TableRow key={a.id}>
-                    <TableCell className="whitespace-nowrap">
-                      {format(a.occurredAt, "dd/MM/yyyy HH:mm:ss")}
-                    </TableCell>
-                    <TableCell>
-                      {ACTIVITY_TYPE_LABEL[a.type as ActivityType] ?? "Hoạt động khác"}
-                      <ActivityDetail activity={a} />
-                    </TableCell>
-                    <TableCell>
-                      {a.result === ActivityResult.FAILURE ? (
-                        <Badge variant="destructive">Thất bại</Badge>
-                      ) : (
-                        <Badge variant="secondary">Thành công</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">{a.ip ?? "—"}</TableCell>
-                    <TableCell>{a.deviceLabel ?? "—"}</TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <ActivityTable
+            items={data.items}
+            isLoading={isLoading}
+            emptyText={hasFilter ? "Không có hoạt động nào khớp bộ lọc." : "Chưa có hoạt động nào."}
+          />
         </div>
       )}
 
@@ -227,24 +173,4 @@ function ActivityPage() {
       </div>
     </div>
   );
-}
-
-/** Phần sau nhãn: tên hệ thống + detail (giá trị đã che do BE trả). Đăng ký: detail là nguồn. */
-function ActivityDetail({ activity: a }: { activity: Activity }) {
-  const parts =
-    a.type === ActivityType.IDENTITY_REGISTERED
-      ? [
-          a.providerName
-            ? `từ ${a.providerName}`
-            : a.detail === "CENTRAL"
-              ? "đăng ký trực tiếp"
-              : null,
-        ]
-      : [a.providerName, a.detail];
-  return parts.filter(Boolean).map((part) => (
-    <span key={part} className="text-muted-foreground">
-      {" "}
-      · {part}
-    </span>
-  ));
 }

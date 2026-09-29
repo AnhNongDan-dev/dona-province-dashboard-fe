@@ -6,10 +6,8 @@ import z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { clientAPI } from "@/config/clientAPI.config";
 import { useLogout } from "@/hooks/use-logout";
-import { errorParam } from "@/lib/api-error";
-import { broadcast, loadSession } from "@/lib/central-session";
+import { continueAfterGate } from "@/lib/central-session";
 import { sessionStore, useSession } from "@/lib/session-store";
 import { mySecurityRepository } from "@/repositories/mySecurity.repository";
 import { ContactOtpForm } from "../_app/account/-components/contacts-card";
@@ -21,27 +19,18 @@ import { ContactOtpForm } from "../_app/account/-components/contacts-card";
 export const Route = createFileRoute("/_auth/email-setup")({
   validateSearch: z.object({ req: z.string().optional().catch(undefined) }),
   beforeLoad: ({ search }) => {
-    if (!sessionStore.get()?.authenticated) {
+    const session = sessionStore.get();
+    if (!session?.authenticated) {
       throw redirect({ to: "/login", search: { req: search.req } });
+    }
+    // Cổng đổi mật khẩu tạm đứng trước cổng email (TASK-006).
+    if (session.identity?.passwordChangeRequired) {
+      throw redirect({ to: "/password-change", search: { req: search.req } });
     }
   },
   loader: () => mySecurityRepository().loader(),
   component: EmailSetupPage,
 });
-
-/** Tài khoản đã có email: làm mới phiên (hết bị chặn), báo các tab khác, rồi đi tiếp. */
-async function proceed(req: string | undefined) {
-  await loadSession().catch(() => null);
-  broadcast("changed");
-  if (req) {
-    const res = await clientAPI.CentralAuth.getLoginContext({ query: { req } });
-    if (res.success && res.data.continueUrl) return window.location.assign(res.data.continueUrl);
-    // req hết hạn → LOGIN_REQUEST_EXPIRED + returnUrl: về lại hệ thống để nó gọi đăng nhập lại.
-    const returnUrl = res.success ? null : errorParam(res, "returnUrl", "string");
-    if (returnUrl) return window.location.assign(returnUrl);
-  }
-  window.location.assign("/");
-}
 
 function EmailSetupPage() {
   const { req } = Route.useSearch();
@@ -53,7 +42,7 @@ function EmailSetupPage() {
   const done = session?.identity?.emailSetupRequired === false || !!email;
 
   useEffect(() => {
-    if (done) void proceed(req);
+    if (done) void continueAfterGate(req);
   }, [done, req]);
 
   if (done) {

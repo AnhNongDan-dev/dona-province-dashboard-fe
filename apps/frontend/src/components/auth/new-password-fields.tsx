@@ -63,6 +63,7 @@ export function NewPasswordFields({
   confirm,
   setConfirm,
   serverCodes,
+  serverLabels,
 }: {
   policy: CredentialPolicy | null;
   username: string | null;
@@ -72,6 +73,8 @@ export function NewPasswordFields({
   setConfirm: (v: string) => void;
   /** errors[].code của PASSWORD_POLICY_VIOLATION; caller xóa khi user sửa mật khẩu. */
   serverCodes: string[];
+  /** Đổi nhãn luật chỉ BE kiểm được theo ngữ cảnh (vd. màn đổi mật khẩu tạm). */
+  serverLabels?: Record<string, string>;
 }) {
   const checks = policy ? ruleChecks(policy.password, username) : [];
   const serverOnly = serverCodes.filter((c) => !checks.some((k) => k.code === c));
@@ -104,7 +107,7 @@ export function NewPasswordFields({
           })}
           {serverOnly.map((code) => (
             <li key={code} className="text-destructive">
-              ○ {SERVER_ONLY_LABEL[code] ?? code}
+              ○ {serverLabels?.[code] ?? SERVER_ONLY_LABEL[code] ?? code}
             </li>
           ))}
         </ul>

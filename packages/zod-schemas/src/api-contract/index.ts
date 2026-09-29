@@ -1,5 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { accountCenterContract } from "./account-center.contract";
+import { adminContract } from "./admin.contract";
 import { centralAuthContract } from "./central-auth.contract";
 import { connectionContract } from "./connection.contract";
 import { linkTransactionContract } from "./link-transaction.contract";
@@ -18,4 +19,5 @@ export const appContract = c.router({
   PasswordReset: passwordResetContract,
   MergeTransaction: mergeTransactionContract,
   Registration: registrationContract,
+  Admin: adminContract,
 });

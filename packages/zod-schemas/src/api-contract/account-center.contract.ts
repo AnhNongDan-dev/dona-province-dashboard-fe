@@ -77,7 +77,7 @@ export const accountCenterContract = c.router({
   changeMyPassword: {
     summary: "D20b — Đổi mật khẩu",
     description:
-      "Cần xác thực lại ≤ 5 phút (không hỏi mật khẩu cũ). Giữ phiên hiện tại, đăng xuất mọi phiên khác.",
+      "Cần xác thực lại ≤ 5 phút (không hỏi mật khẩu cũ). Giữ phiên hiện tại, đăng xuất mọi phiên khác. Được miễn cổng đổi mật khẩu (TASK-006).",
     method: "PUT",
     path: "/api/me/password",
     body: z.object({ newPassword: z.string().min(1) }),

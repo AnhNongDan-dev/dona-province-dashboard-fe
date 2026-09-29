@@ -53,4 +53,6 @@ export const sessionHooks = {
   onSessionLost: (): void => {},
   /** REAUTH_REQUIRED → mở S2; true = xác thực lại thành công, gửi lại thao tác một lần. */
   onReauthRequired: async (): Promise<boolean> => false,
+  /** API quản trị trả ADMIN_FORBIDDEN → đọc lại D1 (cờ admin). */
+  onAdminLost: (): void => {},
 };

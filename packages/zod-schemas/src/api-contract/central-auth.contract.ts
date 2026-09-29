@@ -73,6 +73,7 @@ export const centralAuthContract = c.router({
       ErrorCode.InvalidLoginCredentials,
       ErrorCode.RateLimited,
       ErrorCode.AccountLocked,
+      ErrorCode.TempPasswordExpired,
       ErrorCode.IdentityMerged,
       ErrorCode.CsrfInvalid,
       ErrorCode.SessionChanged,

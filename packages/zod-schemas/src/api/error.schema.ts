@@ -125,6 +125,12 @@ export const ErrorCode = {
   RegistrationNotFound: "REGISTRATION_NOT_FOUND",
   RegistrationExpired: "REGISTRATION_EXPIRED",
   RegistrationInvalidState: "REGISTRATION_INVALID_STATE",
+  // Quản trị (TASK-006)
+  AdminForbidden: "ADMIN_FORBIDDEN",
+  AdminTargetForbidden: "ADMIN_TARGET_FORBIDDEN",
+  UserNotFound: "USER_NOT_FOUND",
+  PasswordChangeRequired: "PASSWORD_CHANGE_REQUIRED",
+  TempPasswordExpired: "TEMP_PASSWORD_EXPIRED",
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
@@ -400,6 +406,26 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   [ErrorCode.RegistrationInvalidState]: {
     statusCode: StatusCode.Conflict,
     message: "Bước này không còn hợp lệ. Trang đã được cập nhật theo trạng thái mới nhất.",
+  },
+  [ErrorCode.AdminForbidden]: {
+    statusCode: StatusCode.Forbidden,
+    message: "Bạn không còn quyền quản trị.",
+  },
+  [ErrorCode.AdminTargetForbidden]: {
+    statusCode: StatusCode.Forbidden,
+    message: "Không thao tác được trên tài khoản quản trị viên.",
+  },
+  [ErrorCode.UserNotFound]: {
+    statusCode: StatusCode.NotFound,
+    message: "Không tìm thấy tài khoản.",
+  },
+  [ErrorCode.PasswordChangeRequired]: {
+    statusCode: StatusCode.Forbidden,
+    message: "Hãy đổi mật khẩu để tiếp tục.",
+  },
+  [ErrorCode.TempPasswordExpired]: {
+    statusCode: StatusCode.Unauthorized,
+    message: "Mật khẩu tạm đã hết hạn. Liên hệ quản trị viên để được cấp lại.",
   },
 };
 

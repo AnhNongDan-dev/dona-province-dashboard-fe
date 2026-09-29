@@ -12,10 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppAccountRouteRouteImport } from './routes/_app/account/route'
+import { Route as AppAdminRouteRouteImport } from './routes/_app/admin/route'
 import { Route as AuthEmailSetupRouteImport } from './routes/_auth/email-setup'
 import { Route as AuthForgotPasswordRouteImport } from './routes/_auth/forgot-password'
 import { Route as AuthLoggedOutRouteImport } from './routes/_auth/logged-out'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as AuthPasswordChangeRouteImport } from './routes/_auth/password-change'
 import { Route as AuthSessionChangedRouteImport } from './routes/_auth/session-changed'
 import { Route as AuthSessionEndedRouteImport } from './routes/_auth/session-ended'
 import { Route as AuthSsoErrorRouteImport } from './routes/_auth/sso-error'
@@ -24,8 +27,12 @@ import { Route as AppAccountActivityRouteImport } from './routes/_app/account/ac
 import { Route as AppAccountConnectionsRouteImport } from './routes/_app/account/connections'
 import { Route as AppAccountSecurityRouteImport } from './routes/_app/account/security'
 import { Route as AppAccountSessionsRouteImport } from './routes/_app/account/sessions'
+import { Route as AppAdminIndexRouteImport } from './routes/_app/admin/index'
+import { Route as AppAdminAuditRouteImport } from './routes/_app/admin/audit'
 import { Route as AuthLinkTxIdRouteImport } from './routes/_auth/link/$txId'
 import { Route as AuthRegisterChar123RegIdChar125RouteImport } from './routes/_auth/register/{-$regId}'
+import { Route as AppAdminUsersIndexRouteImport } from './routes/_app/admin/users/index'
+import { Route as AppAdminUsersIdRouteImport } from './routes/_app/admin/users/$id'
 
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
@@ -38,6 +45,16 @@ const AuthRouteRoute = AuthRouteRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAccountRouteRoute = AppAccountRouteRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAdminRouteRoute = AppAdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AuthEmailSetupRoute = AuthEmailSetupRouteImport.update({
@@ -58,6 +75,11 @@ const AuthLoggedOutRoute = AuthLoggedOutRouteImport.update({
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthPasswordChangeRoute = AuthPasswordChangeRouteImport.update({
+  id: '/password-change',
+  path: '/password-change',
   getParentRoute: () => AuthRouteRoute,
 } as any)
 const AuthSessionChangedRoute = AuthSessionChangedRouteImport.update({
@@ -81,24 +103,34 @@ const MergeTxIdRoute = MergeTxIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppAccountActivityRoute = AppAccountActivityRouteImport.update({
-  id: '/account/activity',
-  path: '/account/activity',
-  getParentRoute: () => AppRouteRoute,
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => AppAccountRouteRoute,
 } as any)
 const AppAccountConnectionsRoute = AppAccountConnectionsRouteImport.update({
-  id: '/account/connections',
-  path: '/account/connections',
-  getParentRoute: () => AppRouteRoute,
+  id: '/connections',
+  path: '/connections',
+  getParentRoute: () => AppAccountRouteRoute,
 } as any)
 const AppAccountSecurityRoute = AppAccountSecurityRouteImport.update({
-  id: '/account/security',
-  path: '/account/security',
-  getParentRoute: () => AppRouteRoute,
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => AppAccountRouteRoute,
 } as any)
 const AppAccountSessionsRoute = AppAccountSessionsRouteImport.update({
-  id: '/account/sessions',
-  path: '/account/sessions',
-  getParentRoute: () => AppRouteRoute,
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => AppAccountRouteRoute,
+} as any)
+const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminAuditRoute = AppAdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AppAdminRouteRoute,
 } as any)
 const AuthLinkTxIdRoute = AuthLinkTxIdRouteImport.update({
   id: '/link/$txId',
@@ -111,13 +143,26 @@ const AuthRegisterChar123RegIdChar125Route =
     path: '/register/{-$regId}',
     getParentRoute: () => AuthRouteRoute,
   } as any)
+const AppAdminUsersIndexRoute = AppAdminUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminUsersIdRoute = AppAdminUsersIdRouteImport.update({
+  id: '/users/$id',
+  path: '/users/$id',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/account': typeof AppAccountRouteRouteWithChildren
+  '/admin': typeof AppAdminRouteRouteWithChildren
   '/email-setup': typeof AuthEmailSetupRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
   '/logged-out': typeof AuthLoggedOutRoute
   '/login': typeof AuthLoginRoute
+  '/password-change': typeof AuthPasswordChangeRoute
   '/session-changed': typeof AuthSessionChangedRoute
   '/session-ended': typeof AuthSessionEndedRoute
   '/sso-error': typeof AuthSsoErrorRoute
@@ -126,15 +171,21 @@ export interface FileRoutesByFullPath {
   '/account/connections': typeof AppAccountConnectionsRoute
   '/account/security': typeof AppAccountSecurityRoute
   '/account/sessions': typeof AppAccountSessionsRoute
+  '/admin/audit': typeof AppAdminAuditRoute
   '/link/$txId': typeof AuthLinkTxIdRoute
   '/register/{-$regId}': typeof AuthRegisterChar123RegIdChar125Route
+  '/admin/': typeof AppAdminIndexRoute
+  '/admin/users/$id': typeof AppAdminUsersIdRoute
+  '/admin/users/': typeof AppAdminUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
+  '/account': typeof AppAccountRouteRouteWithChildren
   '/email-setup': typeof AuthEmailSetupRoute
   '/forgot-password': typeof AuthForgotPasswordRoute
   '/logged-out': typeof AuthLoggedOutRoute
   '/login': typeof AuthLoginRoute
+  '/password-change': typeof AuthPasswordChangeRoute
   '/session-changed': typeof AuthSessionChangedRoute
   '/session-ended': typeof AuthSessionEndedRoute
   '/sso-error': typeof AuthSsoErrorRoute
@@ -143,17 +194,24 @@ export interface FileRoutesByTo {
   '/account/connections': typeof AppAccountConnectionsRoute
   '/account/security': typeof AppAccountSecurityRoute
   '/account/sessions': typeof AppAccountSessionsRoute
+  '/admin/audit': typeof AppAdminAuditRoute
   '/link/$txId': typeof AuthLinkTxIdRoute
   '/register/{-$regId}': typeof AuthRegisterChar123RegIdChar125Route
+  '/admin': typeof AppAdminIndexRoute
+  '/admin/users/$id': typeof AppAdminUsersIdRoute
+  '/admin/users': typeof AppAdminUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteRouteWithChildren
   '/_auth': typeof AuthRouteRouteWithChildren
+  '/_app/account': typeof AppAccountRouteRouteWithChildren
+  '/_app/admin': typeof AppAdminRouteRouteWithChildren
   '/_auth/email-setup': typeof AuthEmailSetupRoute
   '/_auth/forgot-password': typeof AuthForgotPasswordRoute
   '/_auth/logged-out': typeof AuthLoggedOutRoute
   '/_auth/login': typeof AuthLoginRoute
+  '/_auth/password-change': typeof AuthPasswordChangeRoute
   '/_auth/session-changed': typeof AuthSessionChangedRoute
   '/_auth/session-ended': typeof AuthSessionEndedRoute
   '/_auth/sso-error': typeof AuthSsoErrorRoute
@@ -163,17 +221,24 @@ export interface FileRoutesById {
   '/_app/account/connections': typeof AppAccountConnectionsRoute
   '/_app/account/security': typeof AppAccountSecurityRoute
   '/_app/account/sessions': typeof AppAccountSessionsRoute
+  '/_app/admin/audit': typeof AppAdminAuditRoute
   '/_auth/link/$txId': typeof AuthLinkTxIdRoute
   '/_auth/register/{-$regId}': typeof AuthRegisterChar123RegIdChar125Route
+  '/_app/admin/': typeof AppAdminIndexRoute
+  '/_app/admin/users/$id': typeof AppAdminUsersIdRoute
+  '/_app/admin/users/': typeof AppAdminUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
+    | '/admin'
     | '/email-setup'
     | '/forgot-password'
     | '/logged-out'
     | '/login'
+    | '/password-change'
     | '/session-changed'
     | '/session-ended'
     | '/sso-error'
@@ -182,15 +247,21 @@ export interface FileRouteTypes {
     | '/account/connections'
     | '/account/security'
     | '/account/sessions'
+    | '/admin/audit'
     | '/link/$txId'
     | '/register/{-$regId}'
+    | '/admin/'
+    | '/admin/users/$id'
+    | '/admin/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
     | '/email-setup'
     | '/forgot-password'
     | '/logged-out'
     | '/login'
+    | '/password-change'
     | '/session-changed'
     | '/session-ended'
     | '/sso-error'
@@ -199,16 +270,23 @@ export interface FileRouteTypes {
     | '/account/connections'
     | '/account/security'
     | '/account/sessions'
+    | '/admin/audit'
     | '/link/$txId'
     | '/register/{-$regId}'
+    | '/admin'
+    | '/admin/users/$id'
+    | '/admin/users'
   id:
     | '__root__'
     | '/_app'
     | '/_auth'
+    | '/_app/account'
+    | '/_app/admin'
     | '/_auth/email-setup'
     | '/_auth/forgot-password'
     | '/_auth/logged-out'
     | '/_auth/login'
+    | '/_auth/password-change'
     | '/_auth/session-changed'
     | '/_auth/session-ended'
     | '/_auth/sso-error'
@@ -218,8 +296,12 @@ export interface FileRouteTypes {
     | '/_app/account/connections'
     | '/_app/account/security'
     | '/_app/account/sessions'
+    | '/_app/admin/audit'
     | '/_auth/link/$txId'
     | '/_auth/register/{-$regId}'
+    | '/_app/admin/'
+    | '/_app/admin/users/$id'
+    | '/_app/admin/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -251,6 +333,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/account': {
+      id: '/_app/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AppAccountRouteRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/admin': {
+      id: '/_app/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AppAdminRouteRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_auth/email-setup': {
       id: '/_auth/email-setup'
       path: '/email-setup'
@@ -277,6 +373,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/password-change': {
+      id: '/_auth/password-change'
+      path: '/password-change'
+      fullPath: '/password-change'
+      preLoaderRoute: typeof AuthPasswordChangeRouteImport
       parentRoute: typeof AuthRouteRoute
     }
     '/_auth/session-changed': {
@@ -309,31 +412,45 @@ declare module '@tanstack/react-router' {
     }
     '/_app/account/activity': {
       id: '/_app/account/activity'
-      path: '/account/activity'
+      path: '/activity'
       fullPath: '/account/activity'
       preLoaderRoute: typeof AppAccountActivityRouteImport
-      parentRoute: typeof AppRouteRoute
+      parentRoute: typeof AppAccountRouteRoute
     }
     '/_app/account/connections': {
       id: '/_app/account/connections'
-      path: '/account/connections'
+      path: '/connections'
       fullPath: '/account/connections'
       preLoaderRoute: typeof AppAccountConnectionsRouteImport
-      parentRoute: typeof AppRouteRoute
+      parentRoute: typeof AppAccountRouteRoute
     }
     '/_app/account/security': {
       id: '/_app/account/security'
-      path: '/account/security'
+      path: '/security'
       fullPath: '/account/security'
       preLoaderRoute: typeof AppAccountSecurityRouteImport
-      parentRoute: typeof AppRouteRoute
+      parentRoute: typeof AppAccountRouteRoute
     }
     '/_app/account/sessions': {
       id: '/_app/account/sessions'
-      path: '/account/sessions'
+      path: '/sessions'
       fullPath: '/account/sessions'
       preLoaderRoute: typeof AppAccountSessionsRouteImport
-      parentRoute: typeof AppRouteRoute
+      parentRoute: typeof AppAccountRouteRoute
+    }
+    '/_app/admin/': {
+      id: '/_app/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AppAdminIndexRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/audit': {
+      id: '/_app/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AppAdminAuditRouteImport
+      parentRoute: typeof AppAdminRouteRoute
     }
     '/_auth/link/$txId': {
       id: '/_auth/link/$txId'
@@ -349,23 +466,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegisterChar123RegIdChar125RouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_app/admin/users/': {
+      id: '/_app/admin/users/'
+      path: '/users'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AppAdminUsersIndexRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/_app/admin/users/$id': {
+      id: '/_app/admin/users/$id'
+      path: '/users/$id'
+      fullPath: '/admin/users/$id'
+      preLoaderRoute: typeof AppAdminUsersIdRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
   }
 }
 
-interface AppRouteRouteChildren {
-  AppIndexRoute: typeof AppIndexRoute
+interface AppAccountRouteRouteChildren {
   AppAccountActivityRoute: typeof AppAccountActivityRoute
   AppAccountConnectionsRoute: typeof AppAccountConnectionsRoute
   AppAccountSecurityRoute: typeof AppAccountSecurityRoute
   AppAccountSessionsRoute: typeof AppAccountSessionsRoute
 }
 
-const AppRouteRouteChildren: AppRouteRouteChildren = {
-  AppIndexRoute: AppIndexRoute,
+const AppAccountRouteRouteChildren: AppAccountRouteRouteChildren = {
   AppAccountActivityRoute: AppAccountActivityRoute,
   AppAccountConnectionsRoute: AppAccountConnectionsRoute,
   AppAccountSecurityRoute: AppAccountSecurityRoute,
   AppAccountSessionsRoute: AppAccountSessionsRoute,
+}
+
+const AppAccountRouteRouteWithChildren = AppAccountRouteRoute._addFileChildren(
+  AppAccountRouteRouteChildren,
+)
+
+interface AppAdminRouteRouteChildren {
+  AppAdminAuditRoute: typeof AppAdminAuditRoute
+  AppAdminIndexRoute: typeof AppAdminIndexRoute
+  AppAdminUsersIdRoute: typeof AppAdminUsersIdRoute
+  AppAdminUsersIndexRoute: typeof AppAdminUsersIndexRoute
+}
+
+const AppAdminRouteRouteChildren: AppAdminRouteRouteChildren = {
+  AppAdminAuditRoute: AppAdminAuditRoute,
+  AppAdminIndexRoute: AppAdminIndexRoute,
+  AppAdminUsersIdRoute: AppAdminUsersIdRoute,
+  AppAdminUsersIndexRoute: AppAdminUsersIndexRoute,
+}
+
+const AppAdminRouteRouteWithChildren = AppAdminRouteRoute._addFileChildren(
+  AppAdminRouteRouteChildren,
+)
+
+interface AppRouteRouteChildren {
+  AppAccountRouteRoute: typeof AppAccountRouteRouteWithChildren
+  AppAdminRouteRoute: typeof AppAdminRouteRouteWithChildren
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppAccountRouteRoute: AppAccountRouteRouteWithChildren,
+  AppAdminRouteRoute: AppAdminRouteRouteWithChildren,
+  AppIndexRoute: AppIndexRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
@@ -377,6 +540,7 @@ interface AuthRouteRouteChildren {
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoggedOutRoute: typeof AuthLoggedOutRoute
   AuthLoginRoute: typeof AuthLoginRoute
+  AuthPasswordChangeRoute: typeof AuthPasswordChangeRoute
   AuthSessionChangedRoute: typeof AuthSessionChangedRoute
   AuthSessionEndedRoute: typeof AuthSessionEndedRoute
   AuthSsoErrorRoute: typeof AuthSsoErrorRoute
@@ -389,6 +553,7 @@ const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoggedOutRoute: AuthLoggedOutRoute,
   AuthLoginRoute: AuthLoginRoute,
+  AuthPasswordChangeRoute: AuthPasswordChangeRoute,
   AuthSessionChangedRoute: AuthSessionChangedRoute,
   AuthSessionEndedRoute: AuthSessionEndedRoute,
   AuthSsoErrorRoute: AuthSsoErrorRoute,

@@ -78,6 +78,11 @@ const isHandledByTxPage = (path: string, errorCode: string) =>
   (path.includes("/api/link-transactions/") || path.includes("/api/merge-transactions/")) &&
   (errorCode === ErrorCode.SessionExpired || errorCode === ErrorCode.SessionChanged);
 
+const GATE_PAGE: Record<string, string> = {
+  [ErrorCode.PasswordChangeRequired]: "/password-change",
+  [ErrorCode.EmailSetupRequired]: "/email-setup",
+};
+
 export const clientAPI = customInitClientType(
   initClient(appContract, {
     // Cùng origin với BE (dev: Vite proxy; prod: reverse proxy) — cookie phiên HttpOnly đi kèm tự nhiên.
@@ -97,7 +102,10 @@ export const clientAPI = customInitClientType(
 
         return tsRestFetchApi(args)
           .then((rawResult) => {
-            logger.debug("logger ~ clientAPI.config.ts ~ line 90:", rawResult);
+            // Không log response quản trị: có mật khẩu tạm / kênh liên lạc rõ (TASK-006).
+            if (!args.path.startsWith("/api/admin/")) {
+              logger.debug("logger ~ clientAPI.config.ts ~ line 90:", rawResult);
+            }
             recordServerDate(rawResult.headers.get("date"));
             // Trust the BE envelope; safeParse only normalizes errorCode/errors and NEVER
             // throws — a malformed envelope falls back to the raw body instead of being
@@ -135,13 +143,15 @@ export const clientAPI = customInitClientType(
       ) {
         sessionHooks.onSessionLost();
       }
-      // Tài khoản chưa có email đã xác minh (TASK-008): mọi trang của app → màn thêm email.
-      if (
-        !res.success &&
-        res.errorCode === ErrorCode.EmailSetupRequired &&
-        window.location.pathname !== "/email-setup"
-      ) {
-        window.location.assign("/email-setup");
+      // Cổng tài khoản: phải đổi mật khẩu tạm (TASK-006) / chưa có email đã xác minh (TASK-008)
+      // → mọi trang của app sang màn tương ứng.
+      const gatePage = res.success ? null : GATE_PAGE[res.errorCode];
+      if (gatePage && window.location.pathname !== gatePage) {
+        window.location.assign(gatePage);
+      }
+      // Mất quyền quản trị giữa chừng (vd. vừa đổi email ở tab khác): đọc lại D1 để ẩn khu quản trị.
+      if (!res.success && res.errorCode === ErrorCode.AdminForbidden) {
+        sessionHooks.onAdminLost();
       }
       return customResponseType(res);
     },

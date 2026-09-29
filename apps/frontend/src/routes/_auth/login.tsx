@@ -39,6 +39,11 @@ export const Route = createFileRoute("/_auth/login")({
   component: LoginPage,
 });
 
+const LOGIN_GATE_PAGE: Partial<Record<LoginNext, string>> = {
+  [LoginNext.PASSWORD_CHANGE_REQUIRED]: "/password-change",
+  [LoginNext.EMAIL_SETUP_REQUIRED]: "/email-setup",
+};
+
 // Phiên ẩn danh của tab đã cũ (hết 30 phút / tab khác cấp phiên mới) → lấy token mới, gửi lại MỘT lần (Q19).
 const STALE_TOKEN_CODES: string[] = [
   ErrorCode.CsrfInvalid,
@@ -166,10 +171,12 @@ function LoginForm({
 
     if (res.success) {
       broadcast("changed");
-      // Chưa có email đã xác minh → thêm email trước; xong thì đi tiếp bằng req (D3 continueUrl).
-      if (res.data.next === LoginNext.EMAIL_SETUP_REQUIRED) {
+      // Cổng tài khoản: đổi mật khẩu tạm (TASK-006) / thêm email (TASK-008) trước; xong thì đi
+      // tiếp bằng req (D3 continueUrl). redirectUrl không cần: không có req thì đích luôn là "/".
+      const gatePage = LOGIN_GATE_PAGE[res.data.next];
+      if (gatePage) {
         const query = req ? `?${new URLSearchParams({ req })}` : "";
-        return window.location.assign(`/email-setup${query}`);
+        return window.location.assign(`${gatePage}${query}`);
       }
       window.location.assign(res.data.redirectUrl); // giữ pending tới khi rời trang
       return;
@@ -272,7 +279,7 @@ function LoginForm({
           <Link to="/forgot-password">Quên mật khẩu?</Link>
         </Button>
         <p className="text-sm text-muted-foreground">
-          Chưa có tài khoản Thành Đoàn Đồng Nai Central?{" "}
+          Chưa có tài khoản?{" "}
           <Link
             to="/register/{-$regId}"
             search={{ req: req ?? undefined }}

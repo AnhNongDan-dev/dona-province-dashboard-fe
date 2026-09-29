@@ -8,7 +8,7 @@ import { useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { clientAPI } from "@/config/clientAPI.config";
 import { queryClient } from "@/config/query-client.config";
-import { errorMessage } from "@/lib/api-error";
+import { errorMessage, errorParam } from "@/lib/api-error";
 import { sessionHooks, sessionStore } from "@/lib/session-store";
 
 // Điều phối phiên Central phía trình duyệt: đọc D1, đồng bộ nhiều tab, đăng xuất, step-up (S2).
@@ -72,6 +72,27 @@ export async function reconcile(signal?: TabSignal) {
   if (next.identity?.id !== prev.identity?.id) {
     window.location.assign("/session-changed");
   }
+}
+
+/**
+ * Qua xong một cổng tài khoản (đổi mật khẩu tạm / thêm email): làm mới phiên, báo các tab khác,
+ * rồi đi tiếp. Còn cổng email → màn thêm email; có `req` → D3 `continueUrl` (vào hệ thống đã gọi),
+ * `req` hết hạn → `returnUrl`; không → cổng tổng hợp.
+ */
+export async function continueAfterGate(req: string | undefined) {
+  const session = await loadSession().catch(() => null);
+  broadcast("changed");
+  if (session?.identity?.emailSetupRequired) {
+    const query = req ? `?${new URLSearchParams({ req })}` : "";
+    return window.location.assign(`/email-setup${query}`);
+  }
+  if (req) {
+    const res = await clientAPI.CentralAuth.getLoginContext({ query: { req } });
+    if (res.success && res.data.continueUrl) return window.location.assign(res.data.continueUrl);
+    const returnUrl = res.success ? null : errorParam(res, "returnUrl", "string");
+    if (returnUrl) return window.location.assign(returnUrl);
+  }
+  window.location.assign("/");
 }
 
 /** D2 — chỉ gọi khi user bấm [Tiếp tục làm việc], không gọi theo chuột/phím. */
@@ -139,6 +160,7 @@ export function installSessionSync() {
   installed = true;
   sessionHooks.onSessionLost = () => void reconcile();
   sessionHooks.onReauthRequired = requestReauth;
+  sessionHooks.onAdminLost = () => void loadSession().catch(() => null);
   if (channel) channel.onmessage = (e: MessageEvent<TabSignal>) => void reconcile(e.data);
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") void reconcile();

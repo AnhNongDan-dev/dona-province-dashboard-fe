@@ -34,6 +34,10 @@ export const sessionIdentitySchema = z.object({
   hasVerifiedContact: z.boolean(),
   /** Chưa có email đã xác minh → mọi API cần đăng nhập (trừ vài API) trả EMAIL_SETUP_REQUIRED. */
   emailSetupRequired: z.boolean(),
+  /** Đăng nhập bằng mật khẩu tạm admin cấp (TASK-006) → phải đổi mật khẩu trước mọi việc khác. */
+  passwordChangeRequired: z.boolean(),
+  /** Hiện khu quản trị (TASK-006). Chỉ để hiển thị — BE kiểm quyền ở từng API. */
+  admin: z.boolean(),
   tenantId: z.int().nullable(),
   tenantName: z.string().nullable(),
 });
