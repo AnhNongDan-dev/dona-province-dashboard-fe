@@ -9,8 +9,9 @@ import {
 } from "@/repositories/findMyConnections.repository";
 
 /**
- * F6 — liên kết từ Account Center: D8 → điều hướng top-level tới legacyVerifyUrl (BE đã đặt cookie
- * gắn giao dịch với trình duyệt). User quay về /link/:txId sau khi xác minh ở hệ thống cũ.
+ * Liên kết từ Account Center: bắt đầu giao dịch → điều hướng top-level tới legacyVerifyUrl (BE đã
+ * đặt cookie gắn giao dịch với trình duyệt). User quay về /link/:txId sau khi xác minh ở hệ thống
+ * cũ.
  */
 export function useStartLink() {
   const [redirecting, setRedirecting] = useState<string | null>(null);

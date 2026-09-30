@@ -7,13 +7,13 @@ import { OpenAPIHelper } from "../openapi/openAPI.helper";
 
 const c = initContract();
 
-// D25 quên mật khẩu (TASK-004). Công khai + CSRF (phiên ẩn danh). resetId gắn với phiên của
+// Quên mật khẩu. Công khai + CSRF (phiên ẩn danh). resetId gắn với phiên của
 // trình duyệt đã yêu cầu — resend / complete phải dùng cùng phiên, khác phiên → OTP_EXPIRED.
 const resetParams = z.object({ resetId: z.guid() });
 
 export const passwordResetContract = c.router({
   requestPasswordReset: {
-    summary: "D25 — Yêu cầu lấy lại mật khẩu",
+    summary: "Yêu cầu lấy lại mật khẩu",
     description: "Luôn trả cùng hình dạng dù định danh có tồn tại hay không. BE tự chọn kênh gửi.",
     method: "POST",
     path: "/api/password-reset",
@@ -22,7 +22,7 @@ export const passwordResetContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(ErrorCode.RateLimited, ErrorCode.ValidationError),
   },
   resendPasswordReset: {
-    summary: "D25 — Gửi lại mã",
+    summary: "Gửi lại mã",
     description: "Mã cũ mất hiệu lực. Tối đa 3 lần / resetId, cách nhau ≥ 60 giây.",
     method: "POST",
     path: "/api/password-reset/:resetId/resend",
@@ -38,7 +38,7 @@ export const passwordResetContract = c.router({
     ),
   },
   completePasswordReset: {
-    summary: "D25 — Đặt mật khẩu mới",
+    summary: "Đặt mật khẩu mới",
     description:
       "Kiểm mã trước, password sau: mã đúng mà password không đạt thì mã vẫn giữ trạng thái đã xác minh.",
     method: "POST",

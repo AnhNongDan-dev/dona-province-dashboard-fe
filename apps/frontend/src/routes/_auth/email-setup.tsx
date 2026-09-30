@@ -12,9 +12,9 @@ import { sessionStore, useSession } from "@/lib/session-store";
 import { mySecurityRepository } from "@/repositories/mySecurity.repository";
 import { ContactOtpForm } from "../_app/account/-components/contacts-card";
 
-// Màn "Thêm email cho tài khoản" (TASK-008). Tài khoản chưa có email đã xác minh bị giữ ở đây:
-// sau D4 (`next=EMAIL_SETUP_REQUIRED`), hoặc khi hệ thống gọi authorize lúc phiên đã có
-// (BE chuyển tới `/email-setup?req=`). Xác minh xong thì đi tiếp: có `req` → D3 `continueUrl`
+// Màn "Thêm email cho tài khoản". Tài khoản chưa có email đã xác minh bị giữ ở đây:
+// sau đăng nhập (`next=EMAIL_SETUP_REQUIRED`), hoặc khi hệ thống gọi authorize lúc phiên đã có
+// (BE chuyển tới `/email-setup?req=`). Xác minh xong thì đi tiếp: có `req` → `continueUrl`
 // (vào hệ thống đã gọi); không → cổng tổng hợp. Không có [Để sau], chỉ [Đăng xuất].
 export const Route = createFileRoute("/_auth/email-setup")({
   validateSearch: z.object({ req: z.string().optional().catch(undefined) }),
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_auth/email-setup")({
     if (!session?.authenticated) {
       throw redirect({ to: "/login", search: { req: search.req } });
     }
-    // Cổng đổi mật khẩu tạm đứng trước cổng email (TASK-006).
+    // Cổng đổi mật khẩu tạm đứng trước cổng email.
     if (session.identity?.passwordChangeRequired) {
       throw redirect({ to: "/password-change", search: { req: search.req } });
     }
@@ -71,12 +71,7 @@ function EmailSetupPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 text-sm">
-        <ContactOtpForm
-          channel={OtpChannel.EMAIL}
-          pending={pending}
-          replacing={false}
-          onClose={null}
-        />
+        <ContactOtpForm pending={pending} replacing={false} onClose={null} />
         <p className="text-xs text-muted-foreground">
           Email dùng để đăng nhập và lấy lại mật khẩu. Không phải bạn, hoặc đang dùng máy chung?
         </p>

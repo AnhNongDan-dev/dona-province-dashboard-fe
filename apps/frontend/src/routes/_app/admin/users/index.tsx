@@ -30,7 +30,7 @@ const PAGE_SIZE = 20;
 const Q_MIN = 2;
 const Q_MAX = 100;
 
-// A1 — tìm tài khoản (AD1). Bộ lọc nằm trên URL; URL đếm trang từ 1, API từ 0.
+// Tìm tài khoản. Bộ lọc nằm trên URL; URL đếm trang từ 1, API từ 0.
 export const Route = createFileRoute("/_app/admin/users/")({
   validateSearch: z.object({
     page: z.coerce.number().int().min(1).catch(1),
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/_app/admin/users/")({
     status: userStatusFilterZod.optional().catch(undefined),
     providerCode: z.string().optional().catch(undefined),
   }),
-  // Danh sách hệ thống cho bộ lọc: D16 trả mọi hệ thống đã đăng ký.
+  // Danh sách hệ thống cho bộ lọc: GET /api/me/connections trả mọi hệ thống đã đăng ký.
   loader: () => findMyConnectionsRepository().loader(),
   component: AdminUsersPage,
 });

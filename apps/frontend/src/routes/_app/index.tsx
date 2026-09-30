@@ -12,7 +12,7 @@ import {
 } from "@/repositories/findMyConnections.repository";
 import { useStartLink } from "./-components/use-start-link";
 
-// S8 — trang mở các hệ thống. Mỗi ô một hệ thống đã đăng ký với Central (D16).
+// Trang mở các hệ thống. Mỗi ô một hệ thống đã đăng ký với Central.
 export const Route = createFileRoute("/_app/")({
   loader: () => findMyConnectionsRepository().loader(),
   component: DashboardPage,
@@ -41,7 +41,7 @@ function DashboardPage() {
         <p className="text-muted-foreground">Chưa có hệ thống nào được đăng ký.</p>
       ) : (
         <>
-          {/* Tài khoản mới đăng ký chưa có quyền gì ở hệ thống nào — mời liên kết (TASK-007). */}
+          {/* Tài khoản mới đăng ký chưa có quyền gì ở hệ thống nào — mời liên kết. */}
           {data.every((c) => c.accounts.length === 0) && (
             <Alert>
               <AlertDescription>
@@ -67,7 +67,7 @@ function DashboardPage() {
 }
 
 function SystemTile({ connection: c }: { connection: MyConnectionDTO }) {
-  const account = c.accounts[0]; // GĐ A–C: tối đa 1 account / hệ thống
+  const account = c.accounts[0]; // Tối đa 1 account / hệ thống
   const { start, redirecting } = useStartLink();
 
   const heading = (

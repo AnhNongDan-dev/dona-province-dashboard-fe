@@ -2,6 +2,7 @@ import { ErrorCode } from "@repo/zod-schemas/src/api/error.schema";
 import { LinkAction } from "@repo/zod-schemas/src/entity/link-transaction-schema";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
+import { PasswordInput } from "@/components/auth/password-input";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -14,8 +15,8 @@ import type { Wizard } from "../-lib";
 import { ErrorAlert, LegacyAccountCard, TxShell } from "./tx-parts";
 
 /**
- * F5 bước "Đăng nhập tài khoản Central muốn liên kết" (FRESH_LOGIN). Form luôn trống, kể cả khi
- * trình duyệt đang có phiên của ai đó; chỉ điền sẵn SĐT / email user vừa chứng minh sở hữu ở
+ * Liên kết từ hệ thống cũ, bước "Đăng nhập tài khoản Central muốn liên kết" (FRESH_LOGIN). Form
+ * luôn trống, kể cả khi trình duyệt đang có phiên của ai đó; chỉ điền sẵn email user vừa nhập ở
  * trang đăng ký (history state, không lên URL).
  */
 export function CentralLoginStep({ w, onCancel }: { w: Wizard; onCancel: () => void }) {
@@ -41,7 +42,7 @@ export function CentralLoginStep({ w, onCancel }: { w: Wizard; onCancel: () => v
       body: { loginId, password },
     });
     // Password đúng thì phiên đã đổi sang người vừa đăng nhập — kể cả khi BE trả
-    // PROVIDER_ALREADY_LINKED. Đọc lại D1 để tab có token mới, rồi báo các tab khác.
+    // PROVIDER_ALREADY_LINKED. Đọc lại trạng thái phiên để tab có token mới, rồi báo các tab khác.
     if (res.success || res.errorCode === ErrorCode.ProviderAlreadyLinked) {
       await loadSession().catch(() => null);
       broadcast("changed");
@@ -74,7 +75,7 @@ export function CentralLoginStep({ w, onCancel }: { w: Wizard; onCancel: () => v
       <form onSubmit={onSubmit} noValidate>
         <FieldGroup>
           <Field data-invalid={!!fieldError}>
-            <FieldLabel htmlFor="loginId">Tên đăng nhập, email hoặc số điện thoại</FieldLabel>
+            <FieldLabel htmlFor="loginId">Tên đăng nhập hoặc email</FieldLabel>
             <Input
               id="loginId"
               name="loginId"
@@ -85,7 +86,7 @@ export function CentralLoginStep({ w, onCancel }: { w: Wizard; onCancel: () => v
           </Field>
           <Field data-invalid={!!fieldError}>
             <FieldLabel htmlFor="password">Mật khẩu</FieldLabel>
-            <Input id="password" name="password" type="password" autoComplete="current-password" />
+            <PasswordInput id="password" name="password" autoComplete="current-password" />
             {fieldError && <FieldError>{fieldError}</FieldError>}
           </Field>
           <Button

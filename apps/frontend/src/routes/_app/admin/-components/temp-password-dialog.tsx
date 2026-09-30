@@ -20,8 +20,8 @@ export type TempPasswordResult = {
 };
 
 /**
- * Hiện mật khẩu tạm (AD6) đúng một lần. Chỉ nằm trong state của trang cho tới khi đóng hộp —
- * không URL, không storage, không cache truy vấn, không log. Đóng là mất, không mở lại được.
+ * Hiện mật khẩu tạm (cấp lại mật khẩu) đúng một lần. Chỉ nằm trong state của trang cho tới khi đóng
+ * hộp — không URL, không storage, không cache truy vấn, không log. Đóng là mất, không mở lại được.
  */
 export function TempPasswordDialog({
   result,

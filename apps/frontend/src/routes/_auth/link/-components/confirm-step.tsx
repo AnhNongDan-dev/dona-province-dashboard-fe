@@ -8,7 +8,10 @@ import { clientAPI } from "@/config/clientAPI.config";
 import type { Wizard } from "../-lib";
 import { AccountCard, ErrorAlert, LegacyAccountCard, messageOf, TxShell } from "./tx-parts";
 
-/** F5 bước xác nhận — tuyến phòng thủ cuối trên máy dùng chung: hai thẻ + tick xác nhận. */
+/**
+ * Liên kết từ hệ thống cũ, bước xác nhận — tuyến phòng thủ cuối trên máy dùng chung: hai thẻ + tick
+ * xác nhận.
+ */
 export function ConfirmStep({ w, onCancel }: { w: Wizard; onCancel: () => void }) {
   const { tx } = w;
   const [acknowledged, setAcknowledged] = useState(false);

@@ -6,7 +6,7 @@ import { queryClient } from "@/config/query-client.config";
 import { createQueryRepository } from "./-factory";
 import { defaultPagedResult, mapPaging, type PagedResult } from "./-paging";
 
-// AD1 — tìm tài khoản (A1). Phân trang + lọc phía server; page tính từ 0.
+// Tìm tài khoản (màn quản trị). Phân trang + lọc phía server; page tính từ 0.
 export type SearchAdminUsersQuery = {
   page: number;
   size: number;

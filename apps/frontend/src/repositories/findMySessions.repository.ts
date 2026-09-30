@@ -3,7 +3,7 @@ import z from "zod";
 import { clientAPI } from "@/config/clientAPI.config";
 import { createQueryRepository } from "./-factory";
 
-// D18 — phiên còn sống của user đang đăng nhập (S10). Không phân trang (số phiên nhỏ).
+// Phiên còn sống của user đang đăng nhập (Phiên & thiết bị). Không phân trang (số phiên nhỏ).
 const mapToDTO = (data: unknown) => z.array(deviceSessionSchema).parse(data);
 export type MySessionDTO = ReturnType<typeof mapToDTO>[number];
 

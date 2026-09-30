@@ -2,7 +2,7 @@ import z from "zod";
 import { commonZod } from "../common";
 import { linkActionZod, otpChannelZod } from "./link-transaction-schema";
 
-// Mirror D22 — giao dịch gộp tài khoản do user tự làm (TASK-005). Gắn trình duyệt + phiên đã tạo.
+// Mirror giao dịch gộp tài khoản do user tự làm. Gắn trình duyệt + phiên đã tạo.
 // Enum chỉ dùng để rẽ nhánh màn hình, không hiển thị ra UI → không có LABEL/OPTIONS.
 
 export const MergeState = {

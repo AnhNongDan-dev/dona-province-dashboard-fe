@@ -10,9 +10,9 @@ import { OpenAPIHelper } from "../openapi/openAPI.helper";
 
 const c = initContract();
 
-// Giao dịch liên kết (TASK-001 D8–D11; TASK-003/004). Nhánh tạo tài khoản trong giao dịch đã gỡ
-// (TASK-007) — đăng ký dùng registration.contract. Gắn với trình duyệt bằng cookie
-// riêng của BE, không cần phiên đã đăng nhập. Request ghi vẫn gửi X-CSRF-TOKEN (clientAPI tự gắn).
+// Giao dịch liên kết. Nhánh tạo tài khoản trong giao dịch đã gỡ — đăng ký dùng
+// registration.contract. Gắn với trình duyệt bằng cookie riêng của BE, không cần phiên đã đăng
+// nhập. Request ghi vẫn gửi X-CSRF-TOKEN (clientAPI tự gắn).
 const txParams = z.object({ txId: z.guid() });
 const TX_ERRORS = [
   ErrorCode.LinkTxNotFound,
@@ -22,7 +22,7 @@ const TX_ERRORS = [
 
 export const linkTransactionContract = c.router({
   createLinkTransaction: {
-    summary: "D8 — Bắt đầu liên kết từ Account Center (F6)",
+    summary: "Bắt đầu liên kết từ Account Center",
     description:
       "Cần phiên. BE đặt cookie gắn giao dịch; FE điều hướng top-level tới legacyVerifyUrl.",
     method: "POST",
@@ -36,7 +36,7 @@ export const linkTransactionContract = c.router({
     ),
   },
   getLinkTransaction: {
-    summary: "D9 — Trạng thái giao dịch",
+    summary: "Trạng thái giao dịch",
     description: "COMPLETED đọc được 30 phút sau khi hoàn tất; FAILED/CANCELLED tới khi hết hạn.",
     method: "GET",
     path: "/api/link-transactions/:txId",
@@ -45,7 +45,7 @@ export const linkTransactionContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(ErrorCode.LinkTxNotFound, ErrorCode.LinkTxExpired),
   },
   centralLoginLinkTransaction: {
-    summary: "D10 — Đăng nhập Central trong giao dịch",
+    summary: "Đăng nhập Central trong giao dịch",
     description:
       "FRESH_LOGIN { loginId, password }: phiên đổi ngay (PROVIDER_ALREADY_LINKED vẫn kèm token mới). " +
       "REAUTH_CURRENT { password }: chỉ xác thực lại chủ phiên, token không đổi.",
@@ -70,7 +70,7 @@ export const linkTransactionContract = c.router({
     ),
   },
   confirmLinkTransaction: {
-    summary: "D11 — Xác nhận liên kết",
+    summary: "Xác nhận liên kết",
     description: "User phải tick xác nhận hai tài khoản đều là của mình.",
     method: "POST",
     path: "/api/link-transactions/:txId/confirm",
@@ -86,7 +86,7 @@ export const linkTransactionContract = c.router({
     ),
   },
   cancelLinkTransaction: {
-    summary: "D11 — Hủy giao dịch",
+    summary: "Hủy giao dịch",
     description: "Trả giao dịch ở CANCELLED kèm returnUrl.",
     method: "POST",
     path: "/api/link-transactions/:txId/cancel",

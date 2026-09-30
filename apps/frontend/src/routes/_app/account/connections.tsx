@@ -11,7 +11,7 @@ import { findMyConnectionsRepository } from "@/repositories/findMyConnections.re
 import { useStartLink } from "../-components/use-start-link";
 import { UnlinkButton } from "./-components/unlink-button";
 
-// S9 — Liên kết tài khoản: xem, liên kết (F6) và hủy liên kết (D17).
+// Liên kết tài khoản: xem, liên kết (bắt đầu từ Account Center) và hủy liên kết.
 export const Route = createFileRoute("/_app/account/connections")({
   loader: () => findMyConnectionsRepository().loader(),
   component: ConnectionsPage,

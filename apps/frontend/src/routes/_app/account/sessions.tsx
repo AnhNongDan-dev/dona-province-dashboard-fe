@@ -28,7 +28,7 @@ import {
   type MySessionDTO,
 } from "@/repositories/findMySessions.repository";
 
-// S10 — Phiên & thiết bị (D18). Phiên hiện tại chỉ đăng xuất qua D6 (một đường duy nhất).
+// Phiên & thiết bị. Phiên hiện tại chỉ đăng xuất qua API đăng xuất (một đường duy nhất).
 export const Route = createFileRoute("/_app/account/sessions")({
   loader: () => findMySessionsRepository().loader(),
   component: SessionsPage,
@@ -55,7 +55,8 @@ function SessionsPage() {
 
   async function revokeAll(includeCurrent: boolean) {
     setBusy(includeCurrent ? "all" : "others");
-    // Cần xác thực lại: clientAPI tự mở S2 khi gặp REAUTH_REQUIRED rồi gửi lại một lần.
+    // Cần xác thực lại: clientAPI tự mở hộp xác thực lại khi gặp REAUTH_REQUIRED rồi gửi lại một
+    // lần.
     const res = await clientAPI.AccountCenter.revokeAllMySessions({ body: { includeCurrent } });
     setBusy(null);
     setConfirmAll(false);
@@ -68,7 +69,8 @@ function SessionsPage() {
     }
     const result = revokeAllResultSchema.parse(res.data);
     if (includeCurrent && result.csrfToken && result.sessionId) {
-      // Như D6: phiên hiện tại đã kết thúc → phiên ẩn danh mới, báo các tab khác, sang S3.
+      // Như đăng xuất: phiên hiện tại đã kết thúc → phiên ẩn danh mới, báo các tab khác, sang trang
+      // đã đăng xuất.
       applyLoggedOut(result.csrfToken, result.sessionId);
       return navigate({ to: "/logged-out", state: { notifiedClients: result.notifiedClients } });
     }

@@ -19,10 +19,10 @@ import { ReauthCurrentStep } from "./-components/reauth-current-step";
 import { AwaitingLegacy, Completed, Ended, TxLoadError } from "./-components/tx-parts";
 import { fetchTx, parseTx, TX_RELOAD_CODES, type TxResult, type Wizard } from "./-lib";
 
-// S5/S6/S7 — wizard liên kết. BE chuyển trình duyệt tới đây sau khi xác minh tài khoản
-// ở hệ thống cũ. Giao dịch gắn với trình duyệt bằng cookie của BE; FE dựng hoàn toàn theo D9 và
-// chỉ hiện nút có trong allowedActions. Cố ý không cache (React Query): mỗi bước là một thao tác
-// trên giao dịch, dữ liệu cũ vô nghĩa.
+// Wizard liên kết. BE chuyển trình duyệt tới đây sau khi xác minh tài khoản
+// ở hệ thống cũ. Giao dịch gắn với trình duyệt bằng cookie của BE; FE dựng hoàn toàn theo trạng
+// thái giao dịch và chỉ hiện nút có trong allowedActions. Cố ý không cache (React Query): mỗi bước
+// là một thao tác trên giao dịch, dữ liệu cũ vô nghĩa.
 export const Route = createFileRoute("/_auth/link/$txId")({
   loader: async ({ params }) => {
     const [tx, policy] = await Promise.all([
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_auth/link/$txId")({
     ]);
     return { tx, policy: policy.success ? credentialPolicySchema.parse(policy.data) : null };
   },
-  // Mỗi lần vào trang (kể cả quay lại bằng Back) phải đọc D9 mới.
+  // Mỗi lần vào trang (kể cả quay lại bằng Back) phải đọc trạng thái giao dịch mới.
   staleTime: 0,
   gcTime: 0,
   component: LinkPage,
@@ -60,7 +60,8 @@ function LinkPage() {
         res.errorCode === ErrorCode.SessionExpired ||
         res.errorCode === ErrorCode.SessionChanged
       ) {
-        // F6: bộ xử lý chung bỏ qua 2 mã này ở wizard → tự đọc lại D1 (token + chủ phiên hiện tại).
+        // Liên kết từ Account Center: bộ xử lý chung bỏ qua 2 mã này ở wizard → tự đọc lại phiên
+        // (token + chủ phiên hiện tại).
         void loadSession().catch(() => null);
       }
       if (TX_RELOAD_CODES.includes(res.errorCode)) void reload();
@@ -91,7 +92,8 @@ function LinkPage() {
       if (tx.intent === LinkIntent.CREATE && w.can(LinkAction.REGISTER) && !preferLogin) {
         return <Navigate to="/register/{-$regId}" search={{ linkTx: txId }} replace />;
       }
-      // F6 (từ Account Center): chỉ xác thực lại chủ phiên; F5: đăng nhập tài khoản Central muốn liên kết.
+      // Từ Account Center: chỉ xác thực lại chủ phiên; từ hệ thống cũ: đăng nhập tài khoản Central
+      // muốn liên kết.
       return tx.centralStep === CentralStep.REAUTH_CURRENT ? (
         <ReauthCurrentStep key="reauth" w={w} onCancel={() => void cancel()} />
       ) : (

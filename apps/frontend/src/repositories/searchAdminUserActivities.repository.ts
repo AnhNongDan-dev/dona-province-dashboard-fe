@@ -6,7 +6,7 @@ import { createQueryRepository } from "./-factory";
 import { defaultPagedResult, mapPaging, type PagedResult } from "./-paging";
 import type { MyActivityDTO } from "./searchMyActivities.repository";
 
-// AD3 — lịch sử hoạt động của một tài khoản, cùng hình dạng D19.
+// Lịch sử hoạt động của một tài khoản, cùng hình dạng lịch sử hoạt động của chính user.
 export type SearchAdminUserActivitiesQuery = { id: string; page: number; size: number };
 
 const mapToDTO = (data: unknown) => mapPaging(pagedSchema(activitySchema).parse(data), (a) => a);

@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-/** Bảng D19 — lịch sử của chính user (S11) và của một tài khoản ở màn quản trị (AD3). */
+/** Bảng lịch sử hoạt động — của chính user và của một tài khoản ở màn quản trị. */
 export function ActivityTable({
   items,
   isLoading,

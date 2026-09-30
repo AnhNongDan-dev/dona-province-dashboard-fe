@@ -10,6 +10,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { PasswordInput } from "@/components/auth/password-input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -32,7 +33,7 @@ import {
   StepCard,
 } from "./-components/merge-parts";
 
-// S14 — gộp tài khoản (D22). Tài khoản đang đăng nhập (target) được giữ lại; tài khoản đăng nhập
+// Gộp tài khoản. Tài khoản đang đăng nhập (target) được giữ lại; tài khoản đăng nhập
 // ở bước 2 (source) ngừng dùng. Dựng theo state + allowedActions; không cache (mỗi bước là một
 // thao tác trên giao dịch). Trang nằm ngoài layout ứng dụng để lỗi phiên xử lý tại chỗ.
 type TxResult = { ok: true; tx: MergeTransaction } | { ok: false; error: ErrorResponse };
@@ -107,7 +108,7 @@ function MergePage() {
         res.errorCode === ErrorCode.SessionExpired ||
         res.errorCode === ErrorCode.SessionChanged
       ) {
-        // Bộ xử lý phiên chung bỏ qua 2 mã này ở trang giao dịch → tự đọc lại D1.
+        // Bộ xử lý phiên chung bỏ qua 2 mã này ở trang giao dịch → tự đọc lại trạng thái phiên.
         void loadSession().catch(() => null);
       }
       if (RELOAD_CODES.includes(res.errorCode)) void reload();
@@ -170,7 +171,8 @@ function SourceLoginStep({ step }: { step: Step }) {
 
     setPending(true);
     setError(null);
-    // Chỉ xác thực tài khoản thứ hai — phiên giữ nguyên, không đọc lại D1, không báo các tab khác.
+    // Chỉ xác thực tài khoản thứ hai — phiên giữ nguyên, không đọc lại trạng thái phiên, không báo
+    // các tab khác.
     const res = await clientAPI.MergeTransaction.centralLoginMergeTransaction({
       params: { txId: tx.txId },
       body: { loginId, password },
@@ -212,12 +214,12 @@ function SourceLoginStep({ step }: { step: Step }) {
       <form onSubmit={onSubmit} noValidate>
         <FieldGroup>
           <Field>
-            <FieldLabel htmlFor="loginId">Tên đăng nhập, email hoặc số điện thoại</FieldLabel>
+            <FieldLabel htmlFor="loginId">Tên đăng nhập hoặc email</FieldLabel>
             <Input id="loginId" name="loginId" autoComplete="off" autoFocus />
           </Field>
           <Field>
             <FieldLabel htmlFor="password">Mật khẩu của tài khoản đó</FieldLabel>
-            <Input id="password" name="password" type="password" autoComplete="off" />
+            <PasswordInput id="password" name="password" autoComplete="off" />
           </Field>
           <Button
             type="submit"

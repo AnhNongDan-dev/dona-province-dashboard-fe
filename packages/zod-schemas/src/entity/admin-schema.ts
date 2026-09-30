@@ -3,7 +3,7 @@ import { commonZod } from "../common";
 import { notifiedClientSchema } from "./central-auth-schema";
 import { otpChannelZod } from "./link-transaction-schema";
 
-// Mirror DTO màn quản trị (TASK-006 AD1–AD8, AD10). id tài khoản = id công khai (UUID) như D1.
+// Mirror DTO màn quản trị. id tài khoản = id công khai (UUID) như trạng thái phiên.
 
 export const UserStatus = {
   ACTIVE: "ACTIVE",
@@ -18,11 +18,11 @@ export const USER_STATUS_LABEL: Record<UserStatus, string> = {
   [UserStatus.DISABLED]: "Vô hiệu",
   [UserStatus.MERGED]: "Đã gộp",
 };
-/** Giá trị lọc `status` của AD1 (BE không nhận DISABLED). */
+/** Giá trị lọc `status` khi tìm tài khoản (BE không nhận DISABLED). */
 export const USER_STATUS_FILTER = [UserStatus.ACTIVE, UserStatus.LOCKED, UserStatus.MERGED];
 export const userStatusFilterZod = z.enum(USER_STATUS_FILTER);
 
-/** AD2 allowedActions — FE chỉ dựa mảng này để hiện nút. */
+/** allowedActions của chi tiết tài khoản — FE chỉ dựa mảng này để hiện nút. */
 export const AdminUserAction = {
   LOCK: "LOCK",
   UNLOCK: "UNLOCK",
@@ -32,7 +32,7 @@ export const AdminUserAction = {
 } as const;
 export type AdminUserAction = (typeof AdminUserAction)[keyof typeof AdminUserAction];
 
-/** AD10 action. */
+/** Hành động trong nhật ký quản trị. */
 export const AdminAction = {
   LOCK: "LOCK",
   UNLOCK: "UNLOCK",
@@ -55,7 +55,7 @@ export const ADMIN_ACTION_LABEL: Record<AdminAction, string> = {
 // Chuỗi, không enum: giá trị lạ (BE thêm sau) không được làm vỡ cả trang.
 const statusString = z.string();
 
-/** AD1 — một hàng danh sách. Kênh liên lạc đã che, chỉ có khi đã xác minh. */
+/** Tìm tài khoản — một hàng danh sách. Kênh liên lạc đã che, chỉ có khi đã xác minh. */
 export const adminUserRowSchema = z.object({
   id: z.guid(),
   username: z.string(),
@@ -73,7 +73,7 @@ export const adminUserRowSchema = z.object({
 });
 export type AdminUserRow = z.infer<typeof adminUserRowSchema>;
 
-/** AD2 — chi tiết; kênh liên lạc đầy đủ (Q5 = A), verifiedAt null = chưa xác minh. */
+/** Chi tiết tài khoản; kênh liên lạc đầy đủ, verifiedAt null = chưa xác minh. */
 export const adminUserDetailSchema = z.object({
   id: z.guid(),
   username: z.string(),
@@ -140,30 +140,33 @@ export type AdminUserDetail = z.infer<typeof adminUserDetailSchema>;
 
 const notifiedClients = z.array(notifiedClientSchema);
 
-/** AD4 — gọi lặp (đã khóa): status hiện tại, revokedCount 0, notifiedClients rỗng. */
+/** Khóa tài khoản — gọi lặp (đã khóa): status hiện tại, revokedCount 0, notifiedClients rỗng. */
 export const adminLockResultSchema = z.object({
   status: statusString,
   revokedCount: z.int(),
   notifiedClients,
 });
-/** AD5 */
+/** Mở khóa tài khoản */
 export const adminUnlockResultSchema = z.object({ status: statusString });
-/** AD6 — mật khẩu tạm chỉ có ở response này; FE không lưu ở bất kỳ đâu. */
+/** Cấp lại mật khẩu — mật khẩu tạm chỉ có ở response này; FE không lưu ở bất kỳ đâu. */
 export const adminPasswordResetResultSchema = z.object({
   temporaryPassword: z.string(),
   expiresAt: commonZod.datetime,
   revokedCount: z.int(),
   notifiedClients,
 });
-/** AD7 */
+/** Đăng xuất mọi phiên */
 export const adminSessionsRevokeResultSchema = z.object({
   revokedCount: z.int(),
   notifiedClients,
 });
-/** AD8 */
+/** Hủy liên kết */
 export const adminUnlinkResultSchema = z.object({ notifiedClients });
 
-/** AD10 — tên hai bên là bản chụp lúc thao tác; targetId null với ACCESS_DENIED không nhắm ai. */
+/**
+ * Nhật ký quản trị — tên hai bên là bản chụp lúc thao tác; targetId null với ACCESS_DENIED không
+ * nhắm ai.
+ */
 export const adminAuditRowSchema = z.object({
   id: z.int(),
   occurredAt: commonZod.datetime,
@@ -184,7 +187,7 @@ export const adminAuditRowSchema = z.object({
 });
 export type AdminAuditRow = z.infer<typeof adminAuditRowSchema>;
 
-/** Lý do bắt buộc cho mọi thao tác ghi của admin (R5). */
+/** Lý do bắt buộc cho mọi thao tác ghi của admin. */
 export const ADMIN_REASON_MAX_LENGTH = 500;
 export const adminReasonBodySchema = z.object({
   reason: z

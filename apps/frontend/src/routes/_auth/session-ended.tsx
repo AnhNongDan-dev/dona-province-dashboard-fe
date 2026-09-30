@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-// S4 — phiên kết thúc (hết idle / hết hạn tối đa / bị thu hồi). Không hiện tên người trước
+// Phiên kết thúc (hết idle / hết hạn tối đa / bị thu hồi). Không hiện tên người trước
 // (máy dùng chung); đăng nhập lại là đăng nhập đầy đủ, ai cũng được.
 export const Route = createFileRoute("/_auth/session-ended")({
   component: SessionEndedPage,

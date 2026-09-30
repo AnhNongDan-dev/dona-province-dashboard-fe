@@ -62,7 +62,7 @@ const customInitClientType = <T>(a: T): CustomType<T> => a as CustomType<T>;
 const customResponseType = (data: IResponse): ReturnType<ApiFetcher> =>
   data as unknown as ReturnType<ApiFetcher>;
 
-// Nhận một trong các mã này → phiên / token của tab đã cũ → đối chiếu lại D1.
+// Nhận một trong các mã này → phiên / token của tab đã cũ → đối chiếu lại trạng thái phiên.
 const SESSION_LOST_CODES: string[] = [
   ErrorCode.SessionChanged,
   ErrorCode.SessionExpired,
@@ -70,9 +70,9 @@ const SESSION_LOST_CODES: string[] = [
   ErrorCode.Unauthenticated,
 ];
 
-// F6 (liên kết) và gộp tài khoản: giao dịch gắn với phiên đã tạo nó. Phiên hết / đổi người giữa
-// chừng thì giao dịch FAILED và trang /link/:txId, /merge/:txId tự đọc lại giao dịch để hiện màn
-// thất bại — không để bộ xử lý chung đá sang S4 / "phiên đã thay đổi" (TASK-004, TASK-005).
+// Liên kết từ Account Center và gộp tài khoản: giao dịch gắn với phiên đã tạo nó. Phiên hết / đổi
+// người giữa chừng thì giao dịch FAILED và trang /link/:txId, /merge/:txId tự đọc lại giao dịch để
+// hiện màn thất bại — không để bộ xử lý chung đá sang trang phiên kết thúc / "phiên đã thay đổi".
 // CSRF_INVALID vẫn đi đường chung để lấy token mới.
 const isHandledByTxPage = (path: string, errorCode: string) =>
   (path.includes("/api/link-transactions/") || path.includes("/api/merge-transactions/")) &&
@@ -102,7 +102,7 @@ export const clientAPI = customInitClientType(
 
         return tsRestFetchApi(args)
           .then((rawResult) => {
-            // Không log response quản trị: có mật khẩu tạm / kênh liên lạc rõ (TASK-006).
+            // Không log response quản trị: có mật khẩu tạm / kênh liên lạc rõ.
             if (!args.path.startsWith("/api/admin/")) {
               logger.debug("logger ~ clientAPI.config.ts ~ line 90:", rawResult);
             }
@@ -129,13 +129,13 @@ export const clientAPI = customInitClientType(
       };
 
       let res = await send();
-      // Step-up: mở S2, thành công thì gửi lại thao tác đúng một lần.
+      // Step-up: mở hộp xác thực lại, thành công thì gửi lại thao tác đúng một lần.
       if (!res.success && res.errorCode === ErrorCode.ReauthRequired) {
         if (await sessionHooks.onReauthRequired()) res = await send();
       }
-      // Không bao giờ tự gửi lại request ghi khi phiên đổi — chỉ đối chiếu lại phiên (D1).
-      // Tab đang đăng nhập: chuyển S3/S4/"phiên đã thay đổi". Tab chưa đăng nhập (login, wizard
-      // liên kết): chỉ lấy token mới, user bấm lại là được.
+      // Không bao giờ tự gửi lại request ghi khi phiên đổi — chỉ đối chiếu lại phiên.
+      // Tab đang đăng nhập: chuyển trang đã đăng xuất / phiên kết thúc / "phiên đã thay đổi". Tab
+      // chưa đăng nhập (login, wizard liên kết): chỉ lấy token mới, user bấm lại là được.
       if (
         !res.success &&
         SESSION_LOST_CODES.includes(res.errorCode) &&
@@ -143,13 +143,14 @@ export const clientAPI = customInitClientType(
       ) {
         sessionHooks.onSessionLost();
       }
-      // Cổng tài khoản: phải đổi mật khẩu tạm (TASK-006) / chưa có email đã xác minh (TASK-008)
+      // Cổng tài khoản: phải đổi mật khẩu tạm / chưa có email đã xác minh
       // → mọi trang của app sang màn tương ứng.
       const gatePage = res.success ? null : GATE_PAGE[res.errorCode];
       if (gatePage && window.location.pathname !== gatePage) {
         window.location.assign(gatePage);
       }
-      // Mất quyền quản trị giữa chừng (vd. vừa đổi email ở tab khác): đọc lại D1 để ẩn khu quản trị.
+      // Mất quyền quản trị giữa chừng (vd. vừa đổi email ở tab khác): đọc lại trạng thái phiên để
+      // ẩn khu quản trị.
       if (!res.success && res.errorCode === ErrorCode.AdminForbidden) {
         sessionHooks.onAdminLost();
       }

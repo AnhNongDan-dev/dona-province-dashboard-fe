@@ -14,4 +14,4 @@ pnpm dev:fe          # chỉ FE
 pnpm dev:fullstack   # FE + BE
 ```
 
-Luồng và contract: `../collaboration/tasks/TASK-001…` (xem `CLAUDE.md`).
+Luồng và contract: xem `packages/zod-schemas/src/api-contract/` và `CLAUDE.md`.

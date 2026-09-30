@@ -18,7 +18,7 @@ import { formatSeconds, useCountdown, useSecondsUntil } from "@/hooks/use-countd
 import { errorMessage, errorParam } from "@/lib/api-error";
 import { credentialPolicyRepository } from "@/repositories/credentialPolicy.repository";
 
-// S15 — Quên mật khẩu (D25). resetId chỉ giữ trong bộ nhớ tab (không lên URL / lịch sử trình
+// Quên mật khẩu. resetId chỉ giữ trong bộ nhớ tab (không lên URL / lịch sử trình
 // duyệt) và gắn với phiên ẩn danh của trình duyệt này — reload thì bắt đầu lại.
 export const Route = createFileRoute("/_auth/forgot-password")({
   loader: () => credentialPolicyRepository().loader(),
@@ -42,7 +42,7 @@ function RequestStep({ onRequested }: { onRequested: (r: PasswordReset) => void 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const loginId = String(new FormData(e.currentTarget).get("loginId") ?? "").trim();
-    if (!loginId) return setError("Vui lòng nhập tên đăng nhập, email hoặc số điện thoại");
+    if (!loginId) return setError("Vui lòng nhập tên đăng nhập hoặc email");
 
     setPending(true);
     setError(null);
@@ -61,15 +61,14 @@ function RequestStep({ onRequested }: { onRequested: (r: PasswordReset) => void 
       <CardHeader>
         <CardTitle>Quên mật khẩu</CardTitle>
         <CardDescription>
-          Nhập tên đăng nhập, email hoặc số điện thoại của tài khoản. Mã xác minh được gửi tới email
-          của tài khoản (tài khoản chưa có email thì gửi tới số điện thoại).
+          Nhập tên đăng nhập hoặc email của tài khoản. Mã xác minh được gửi tới email của tài khoản.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <form onSubmit={onSubmit} noValidate>
           <FieldGroup>
             <Field data-invalid={!!error}>
-              <FieldLabel htmlFor="loginId">Tên đăng nhập, email hoặc số điện thoại</FieldLabel>
+              <FieldLabel htmlFor="loginId">Tên đăng nhập hoặc email</FieldLabel>
               <Input id="loginId" name="loginId" autoComplete="username" autoFocus />
               {error && (
                 <FieldError>
@@ -189,8 +188,8 @@ function CompleteStep({
       <CardHeader>
         <CardTitle>Đặt mật khẩu mới</CardTitle>
         <CardDescription>
-          Nếu thông tin bạn nhập khớp với một tài khoản có số điện thoại / email đã xác minh, mã xác
-          minh đã được gửi tới đó.
+          Nếu thông tin bạn nhập khớp với một tài khoản có email đã xác minh, mã xác minh đã được
+          gửi tới đó.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

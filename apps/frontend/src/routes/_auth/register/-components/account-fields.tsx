@@ -2,13 +2,9 @@ import { ErrorCode } from "@repo/zod-schemas/src/api/error.schema";
 import type { CredentialPolicy } from "@repo/zod-schemas/src/entity/central-auth-schema";
 import { usernameAvailabilitySchema } from "@repo/zod-schemas/src/entity/registration-schema";
 import { useEffect, useRef, useState } from "react";
-import { isNewPasswordReady, NewPasswordFields } from "@/components/auth/new-password-fields";
-import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
 import { clientAPI } from "@/config/clientAPI.config";
-import { ErrorAlert } from "../../link/-components/tx-parts";
 
 export const USERNAME_REASON: Record<string, string> = {
   TAKEN: "Tên đăng nhập đã có người dùng.",
@@ -19,8 +15,8 @@ export const USERNAME_REASON: Record<string, string> = {
 // Khớp giới hạn displayName của BE (1–100 ký tự).
 const DISPLAY_NAME_MAX = 100;
 
-/** Bước 1 — họ tên + tên đăng nhập (kiểm trùng khi gõ). */
-export function ProfileStep({
+/** Họ tên + tên đăng nhập (kiểm trùng khi gõ); báo lên form khi cả hai hợp lệ. */
+export function AccountFields({
   policy,
   ensureRegId,
   displayName,
@@ -28,19 +24,17 @@ export function ProfileStep({
   username,
   setUsername,
   serverError,
-  pending,
-  onNext,
+  onValidity,
 }: {
   policy: CredentialPolicy | null;
-  /** Phiên đăng ký chỉ được mở khi user thật sự bắt đầu (gõ tên đăng nhập / bấm tiếp tục). */
+  /** Phiên đăng ký chỉ được mở khi user thật sự bắt đầu (gõ tên đăng nhập). */
   ensureRegId: () => Promise<string | null>;
   displayName: string;
   setDisplayName: (v: string) => void;
   username: string;
   setUsername: (v: string) => void;
   serverError: string | null;
-  pending: boolean;
-  onNext: () => void;
+  onValidity: (valid: boolean) => void;
 }) {
   const rule = policy?.username;
   const pattern = rule?.pattern ? new RegExp(rule.pattern) : null;
@@ -54,9 +48,12 @@ export function ProfileStep({
       : availability.status === "unavailable"
         ? USERNAME_REASON[availability.reason]
         : null);
+  const valid =
+    nameOk && !!username && formatOk && !usernameError && availability.status !== "checking";
+  useEffect(() => onValidity(valid), [valid, onValidity]);
 
   return (
-    <FieldGroup>
+    <>
       <Field data-invalid={!nameOk && displayName !== ""}>
         <FieldLabel htmlFor="displayName">Họ và tên</FieldLabel>
         <Input
@@ -89,21 +86,7 @@ export function ProfileStep({
           <FieldDescription className="text-green-600">Tên đăng nhập dùng được.</FieldDescription>
         ) : null}
       </Field>
-      <Button
-        disabled={
-          pending ||
-          !nameOk ||
-          !username ||
-          !formatOk ||
-          !!usernameError ||
-          availability.status === "checking"
-        }
-        onClick={onNext}
-      >
-        {pending && <Spinner />}
-        Tiếp tục
-      </Button>
-    </FieldGroup>
+    </>
   );
 }
 
@@ -155,54 +138,4 @@ function useUsernameAvailability(
   }, [username]);
 
   return state;
-}
-
-/** Bước 2 — mật khẩu theo luật D7. */
-export function PasswordStep({
-  policy,
-  username,
-  password,
-  setPassword,
-  serverCodes,
-  onBack,
-  onNext,
-}: {
-  policy: CredentialPolicy | null;
-  username: string;
-  password: string;
-  setPassword: (v: string) => void;
-  serverCodes: string[];
-  onBack: () => void;
-  onNext: () => void;
-}) {
-  const [confirm, setConfirm] = useState(password);
-
-  return (
-    <FieldGroup>
-      <NewPasswordFields
-        policy={policy}
-        username={username}
-        password={password}
-        setPassword={setPassword}
-        confirm={confirm}
-        setConfirm={setConfirm}
-        serverCodes={serverCodes}
-      />
-      {serverCodes.length > 0 && (
-        <ErrorAlert message="Mật khẩu chưa đạt yêu cầu — xem các điều kiện ở trên." />
-      )}
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={onBack}>
-          Quay lại
-        </Button>
-        <Button
-          className="flex-1"
-          disabled={!isNewPasswordReady(policy, username, password, confirm, serverCodes)}
-          onClick={onNext}
-        >
-          Tiếp tục
-        </Button>
-      </div>
-    </FieldGroup>
-  );
 }

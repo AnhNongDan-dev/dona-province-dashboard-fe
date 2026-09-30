@@ -1,8 +1,9 @@
 import type { Session } from "@repo/zod-schemas/src/entity/central-auth-schema";
 import { useSyncExternalStore } from "react";
 
-// Phiên Central của TAB này, chỉ nằm trong bộ nhớ (không storage — mỗi tab tự lấy từ BE qua D1).
-// Module thuần, không import clientAPI/router để clientAPI dùng được mà không bị vòng import.
+// Phiên Central của TAB này, chỉ nằm trong bộ nhớ (không storage — mỗi tab tự lấy từ BE qua GET
+// /api/session). Module thuần, không import clientAPI/router để clientAPI dùng được mà không bị
+// vòng import.
 
 let session: Session | null = null;
 let clockOffsetMs = 0;
@@ -14,7 +15,7 @@ export const sessionStore = {
     session = next;
     for (const l of listeners) l();
   },
-  /** D6 trả token của phiên ẩn danh mới — dùng luôn, không gọi lại D1. */
+  /** Đăng xuất trả token của phiên ẩn danh mới — dùng luôn, không đọc lại phiên. */
   setAnonymous(csrfToken: string, sessionId: string) {
     sessionStore.set({
       authenticated: false,
@@ -49,10 +50,16 @@ export function msUntil(at: Date) {
 
 // Hook do central-session đăng ký lúc khởi động (tránh vòng import clientAPI ↔ central-session).
 export const sessionHooks = {
-  /** Tab đang đăng nhập nhận lỗi phiên (đổi người / hết phiên / token cũ) → đối chiếu lại D1. */
+  /**
+   * Tab đang đăng nhập nhận lỗi phiên (đổi người / hết phiên / token cũ) → đối chiếu lại trạng thái
+   * phiên.
+   */
   onSessionLost: (): void => {},
-  /** REAUTH_REQUIRED → mở S2; true = xác thực lại thành công, gửi lại thao tác một lần. */
+  /**
+   * REAUTH_REQUIRED → mở hộp xác thực lại; true = xác thực lại thành công, gửi lại thao tác một
+   * lần.
+   */
   onReauthRequired: async (): Promise<boolean> => false,
-  /** API quản trị trả ADMIN_FORBIDDEN → đọc lại D1 (cờ admin). */
+  /** API quản trị trả ADMIN_FORBIDDEN → đọc lại trạng thái phiên (cờ admin). */
   onAdminLost: (): void => {},
 };

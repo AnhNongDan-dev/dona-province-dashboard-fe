@@ -1,7 +1,7 @@
 import z from "zod";
 import { commonZod } from "../common";
 
-// Mirror DTO của BE Central Auth giai đoạn 0 (TASK-001 API Summary D1–D7, TASK-002).
+// Mirror DTO của BE Central Auth (phiên, đăng nhập, xác thực lại, đăng xuất, chính sách).
 
 export const LogoutMode = {
   LOGOUT: "LOGOUT",
@@ -14,7 +14,7 @@ export const LoginNext = {
   REDIRECT: "REDIRECT",
   PASSWORD_CHANGE_REQUIRED: "PASSWORD_CHANGE_REQUIRED",
   MFA_REQUIRED: "MFA_REQUIRED",
-  /** Tài khoản chưa có email đã xác minh (TASK-008): phiên đã cấp, phải thêm email trước. */
+  /** Tài khoản chưa có email đã xác minh: phiên đã cấp, phải thêm email trước. */
   EMAIL_SETUP_REQUIRED: "EMAIL_SETUP_REQUIRED",
 } as const;
 export type LoginNext = (typeof LoginNext)[keyof typeof LoginNext];
@@ -34,16 +34,19 @@ export const sessionIdentitySchema = z.object({
   hasVerifiedContact: z.boolean(),
   /** Chưa có email đã xác minh → mọi API cần đăng nhập (trừ vài API) trả EMAIL_SETUP_REQUIRED. */
   emailSetupRequired: z.boolean(),
-  /** Đăng nhập bằng mật khẩu tạm admin cấp (TASK-006) → phải đổi mật khẩu trước mọi việc khác. */
+  /** Đăng nhập bằng mật khẩu tạm admin cấp → phải đổi mật khẩu trước mọi việc khác. */
   passwordChangeRequired: z.boolean(),
-  /** Hiện khu quản trị (TASK-006). Chỉ để hiển thị — BE kiểm quyền ở từng API. */
+  /** Hiện khu quản trị. Chỉ để hiển thị — BE kiểm quyền ở từng API. */
   admin: z.boolean(),
   tenantId: z.int().nullable(),
   tenantName: z.string().nullable(),
 });
 export type SessionIdentity = z.infer<typeof sessionIdentitySchema>;
 
-/** D1 / D2. Phiên ẩn danh: authenticated=false, identity + các mốc thời gian là null. */
+/**
+ * Trạng thái phiên / báo còn hoạt động. Phiên ẩn danh: authenticated=false, identity + các mốc thời
+ * gian là null.
+ */
 export const sessionSchema = z.object({
   authenticated: z.boolean(),
   sessionId: z.guid(),
@@ -56,14 +59,14 @@ export const sessionSchema = z.object({
 });
 export type Session = z.infer<typeof sessionSchema>;
 
-/** Token mới trả kèm D4 / D6 khi phiên đổi. */
+/** Token mới trả kèm đăng nhập / đăng xuất khi phiên đổi. */
 export const sessionTokensSchema = z.object({
   csrfToken: z.string(),
   sessionId: z.guid(),
 });
 export type SessionTokens = z.infer<typeof sessionTokensSchema>;
 
-/** D3 */
+/** Ngữ cảnh trang đăng nhập */
 export const loginContextSchema = z.object({
   clientId: z.string(),
   clientName: z.string(),
@@ -73,7 +76,7 @@ export const loginContextSchema = z.object({
 });
 export type LoginContext = z.infer<typeof loginContextSchema>;
 
-/** D4 */
+/** Đăng nhập */
 export const loginResultSchema = sessionTokensSchema.extend({
   next: loginNextZod,
   redirectUrl: z.string(),
@@ -85,12 +88,15 @@ export const notifiedClientSchema = z.object({
 });
 export type NotifiedClient = z.infer<typeof notifiedClientSchema>;
 
-/** D6 */
+/** Đăng xuất / đổi người dùng */
 export const logoutResultSchema = sessionTokensSchema.extend({
   notifiedClients: z.array(notifiedClientSchema),
 });
 
-/** D7 — luật công khai; mã trong `password.rules` = `errors[].code` của PASSWORD_POLICY_VIOLATION. */
+/**
+ * Chính sách username / password — luật công khai; mã trong `password.rules` = `errors[].code` của
+ * PASSWORD_POLICY_VIOLATION.
+ */
 export const credentialPolicySchema = z.object({
   password: z.object({ minLength: z.int(), maxLength: z.int(), rules: z.array(z.string()) }),
   username: z.object({

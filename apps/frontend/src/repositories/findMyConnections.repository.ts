@@ -3,8 +3,8 @@ import z from "zod";
 import { clientAPI } from "@/config/clientAPI.config";
 import { createQueryRepository } from "./-factory";
 
-// D16 — hệ thống đã đăng ký + tài khoản đã liên kết của user đang đăng nhập (S8, S9).
-// clientAPI không validate response → parse ở đây để linkedAt / lastSsoLoginAt thành Date.
+// Hệ thống đã đăng ký + tài khoản đã liên kết của user đang đăng nhập (trang chủ, Liên kết tài
+// khoản). clientAPI không validate response → parse ở đây để linkedAt / lastSsoLoginAt thành Date.
 const mapToDTO = (data: unknown) => z.array(connectionSchema).parse(data);
 export type MyConnectionDTO = ReturnType<typeof mapToDTO>[number];
 

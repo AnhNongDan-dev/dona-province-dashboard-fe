@@ -7,15 +7,6 @@ import { OtpChannel } from "@repo/zod-schemas/src/entity/link-transaction-schema
 import { format } from "date-fns";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
@@ -24,48 +15,48 @@ import { Spinner } from "@/components/ui/spinner";
 import { clientAPI } from "@/config/clientAPI.config";
 import { formatSeconds, useCountdown, useSecondsUntil } from "@/hooks/use-countdown";
 import { errorMessage, errorParam } from "@/lib/api-error";
-import { isValidContact, normalizeContact } from "@/lib/contact-validation";
+import {
+  isValidEmail,
+  isValidPhone,
+  normalizePhone,
+  PHONE_FORMAT_ERROR,
+} from "@/lib/contact-validation";
 import { type MySecurityDTO, mySecurityRepository } from "@/repositories/mySecurity.repository";
 import { useStartMerge } from "./merge-card";
 
-// S12a / S12c — kênh liên lạc (D24 / D20c). Mỗi tài khoản tối đa 1 SĐT + 1 email (TASK-005 Q4).
-// Email là định danh chính (TASK-008): chỉ đổi, không gỡ; SĐT tùy chọn, gỡ được.
-// Gửi mã / gỡ cần xác thực lại (S2 tự mở).
-const LABEL = { [OtpChannel.SMS]: "Số điện thoại", [OtpChannel.EMAIL]: "Email" } as const;
-type Channel = (typeof OtpChannel)[keyof typeof OtpChannel];
+// Mục Liên lạc. Email là định danh chính: đổi bằng mã gửi tới email mới, không
+// gỡ; gửi mã cần xác thực lại (hộp xác thực lại tự mở). SĐT chỉ là thông tin tự khai, không xác
+// minh.
 
-/** Response D24 verify / D20c là D20a mới → ghi thẳng vào cache, khỏi gọi lại. */
+/** Response xác minh email là thông tin bảo mật mới → ghi thẳng vào cache, khỏi gọi lại. */
 const applySecurity = (data: unknown) =>
   mySecurityRepository().updateCache(accountSecuritySchema.parse(data));
 
 export function ContactsCard({ security }: { security: MySecurityDTO }) {
-  const find = (ch: Channel) => security.contacts.find((c) => c.channel === ch) ?? null;
-  const pending = (ch: Channel) => security.pendingContacts.find((c) => c.channel === ch) ?? null;
+  const email = security.contacts.find((c) => c.channel === OtpChannel.EMAIL) ?? null;
+  const pending = security.pendingContacts.find((c) => c.channel === OtpChannel.EMAIL) ?? null;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Kênh liên lạc</CardTitle>
+        <CardTitle className="text-base">Liên lạc</CardTitle>
         <CardDescription>
-          Dùng để đăng nhập và lấy lại mật khẩu. Email là định danh chính của tài khoản; số điện
-          thoại tùy chọn.
+          Email là định danh chính: dùng để đăng nhập và lấy lại mật khẩu. Số điện thoại chỉ là
+          thông tin liên hệ, không bắt buộc.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 text-sm">
-        {[OtpChannel.EMAIL, OtpChannel.SMS].map((ch) => (
-          <ContactRow key={ch} channel={ch} current={find(ch)} pending={pending(ch)} />
-        ))}
+        <EmailRow current={email} pending={pending} />
+        <PhoneRow phone={security.phone} />
       </CardContent>
     </Card>
   );
 }
 
-function ContactRow({
-  channel,
+function EmailRow({
   current,
   pending,
 }: {
-  channel: Channel;
   current: MySecurityDTO["contacts"][number] | null;
   pending: PendingContact | null;
 }) {
@@ -73,10 +64,10 @@ function ContactRow({
   const open = editing || !!pending;
 
   return (
-    <div className="flex flex-col gap-2 border-b pb-4 last:border-b-0 last:pb-0">
+    <div className="flex flex-col gap-2 border-b pb-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <div className="text-muted-foreground">{LABEL[channel]}</div>
+          <div className="text-muted-foreground">Email</div>
           {current ? (
             <div>
               <span className="font-medium">{current.maskedDestination}</span>{" "}
@@ -89,38 +80,124 @@ function ContactRow({
           )}
         </div>
         {!open && (
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
-              {current ? "Đổi" : `Thêm ${LABEL[channel].toLowerCase()}`}
-            </Button>
-            {/* Email là định danh chính → chỉ đổi (BE vẫn chặn gỡ bằng LAST_AUTH_METHOD). */}
-            {current && channel === OtpChannel.SMS && <RemovePhoneButton />}
-          </div>
+          <Button size="sm" variant="outline" onClick={() => setEditing(true)}>
+            {current ? "Đổi" : "Thêm email"}
+          </Button>
         )}
       </div>
       {open && (
-        <ContactOtpForm
-          channel={channel}
-          pending={pending}
-          replacing={!!current}
-          onClose={() => setEditing(false)}
-        />
+        <ContactOtpForm pending={pending} replacing={!!current} onClose={() => setEditing(false)} />
       )}
     </div>
   );
 }
 
+/** SĐT tự khai: sửa / xóa trực tiếp, không mã, không cần xác thực lại. */
+function PhoneRow({ phone }: { phone: string | null }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(phone ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function save(next: string | null) {
+    if (next !== null && !isValidPhone(next)) return setError(PHONE_FORMAT_ERROR);
+    setBusy(true);
+    setError(null);
+    const res = await clientAPI.AccountCenter.updateMyPhone({ body: { phone: next } });
+    setBusy(false);
+    if (res.success) {
+      mySecurityRepository().updateCache({ phone: res.data.phone });
+      setEditing(false);
+      return toast.success(next ? "Đã lưu số điện thoại." : "Đã xóa số điện thoại.");
+    }
+    const field = res.errors.find((e) => e.fieldName === "phone");
+    setError(field?.message ?? (field ? PHONE_FORMAT_ERROR : errorMessage(res)));
+  }
+
+  if (!editing) {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <div className="text-muted-foreground">Số điện thoại</div>
+          <div className={phone ? "font-medium" : "text-muted-foreground"}>
+            {phone ?? "Chưa khai"}
+          </div>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            setValue(phone ?? "");
+            setError(null);
+            setEditing(true);
+          }}
+        >
+          {phone ? "Sửa" : "Thêm số điện thoại"}
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const v = normalizePhone(value);
+        void save(v === "" ? null : v);
+      }}
+      noValidate
+      className="flex flex-col gap-2 rounded-md bg-muted/40 p-3"
+    >
+      <Field data-invalid={!!error}>
+        <FieldLabel htmlFor="phone">Số điện thoại</FieldLabel>
+        <Input
+          id="phone"
+          type="tel"
+          autoComplete="tel"
+          placeholder="09xxxxxxxx"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          autoFocus
+        />
+        <FieldDescription>
+          Chỉ để liên hệ — không dùng để đăng nhập hay lấy lại mật khẩu.
+        </FieldDescription>
+        {error && <FieldError>{error}</FieldError>}
+      </Field>
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" size="sm" disabled={busy}>
+          {busy && <Spinner />}
+          Lưu
+        </Button>
+        {phone && (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={busy}
+            onClick={() => void save(null)}
+          >
+            Xóa số
+          </Button>
+        )}
+        <Button type="button" size="sm" variant="ghost" onClick={() => setEditing(false)}>
+          Hủy
+        </Button>
+      </div>
+    </form>
+  );
+}
+
 /**
- * Gửi mã → nhập mã. Mã đang chờ lấy từ pendingContacts (reload vẫn dựng lại được).
- * `onClose` null = bắt buộc (màn thêm email): không có nút Hủy / Đóng.
+ * Thêm / đổi email: nhập địa chỉ → [Gửi mã] (BE gửi mã tới địa chỉ mới) → nhập mã. Mã đang chờ lấy
+ * từ pendingContacts (reload vẫn dựng lại được). `onClose` null = bắt buộc (màn thêm email): không có
+ * nút Hủy / Đóng.
  */
 export function ContactOtpForm({
-  channel,
   pending,
   replacing,
   onClose,
 }: {
-  channel: Channel;
   pending: PendingContact | null;
   replacing: boolean;
   onClose: (() => void) | null;
@@ -134,22 +211,15 @@ export function ContactOtpForm({
   const lock = useCountdown();
   const resendIn = useSecondsUntil(pending?.resendAvailableAt ?? null);
   const merge = useStartMerge();
-  const label = LABEL[channel].toLowerCase();
 
   async function send(value: string) {
-    const dest = normalizeContact(channel, value);
-    if (!isValidContact(channel, dest)) {
-      return setError(
-        channel === OtpChannel.SMS
-          ? "Số điện thoại di động không hợp lệ (10 số, đầu 03/05/07/08/09)"
-          : "Email không hợp lệ",
-      );
-    }
+    const dest = value.trim();
+    if (!isValidEmail(dest)) return setError("Email không hợp lệ");
     setBusy(true);
     setError(null);
     setUsedByOther(false);
     const res = await clientAPI.AccountCenter.addMyContact({
-      body: { channel, destination: dest },
+      body: { channel: OtpChannel.EMAIL, destination: dest },
     });
     setBusy(false);
     if (res.success) {
@@ -163,9 +233,9 @@ export function ContactOtpForm({
     }
     setError(
       res.errorCode === ErrorCode.ValidationError
-        ? `${LABEL[channel]} không hợp lệ hoặc trùng với ${label} hiện tại.`
+        ? "Email không hợp lệ hoặc trùng với email hiện tại."
         : res.errorCode === ErrorCode.ReauthRequired
-          ? "Cần xác nhận lại mật khẩu để thay đổi kênh liên lạc."
+          ? "Cần xác nhận lại mật khẩu để đổi email."
           : errorMessage(res),
     );
   }
@@ -176,12 +246,12 @@ export function ContactOtpForm({
     setBusy(true);
     setError(null);
     const res = await clientAPI.AccountCenter.verifyMyContact({
-      body: { channel, code: code.trim() },
+      body: { channel: OtpChannel.EMAIL, code: code.trim() },
     });
     setBusy(false);
     if (res.success) {
       applySecurity(res.data);
-      toast.success(replacing ? `Đã đổi ${label}.` : `Đã thêm ${label}.`);
+      toast.success(replacing ? "Đã đổi email." : "Đã thêm email.");
       return onClose?.();
     }
     if (res.errorCode === ErrorCode.OtpInvalid) {
@@ -198,7 +268,7 @@ export function ContactOtpForm({
 
   const hint = usedByOther && (
     <p className="text-sm">
-      Có thể bạn có một tài khoản Thành Đoàn Đồng Nai Central khác dùng {label} này.{" "}
+      Có thể bạn có một tài khoản Thành Đoàn Đồng Nai Central khác dùng email này.{" "}
       <Button
         variant="link"
         className="h-auto p-0"
@@ -221,31 +291,26 @@ export function ContactOtpForm({
         className="flex flex-col gap-2 rounded-md bg-muted/40 p-3"
       >
         <Field data-invalid={!!error}>
-          <FieldLabel htmlFor={`contact-${channel}`}>
-            {replacing ? `${LABEL[channel]} mới` : LABEL[channel]}
-          </FieldLabel>
+          <FieldLabel htmlFor="contact-email">{replacing ? "Email mới" : "Email"}</FieldLabel>
           <Input
-            id={`contact-${channel}`}
+            id="contact-email"
             name="destination"
-            type={channel === OtpChannel.SMS ? "tel" : "email"}
-            autoComplete={channel === OtpChannel.SMS ? "tel" : "email"}
+            type="email"
+            autoComplete="email"
             defaultValue={destination}
             autoFocus
           />
-          {replacing && (
-            <FieldDescription>
-              Sau khi xác minh, {label} mới sẽ thay {label} hiện tại.
-            </FieldDescription>
-          )}
+          <FieldDescription>
+            Mã xác minh sẽ được gửi tới email này
+            {replacing ? "; sau khi xác minh, email mới sẽ thay email hiện tại." : "."}
+          </FieldDescription>
           {error && <FieldError>{error}</FieldError>}
         </Field>
         {hint}
         <div className="flex gap-2">
           <Button type="submit" size="sm" disabled={busy || lock.secondsLeft > 0}>
             {busy && <Spinner />}
-            {lock.secondsLeft > 0
-              ? `Gửi mã sau ${formatSeconds(lock.secondsLeft)}`
-              : "Gửi mã xác minh"}
+            {lock.secondsLeft > 0 ? `Thử lại sau ${formatSeconds(lock.secondsLeft)}` : "Lưu"}
           </Button>
           {(pending || onClose) && (
             <Button
@@ -265,13 +330,13 @@ export function ContactOtpForm({
   return (
     <form onSubmit={verify} noValidate className="flex flex-col gap-2 rounded-md bg-muted/40 p-3">
       <Field data-invalid={!!error}>
-        <FieldLabel htmlFor={`code-${channel}`}>Mã xác minh</FieldLabel>
+        <FieldLabel htmlFor="code-email">Mã xác minh</FieldLabel>
         <FieldDescription>
           Đã gửi mã tới {pending.maskedDestination}, hết hạn lúc{" "}
-          {format(pending.expiresAt, "HH:mm")}. Còn {pending.sendsRemaining} lần gửi.
+          {format(pending.expiresAt, "HH:mm")}. Không thấy thư? Kiểm tra thư mục Spam / Quảng cáo.
         </FieldDescription>
         <Input
-          id={`code-${channel}`}
+          id="code-email"
           inputMode="numeric"
           autoComplete="one-time-code"
           value={code}
@@ -304,7 +369,7 @@ export function ContactOtpForm({
           className="h-auto p-0"
           onClick={() => setEnteringNew(true)}
         >
-          Dùng {channel === OtpChannel.SMS ? "số" : "email"} khác
+          Dùng email khác
         </Button>
         {onClose && (
           <Button type="button" size="sm" variant="ghost" onClick={onClose}>
@@ -313,54 +378,5 @@ export function ContactOtpForm({
         )}
       </div>
     </form>
-  );
-}
-
-/** D20c — chỉ SĐT gỡ được (cần xác thực lại). */
-function RemovePhoneButton() {
-  const [open, setOpen] = useState(false);
-  const [pending, setPending] = useState(false);
-
-  async function remove() {
-    setPending(true);
-    const res = await clientAPI.AccountCenter.removeMyContact({
-      params: { channel: OtpChannel.SMS },
-    });
-    setPending(false);
-    setOpen(false);
-    if (res.success) {
-      applySecurity(res.data);
-      return toast.success("Đã gỡ số điện thoại.");
-    }
-    toast.error(
-      res.errorCode === ErrorCode.ReauthRequired
-        ? "Cần xác nhận lại mật khẩu để gỡ số điện thoại."
-        : errorMessage(res),
-    );
-    void mySecurityRepository().invalidate();
-  }
-
-  return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
-        Gỡ
-      </Button>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Gỡ số điện thoại?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Bạn sẽ không đăng nhập hay lấy lại mật khẩu bằng số này được nữa. Một thông báo sẽ được
-            gửi tới số này và email của bạn.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={pending}>Không</AlertDialogCancel>
-          <Button variant="destructive" disabled={pending} onClick={() => void remove()}>
-            {pending && <Spinner />}
-            Gỡ số điện thoại
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   );
 }

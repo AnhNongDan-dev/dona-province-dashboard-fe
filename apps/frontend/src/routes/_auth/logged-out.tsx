@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-// S3 — đã đăng xuất. Danh sách hệ thống chỉ có khi đăng xuất từ chính SPA (D6);
+// Trang đã đăng xuất. Danh sách hệ thống chỉ có khi đăng xuất từ chính SPA;
 // tới đây qua /connect/logout thì hiện bản chung.
 export const Route = createFileRoute("/_auth/logged-out")({
   component: LoggedOutPage,

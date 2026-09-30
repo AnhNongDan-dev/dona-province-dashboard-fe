@@ -7,7 +7,7 @@ import { OpenAPIHelper } from "../openapi/openAPI.helper";
 
 const c = initContract();
 
-// D22 — gộp tài khoản do user tự làm (TASK-005). Gắn trình duyệt (cookie) + phiên đã tạo giao dịch:
+// Gộp tài khoản do user tự làm. Gắn trình duyệt (cookie) + phiên đã tạo giao dịch:
 // phiên hết / đổi người → FAILED. Bước đăng nhập tài khoản thứ hai KHÔNG đổi phiên.
 const txParams = z.object({ txId: z.guid() });
 const TX_ERRORS = [
@@ -20,7 +20,7 @@ const TX_ERRORS = [
 
 export const mergeTransactionContract = c.router({
   createMergeTransaction: {
-    summary: "D22 — Bắt đầu gộp tài khoản",
+    summary: "Bắt đầu gộp tài khoản",
     description: "Cần xác thực lại ≤ 5 phút. Tài khoản đang đăng nhập là tài khoản giữ lại.",
     method: "POST",
     path: "/api/merge-transactions",
@@ -29,7 +29,7 @@ export const mergeTransactionContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(ErrorCode.ReauthRequired),
   },
   getMergeTransaction: {
-    summary: "D22 — Trạng thái giao dịch gộp",
+    summary: "Trạng thái giao dịch gộp",
     description:
       "COMPLETED đọc lại được 30 phút; source / conflicts / contactChanges có sau bước 2.",
     method: "GET",
@@ -39,7 +39,7 @@ export const mergeTransactionContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(...TX_ERRORS),
   },
   centralLoginMergeTransaction: {
-    summary: "D22 — Xác thực tài khoản sẽ gộp vào",
+    summary: "Xác thực tài khoản sẽ gộp vào",
     description:
       "Chỉ xác thực, phiên / token giữ nguyên. ACCOUNT_LOCKED / IDENTITY_MERGED / MERGE_SAME_IDENTITY không làm hỏng giao dịch.",
     method: "POST",
@@ -60,7 +60,7 @@ export const mergeTransactionContract = c.router({
     ),
   },
   confirmMergeTransaction: {
-    summary: "D22 — Xác nhận gộp",
+    summary: "Xác nhận gộp",
     description:
       "Một giao dịch dữ liệu: chuyển liên kết, giải xung đột, chuyển / bỏ kênh, khóa source.",
     method: "POST",
@@ -79,7 +79,7 @@ export const mergeTransactionContract = c.router({
     ),
   },
   cancelMergeTransaction: {
-    summary: "D22 — Hủy gộp",
+    summary: "Hủy gộp",
     description: "Trả giao dịch ở CANCELLED.",
     method: "POST",
     path: "/api/merge-transactions/:txId/cancel",

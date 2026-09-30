@@ -2,7 +2,10 @@ import { LogoutMode } from "@repo/zod-schemas/src/entity/central-auth-schema";
 import { useNavigate } from "@tanstack/react-router";
 import { logout } from "@/lib/central-session";
 
-/** F3 đăng xuất → S3 (kèm danh sách hệ thống đã gửi yêu cầu); F4 đổi người dùng → S1 form trống. */
+/**
+ * Đăng xuất → trang đã đăng xuất (kèm danh sách hệ thống đã gửi yêu cầu); đổi người dùng → trang
+ * đăng nhập form trống.
+ */
 export function useLogout() {
   const navigate = useNavigate();
   return async (mode: LogoutMode) => {

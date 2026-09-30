@@ -6,7 +6,7 @@ import { queryClient } from "@/config/query-client.config";
 import { createQueryRepository } from "./-factory";
 import { defaultPagedResult, mapPaging, type PagedResult } from "./-paging";
 
-// AD10 — nhật ký quản trị (A7). Phân trang + lọc phía server; page tính từ 0.
+// Nhật ký quản trị. Phân trang + lọc phía server; page tính từ 0.
 export type SearchAdminAuditQuery = {
   page: number;
   size: number;

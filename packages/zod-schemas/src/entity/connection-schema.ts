@@ -1,7 +1,7 @@
 import z from "zod";
 import { commonZod } from "../common";
 
-// Mirror D16 `GET /api/me/connections` (TASK-001, TASK-003).
+// Mirror `GET /api/me/connections`.
 
 export const SsoStatus = {
   AVAILABLE: "AVAILABLE",

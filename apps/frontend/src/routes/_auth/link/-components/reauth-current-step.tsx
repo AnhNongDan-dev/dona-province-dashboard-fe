@@ -2,9 +2,9 @@ import { ErrorCode } from "@repo/zod-schemas/src/api/error.schema";
 import { LogoutMode } from "@repo/zod-schemas/src/entity/central-auth-schema";
 import { LinkAction } from "@repo/zod-schemas/src/entity/link-transaction-schema";
 import { type FormEvent, useState } from "react";
+import { PasswordInput } from "@/components/auth/password-input";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { clientAPI } from "@/config/clientAPI.config";
 import { formatSeconds, useCountdown } from "@/hooks/use-countdown";
@@ -14,8 +14,9 @@ import type { Wizard } from "../-lib";
 import { AccountCard, ErrorAlert, LegacyAccountCard, TxShell } from "./tx-parts";
 
 /**
- * F6 bước REAUTH_CURRENT — "liên kết vào chính tôi": thẻ chủ phiên cố định, chỉ nhập password.
- * Token không đổi. Người đang ngồi máy không phải chủ phiên → hủy giao dịch rồi đổi người dùng.
+ * Liên kết từ Account Center, bước REAUTH_CURRENT — "liên kết vào chính tôi": thẻ chủ phiên cố
+ * định, chỉ nhập password. Token không đổi. Người đang ngồi máy không phải chủ phiên → hủy giao
+ * dịch rồi đổi người dùng.
  */
 export function ReauthCurrentStep({ w, onCancel }: { w: Wizard; onCancel: () => void }) {
   const { tx } = w;
@@ -82,10 +83,9 @@ export function ReauthCurrentStep({ w, onCancel }: { w: Wizard; onCancel: () => 
         <FieldGroup>
           <Field data-invalid={!!error}>
             <FieldLabel htmlFor="password">Mật khẩu</FieldLabel>
-            <Input
+            <PasswordInput
               id="password"
               name="password"
-              type="password"
               autoComplete="current-password"
               autoFocus
             />

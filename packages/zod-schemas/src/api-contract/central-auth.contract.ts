@@ -19,7 +19,7 @@ const c = initContract();
 // Đường dẫn giữ đúng BE (`/api/...`, không có `/v1`).
 export const centralAuthContract = c.router({
   getSession: {
-    summary: "D1 — Trạng thái phiên",
+    summary: "Trạng thái phiên",
     description: "Không kéo dài idle. Chưa có phiên thì BE cấp phiên ẩn danh kèm csrfToken.",
     method: "GET",
     path: "/api/session",
@@ -27,7 +27,7 @@ export const centralAuthContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(),
   },
   recordActivity: {
-    summary: "D2 — Báo còn hoạt động",
+    summary: "Báo còn hoạt động",
     description: "Kéo dài idle khi user bấm [Tiếp tục làm việc].",
     method: "POST",
     path: "/api/session/activity",
@@ -41,7 +41,7 @@ export const centralAuthContract = c.router({
     ),
   },
   getCredentialPolicy: {
-    summary: "D7 — Chính sách username / password",
+    summary: "Chính sách username / password",
     description: "Công khai; FE kiểm tra sớm khi user gõ, BE kiểm lại.",
     method: "GET",
     path: "/api/credential-policy",
@@ -49,7 +49,7 @@ export const centralAuthContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(),
   },
   getLoginContext: {
-    summary: "D3 — Ngữ cảnh trang đăng nhập",
+    summary: "Ngữ cảnh trang đăng nhập",
     description: "Tên hệ thống đang xin đăng nhập; continueUrl khi đã đăng nhập và không ép.",
     method: "GET",
     path: "/api/login/context",
@@ -58,7 +58,7 @@ export const centralAuthContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(ErrorCode.LoginRequestExpired),
   },
   login: {
-    summary: "D4 — Đăng nhập",
+    summary: "Đăng nhập",
     description: "loginId = username / email / SĐT đã xác minh.",
     method: "POST",
     path: "/api/login",
@@ -82,7 +82,7 @@ export const centralAuthContract = c.router({
     ),
   },
   reauthenticate: {
-    summary: "D5 — Xác thực lại (step-up)",
+    summary: "Xác thực lại (step-up)",
     description: "Không đổi csrfToken / sessionId.",
     method: "POST",
     path: "/api/session/reauthenticate",
@@ -97,7 +97,7 @@ export const centralAuthContract = c.router({
     ),
   },
   logout: {
-    summary: "D6 — Đăng xuất / Đổi người dùng",
+    summary: "Đăng xuất / Đổi người dùng",
     description:
       "Trả token của phiên ẩn danh mới và danh sách hệ thống đã được gửi yêu cầu đăng xuất.",
     method: "POST",

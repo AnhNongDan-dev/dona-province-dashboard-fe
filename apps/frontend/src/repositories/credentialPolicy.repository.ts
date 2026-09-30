@@ -2,7 +2,8 @@ import { credentialPolicySchema } from "@repo/zod-schemas/src/entity/central-aut
 import { clientAPI } from "@/config/clientAPI.config";
 import { createQueryRepository } from "./-factory";
 
-// D7 — chính sách username / password công khai (S12, S15). Gần như không đổi → cache mặc định.
+// Chính sách username / password công khai (trang Bảo mật, quên mật khẩu). Gần như không đổi →
+// cache mặc định.
 const mapToDTO = (data: unknown) => credentialPolicySchema.parse(data);
 export type CredentialPolicyDTO = ReturnType<typeof mapToDTO>;
 

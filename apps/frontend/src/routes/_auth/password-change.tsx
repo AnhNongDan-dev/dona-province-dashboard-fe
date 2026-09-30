@@ -16,9 +16,10 @@ import { continueAfterGate } from "@/lib/central-session";
 import { sessionStore, useSession } from "@/lib/session-store";
 import { credentialPolicyRepository } from "@/repositories/credentialPolicy.repository";
 
-// Màn "Đổi mật khẩu" bắt buộc (TASK-006): đăng nhập bằng mật khẩu tạm quản trị viên cấp. Vào từ
-// D4 (`next=PASSWORD_CHANGE_REQUIRED`), từ authorize (`/password-change?req=`) hoặc khi API trả
-// PASSWORD_CHANGE_REQUIRED. Đổi xong: còn thiếu email → màn thêm email; có `req` → D3; không → "/".
+// Màn "Đổi mật khẩu" bắt buộc: đăng nhập bằng mật khẩu tạm quản trị viên cấp. Vào từ
+// đăng nhập (`next=PASSWORD_CHANGE_REQUIRED`), từ authorize (`/password-change?req=`) hoặc khi API
+// trả PASSWORD_CHANGE_REQUIRED. Đổi xong: còn thiếu email → màn thêm email; có `req` →
+// `continueUrl`; không → "/".
 export const Route = createFileRoute("/_auth/password-change")({
   validateSearch: z.object({ req: z.string().optional().catch(undefined) }),
   beforeLoad: ({ search }) => {
@@ -63,7 +64,8 @@ function PasswordChangePage() {
     e.preventDefault();
     setPending(true);
     setError(null);
-    // D20b cần xác thực ≤ 5 phút: để màn quá lâu thì clientAPI mở S2 rồi gửi lại một lần.
+    // Đổi mật khẩu cần xác thực ≤ 5 phút: để màn quá lâu thì clientAPI mở hộp xác thực lại rồi gửi
+    // lại một lần.
     const res = await clientAPI.AccountCenter.changeMyPassword({ body: { newPassword: password } });
     if (res.success) return continueAfterGate(req); // giữ pending tới khi rời trang
     setPending(false);

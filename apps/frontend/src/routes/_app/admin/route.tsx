@@ -10,14 +10,15 @@ const ADMIN_NAV = [
   { to: "/admin/audit", label: "Nhật ký quản trị" },
 ] as const;
 
-// Khu quản trị (TASK-006). Chỉ hiện theo D1 `identity.admin`; BE vẫn kiểm từng API.
+// Khu quản trị. Chỉ hiện theo `identity.admin` của trạng thái phiên; BE vẫn kiểm từng API.
 export const Route = createFileRoute("/_app/admin")({
   component: AdminLayout,
 });
 
 function AdminLayout() {
   const admin = useSession()?.identity?.admin === true;
-  // Đang ở khu quản trị thì mất quyền (API trả ADMIN_FORBIDDEN → D1 đọc lại): về cổng tổng hợp.
+  // Đang ở khu quản trị thì mất quyền (API trả ADMIN_FORBIDDEN → đọc lại trạng thái phiên): về cổng
+  // tổng hợp.
   const wasAdmin = useRef(admin);
   const lost = wasAdmin.current && !admin;
   useEffect(() => {

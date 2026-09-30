@@ -2,20 +2,18 @@ import { initContract } from "@ts-rest/core";
 import z from "zod";
 import { ErrorCode } from "../api/error.schema";
 import { successResponseSchema } from "../api/response";
-import { otpChannelZod } from "../entity/link-transaction-schema";
 import {
-  otpSendResultSchema,
-  otpVerifyResultSchema,
-  registrationCompleteResultSchema,
   registrationSchema,
+  registrationSubmitResultSchema,
+  registrationVerifyResultSchema,
   usernameAvailabilitySchema,
 } from "../entity/registration-schema";
 import { OpenAPIHelper } from "../openapi/openAPI.helper";
 
 const c = initContract();
 
-// Tự đăng ký tài khoản Thành Đoàn Đồng Nai Central (TASK-007). Công khai + CSRF của phiên ẩn danh;
-// gắn trình duyệt bằng cookie — trình duyệt khác → REGISTRATION_NOT_FOUND.
+// Tự đăng ký tài khoản Thành Đoàn Đồng Nai Central (mã gửi ngầm qua email). Công khai + CSRF của
+// phiên ẩn danh; gắn trình duyệt bằng cookie — trình duyệt khác → REGISTRATION_NOT_FOUND.
 const regParams = z.object({ regId: z.guid() });
 const REG_ERRORS = [
   ErrorCode.RegistrationNotFound,
@@ -42,7 +40,8 @@ export const registrationContract = c.router({
   },
   getRegistration: {
     summary: "Trạng thái phiên đăng ký",
-    description: "COMPLETED vẫn đọc được (allowedActions rỗng).",
+    description:
+      "Tải lại trang: draft != null → màn nhập mã. COMPLETED vẫn đọc được (allowedActions rỗng).",
     method: "GET",
     path: "/api/registrations/:regId",
     pathParams: regParams,
@@ -62,60 +61,66 @@ export const registrationContract = c.router({
     responses: { 200: successResponseSchema(usernameAvailabilitySchema) },
     metadata: OpenAPIHelper.generateErrorCodes(...REG_ERRORS, ErrorCode.RateLimited),
   },
-  sendRegistrationOtp: {
-    summary: "Gửi mã OTP",
+  submitRegistration: {
+    summary: "Gửi thông tin đăng ký",
     description:
-      "Theo kênh: 3 lần gửi / phiên, cách 60 giây; SĐT/email đã bị chặn trong phiên → CONTACT_ALREADY_USED.",
+      "BE kiểm hợp lệ, lưu nháp (mật khẩu chỉ dạng băm) và gửi mã 6 số tới email ngầm. Gửi lại = thay nháp + mã mới " +
+      "(tính vào lượt gửi). Email đã có tài khoản → CONTACT_ALREADY_USED (fieldName email), không gửi mã.",
     method: "POST",
-    path: "/api/registrations/:regId/otp",
+    path: "/api/registrations/:regId/submit",
     pathParams: regParams,
-    body: z.object({ channel: otpChannelZod, destination: z.string().trim().min(1) }),
-    responses: { 200: successResponseSchema(otpSendResultSchema) },
+    body: z.object({
+      displayName: z.string().trim().min(1).max(100),
+      username: z.string().trim().min(1),
+      email: z.string().trim().min(1),
+      // SĐT tự khai, không xác minh; null = không khai.
+      phone: z.string().trim().nullable(),
+      password: z.string().min(1),
+    }),
+    responses: { 200: successResponseSchema(registrationSubmitResultSchema) },
+    metadata: OpenAPIHelper.generateErrorCodes(
+      ...REG_ERRORS,
+      ErrorCode.ValidationError,
+      ErrorCode.UsernamePolicyViolation,
+      ErrorCode.UsernameTaken,
+      ErrorCode.PasswordPolicyViolation,
+      ErrorCode.ContactAlreadyUsed,
+      ErrorCode.RateLimited,
+      ErrorCode.OtpTooManyAttempts,
+    ),
+  },
+  resendRegistrationCode: {
+    summary: "Gửi lại mã",
+    description:
+      "Mã mới tới email trong nháp, mã cũ vô hiệu. 3 lần gửi / phiên (tính cả lần đầu), cách 60 giây.",
+    method: "POST",
+    path: "/api/registrations/:regId/resend",
+    pathParams: regParams,
+    body: c.noBody(),
+    responses: { 200: successResponseSchema(registrationSubmitResultSchema) },
     metadata: OpenAPIHelper.generateErrorCodes(
       ...REG_ERRORS,
       ErrorCode.RateLimited,
       ErrorCode.OtpTooManyAttempts,
-      ErrorCode.ContactAlreadyUsed,
-      ErrorCode.ValidationError,
     ),
   },
-  verifyRegistrationOtp: {
-    summary: "Xác minh mã OTP",
+  verifyRegistration: {
+    summary: "Nhập mã, tạo tài khoản",
     description:
-      "Kênh đã thuộc tài khoản khác → contactBelongsToExistingIdentity=true, không nhận kênh.",
+      "Đúng mã → tạo tài khoản (email đã xác minh) + đăng nhập luôn. Idempotent. redirectUrl: /link/{txId} | tiếp tục OIDC | /.",
     method: "POST",
-    path: "/api/registrations/:regId/otp/verify",
+    path: "/api/registrations/:regId/verify",
     pathParams: regParams,
-    body: z.object({ channel: otpChannelZod, code: z.string().trim().min(1) }),
-    responses: { 200: successResponseSchema(otpVerifyResultSchema) },
+    body: z.object({ code: z.string().trim().min(1) }),
+    responses: { 200: successResponseSchema(registrationVerifyResultSchema) },
     metadata: OpenAPIHelper.generateErrorCodes(
       ...REG_ERRORS,
       ErrorCode.OtpInvalid,
       ErrorCode.OtpExpired,
       ErrorCode.OtpTooManyAttempts,
-    ),
-  },
-  completeRegistration: {
-    summary: "Hoàn tất đăng ký",
-    description:
-      "Tạo tài khoản + đăng nhập luôn (thay phiên cũ). Idempotent. redirectUrl: /link/{txId} | tiếp tục OIDC | /.",
-    method: "POST",
-    path: "/api/registrations/:regId/complete",
-    pathParams: regParams,
-    body: z.object({
-      displayName: z.string().trim().min(1).max(100),
-      username: z.string().trim().min(1),
-      password: z.string().min(1),
-    }),
-    responses: { 200: successResponseSchema(registrationCompleteResultSchema) },
-    metadata: OpenAPIHelper.generateErrorCodes(
-      ...REG_ERRORS,
-      ErrorCode.EmailVerificationRequired,
-      ErrorCode.RateLimited,
       ErrorCode.UsernameTaken,
-      ErrorCode.UsernamePolicyViolation,
-      ErrorCode.PasswordPolicyViolation,
       ErrorCode.ContactAlreadyUsed,
+      ErrorCode.RateLimited,
     ),
   },
 });

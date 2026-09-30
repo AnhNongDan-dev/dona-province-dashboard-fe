@@ -59,7 +59,7 @@ function Countdown({ until, onExpire }: { until: Date; onExpire: () => void }) {
       setSeconds(left);
       if (left === 0) {
         clearInterval(timer);
-        onExpire(); // BE là bên quyết hết hạn — đọc lại D9
+        onExpire(); // BE là bên quyết hết hạn — đọc lại trạng thái giao dịch
       }
     }, 1000);
     return () => clearInterval(timer);
@@ -112,7 +112,7 @@ export function ErrorAlert({ message }: { message: string | null }) {
 }
 
 function BackToProvider({ tx, variant }: { tx: LinkTransaction; variant?: "outline" }) {
-  // F6 (từ Account Center): returnUrl luôn là /account/connections của chính Central.
+  // Liên kết từ Account Center: returnUrl luôn là /account/connections của chính Central.
   const label =
     tx.origin === LinkOrigin.ACCOUNT_CENTER
       ? "Về Liên kết tài khoản"
@@ -128,7 +128,7 @@ function BackToProvider({ tx, variant }: { tx: LinkTransaction; variant?: "outli
   );
 }
 
-/** D9 lỗi (không tìm thấy / hết hạn / không thuộc trình duyệt này). */
+/** Đọc trạng thái giao dịch lỗi (không tìm thấy / hết hạn / không thuộc trình duyệt này). */
 export function TxLoadError({ error, onRetry }: { error: ErrorResponse; onRetry: () => void }) {
   const gone =
     error.errorCode === ErrorCode.LinkTxNotFound || error.errorCode === ErrorCode.LinkTxExpired;
@@ -201,7 +201,7 @@ export function AwaitingLegacy({ w, onCancel }: { w: Wizard; onCancel: () => voi
   );
 }
 
-/** COMPLETED — reload trong 30 phút vẫn đọc được D9 nên màn này dựng lại được. */
+/** COMPLETED — reload trong 30 phút vẫn đọc được trạng thái giao dịch nên màn này dựng lại được. */
 export function Completed({ tx }: { tx: LinkTransaction }) {
   return (
     <TxShell tx={tx} title="Đã liên kết thành công">
@@ -267,7 +267,7 @@ export function Ended({ tx }: { tx: LinkTransaction }) {
   );
 }
 
-/** Câu tiếng Việt cho mã lỗi dạng chuỗi (lastErrorCode / failureCode của D9). */
+/** Câu tiếng Việt cho mã lỗi dạng chuỗi (lastErrorCode / failureCode của giao dịch). */
 export function messageOf(code: string) {
   const parsed = errorCodeZod.safeParse(code);
   return parsed.success

@@ -1,16 +1,17 @@
 import type { CredentialPolicy } from "@repo/zod-schemas/src/entity/central-auth-schema";
+import { PasswordInput } from "@/components/auth/password-input";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 
-// Luật chỉ BE kiểm được (không nằm trong D7): chỉ hiện khi BE trả trong errors[].code.
+// Luật chỉ BE kiểm được (không nằm trong chính sách mật khẩu công khai): chỉ hiện khi BE trả trong
+// errors[].code.
 const SERVER_ONLY_LABEL: Record<string, string> = {
   NOT_SAME_AS_CURRENT: "Khác mật khẩu hiện tại",
 };
 
 /**
- * Điều kiện kiểm được ở trình duyệt, theo mã luật của D7 (cùng mã với errors[].code của BE).
- * username = null khi FE không biết username (quên mật khẩu bằng SĐT/email) → luật
- * NOT_CONTAIN_USERNAME để BE kiểm.
+ * Điều kiện kiểm được ở trình duyệt, theo mã luật của chính sách mật khẩu (cùng mã với
+ * errors[].code của BE). username = null khi FE không biết username (quên mật khẩu bằng email) →
+ * luật NOT_CONTAIN_USERNAME để BE kiểm.
  */
 function ruleChecks(policy: CredentialPolicy["password"], username: string | null) {
   const known: Record<string, { label: string; ok: (p: string) => boolean }> = {
@@ -54,7 +55,10 @@ export function isNewPasswordReady(
   );
 }
 
-/** Ô mật khẩu mới + nhập lại + danh sách điều kiện đạt / chưa đạt (đăng ký, S12, S15). */
+/**
+ * Ô mật khẩu mới + nhập lại + danh sách điều kiện đạt / chưa đạt (đăng ký, trang Bảo mật, quên mật
+ * khẩu).
+ */
 export function NewPasswordFields({
   policy,
   username,
@@ -64,6 +68,7 @@ export function NewPasswordFields({
   setConfirm,
   serverCodes,
   serverLabels,
+  label = "Mật khẩu mới",
 }: {
   policy: CredentialPolicy | null;
   username: string | null;
@@ -75,6 +80,8 @@ export function NewPasswordFields({
   serverCodes: string[];
   /** Đổi nhãn luật chỉ BE kiểm được theo ngữ cảnh (vd. màn đổi mật khẩu tạm). */
   serverLabels?: Record<string, string>;
+  /** Nhãn ô mật khẩu (đăng ký: "Mật khẩu"); ô nhập lại theo cùng nhãn. */
+  label?: string;
 }) {
   const checks = policy ? ruleChecks(policy.password, username) : [];
   const serverOnly = serverCodes.filter((c) => !checks.some((k) => k.code === c));
@@ -82,10 +89,9 @@ export function NewPasswordFields({
   return (
     <>
       <Field>
-        <FieldLabel htmlFor="new-password">Mật khẩu mới</FieldLabel>
-        <Input
+        <FieldLabel htmlFor="new-password">{label}</FieldLabel>
+        <PasswordInput
           id="new-password"
-          type="password"
           autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -113,10 +119,9 @@ export function NewPasswordFields({
         </ul>
       </Field>
       <Field data-invalid={confirm !== "" && confirm !== password}>
-        <FieldLabel htmlFor="confirm-password">Nhập lại mật khẩu mới</FieldLabel>
-        <Input
+        <FieldLabel htmlFor="confirm-password">Nhập lại {label.toLowerCase()}</FieldLabel>
+        <PasswordInput
           id="confirm-password"
-          type="password"
           autoComplete="new-password"
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}

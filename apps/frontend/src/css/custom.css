@@ -9,45 +9,39 @@
   --error: oklch(58.287% 0.19407 25.576);
   --error-foreground: oklch(98.463% 0.00181 249.248);
 
-  /* ── ELP brand kit (see mock/brand-tokens.css) — navy + cyan + yellow ──
-     custom.css is imported last in main.css, so these overrides win over
-     theme.css for the default color theme. */
-  --elp-navy: #073b8e;
-  --elp-navy-dark: #061a3d;
-  --elp-cyan: #19b9f2;
-  --elp-yellow: #ffc400;
-  --elp-light-blue: #eaf7ff;
+  /* Màu thương hiệu Đoàn — cùng tone với các hệ thống đã liên kết: xanh Đoàn (Bộ tiêu chí) làm
+     màu chính, đỏ (Lý Luận Trẻ) làm điểm nhấn. custom.css được import cuối nên đè theme.css. */
+  --doan-blue: #0066cc;
+  --doan-navy: #012970;
+  --doan-red: #b22222;
+  --doan-red-soft: #cd5c5c;
+  --doan-light-blue: #e8f1fb;
 
-  /* Map the app's semantic tokens onto the brand (navy primary, light-blue
-     surfaces). Everything that reads --primary/--accent rebrands from here. */
-  --primary: var(--elp-navy);
+  --primary: var(--doan-blue);
   --primary-foreground: #ffffff;
-  --secondary: var(--elp-light-blue);
-  --secondary-foreground: var(--elp-navy);
-  --accent: var(--elp-light-blue);
-  --accent-foreground: var(--elp-navy);
-  --ring: var(--elp-cyan);
+  --secondary: var(--doan-light-blue);
+  --secondary-foreground: var(--doan-navy);
+  --accent: var(--doan-light-blue);
+  --accent-foreground: var(--doan-navy);
+  --ring: var(--doan-blue);
 
-  /* Brand gradient second stop — navy → cyan for headline accents / CTA band.
-     NOTE: surface tokens (--foreground/--border/--muted/--input) live in
-     theme.css :root so theme.css's .dark block can still override them — setting
-     them here (custom.css loads last) would leak light values into dark mode. */
-  --lp-violet: var(--elp-cyan);
+  /* Điểm dừng thứ hai của gradient tiêu đề / dải CTA. Token bề mặt (--foreground/--border/
+     --muted/--input) nằm ở theme.css để khối .dark bên đó vẫn đè được. */
+  --lp-violet: var(--doan-red-soft);
 }
 
 .dark {
-  /* The app defaults to dark mode, so primary is brightened from the deep navy
-     to stay legible and let buttons/CTAs pop; surfaces shift to a navy tint. */
-  --primary: #2f86e0;
+  /* Nền tối: làm sáng màu chính để nút / liên kết vẫn đủ tương phản. */
+  --primary: #3d8bf0;
   --primary-foreground: #ffffff;
-  --ring: #2f86e0;
-  --secondary: #0e2a52;
-  --secondary-foreground: #cfe8fb;
-  --accent: #0e2a52;
-  --accent-foreground: #cfe8fb;
+  --ring: #3d8bf0;
+  --secondary: #0d2a55;
+  --secondary-foreground: #cfe3fb;
+  --accent: #0d2a55;
+  --accent-foreground: #cfe3fb;
   --success: #2fcf6c;
   --info: #2bb6f2;
-  --lp-violet: #38c3fb;
+  --lp-violet: #e07070;
 }
 
 @theme inline {

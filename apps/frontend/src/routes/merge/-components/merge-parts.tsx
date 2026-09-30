@@ -11,12 +11,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatSeconds } from "@/hooks/use-countdown";
 
-/** Khung trang gộp: ngoài layout ứng dụng để lỗi phiên được xử lý tại chỗ (TASK-005). */
+/** Khung trang gộp: ngoài layout ứng dụng để lỗi phiên được xử lý tại chỗ. */
 export function MergeShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-svh flex-col bg-muted/40">
       <header className="flex h-14 items-center gap-2 border-b border-border/50 bg-background px-6">
-        <img src="/app-icon.svg" alt="" className="size-7" />
+        <img src="/huy-hieu-doan.png" alt="Huy hiệu Đoàn" className="size-7 object-contain" />
         <span className="font-semibold">{APP_CONFIG.NAME}</span>
         <span className="text-muted-foreground">· Gộp tài khoản</span>
       </header>

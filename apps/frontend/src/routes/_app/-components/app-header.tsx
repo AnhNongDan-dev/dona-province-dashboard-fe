@@ -34,7 +34,7 @@ export function AppHeader({ session }: { session: Session }) {
       <div className="flex h-14 items-center justify-between gap-4 px-4 sm:px-6">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2">
-            <img src="/app-icon.svg" alt="" className="size-7" />
+            <img src="/huy-hieu-doan.png" alt="Huy hiệu Đoàn" className="size-7 object-contain" />
             <span className="hidden font-semibold md:inline">{APP_CONFIG.NAME}</span>
           </Link>
           <nav className="flex items-center gap-5 text-sm">
@@ -47,7 +47,7 @@ export function AppHeader({ session }: { session: Session }) {
             >
               Tài khoản
             </Link>
-            {/* Chỉ để hiển thị — BE kiểm quyền quản trị ở từng API (TASK-006). */}
+            {/* Chỉ để hiển thị — BE kiểm quyền quản trị ở từng API. */}
             {identity.admin && (
               <Link
                 to="/admin/users"

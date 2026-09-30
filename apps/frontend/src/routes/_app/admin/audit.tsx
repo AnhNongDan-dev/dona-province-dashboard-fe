@@ -32,8 +32,8 @@ import { Pager } from "./-components/pager";
 const PAGE_SIZE = 20;
 const resultZod = z.enum([ActivityResult.SUCCESS, ActivityResult.FAILURE]);
 
-// A7 — nhật ký quản trị (AD10). Bộ lọc nằm trên URL; URL đếm trang từ 1, API từ 0.
-// actorId / targetId đến từ link ở A2 ("Nhật ký quản trị về tài khoản này").
+// Nhật ký quản trị. Bộ lọc nằm trên URL; URL đếm trang từ 1, API từ 0.
+// actorId / targetId đến từ link ở trang chi tiết tài khoản ("Nhật ký quản trị về tài khoản này").
 export const Route = createFileRoute("/_app/admin/audit")({
   validateSearch: z.object({
     page: z.coerce.number().int().min(1).catch(1),
@@ -264,7 +264,7 @@ function AuditRow({ row: r }: { row: AdminAuditRowDTO }) {
   );
 }
 
-/** Tên chụp lúc thao tác; bấm để mở A2 của tài khoản đó. */
+/** Tên chụp lúc thao tác; bấm để mở chi tiết tài khoản đó. */
 function Person({
   id,
   username,

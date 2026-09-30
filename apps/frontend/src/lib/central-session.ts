@@ -11,8 +11,8 @@ import { queryClient } from "@/config/query-client.config";
 import { errorMessage, errorParam } from "@/lib/api-error";
 import { sessionHooks, sessionStore } from "@/lib/session-store";
 
-// Điều phối phiên Central phía trình duyệt: đọc D1, đồng bộ nhiều tab, đăng xuất, step-up (S2).
-// Mọi quyết định dựa trên D1 của BE — FE không tự tính hạn phiên.
+// Điều phối phiên Central phía trình duyệt: đọc trạng thái phiên, đồng bộ nhiều tab, đăng xuất,
+// step-up. Mọi quyết định dựa trên trạng thái phiên BE trả — FE không tự tính hạn phiên.
 
 type TabSignal = "changed" | "logged-out";
 
@@ -28,7 +28,7 @@ function applySession(data: unknown): Session {
   return session;
 }
 
-/** Đọc D1 (không kéo dài idle) và cập nhật phiên của tab. */
+/** Đọc trạng thái phiên (không kéo dài idle) và cập nhật phiên của tab. */
 export function loadSession(): Promise<Session> {
   inflight ??= clientAPI.CentralAuth.getSession()
     .then((res) => {
@@ -52,8 +52,8 @@ export function broadcast(signal: TabSignal) {
 }
 
 /**
- * Đối chiếu phiên tab đang tin với D1 hiện tại. Phiên đổi/hết thì tải lại hẳn trang đích
- * (xóa sạch cache và state trong bộ nhớ — quan trọng trên máy dùng chung).
+ * Đối chiếu phiên tab đang tin với trạng thái phiên hiện tại. Phiên đổi/hết thì tải lại hẳn trang
+ * đích (xóa sạch cache và state trong bộ nhớ — quan trọng trên máy dùng chung).
  */
 export async function reconcile(signal?: TabSignal) {
   const prev = sessionStore.get();
@@ -76,8 +76,8 @@ export async function reconcile(signal?: TabSignal) {
 
 /**
  * Qua xong một cổng tài khoản (đổi mật khẩu tạm / thêm email): làm mới phiên, báo các tab khác,
- * rồi đi tiếp. Còn cổng email → màn thêm email; có `req` → D3 `continueUrl` (vào hệ thống đã gọi),
- * `req` hết hạn → `returnUrl`; không → cổng tổng hợp.
+ * rồi đi tiếp. Còn cổng email → màn thêm email; có `req` → `continueUrl` của ngữ cảnh đăng nhập
+ * (vào hệ thống đã gọi), `req` hết hạn → `returnUrl`; không → cổng tổng hợp.
  */
 export async function continueAfterGate(req: string | undefined) {
   const session = await loadSession().catch(() => null);
@@ -95,14 +95,17 @@ export async function continueAfterGate(req: string | undefined) {
   window.location.assign("/");
 }
 
-/** D2 — chỉ gọi khi user bấm [Tiếp tục làm việc], không gọi theo chuột/phím. */
+/** Báo còn hoạt động — chỉ gọi khi user bấm [Tiếp tục làm việc], không gọi theo chuột/phím. */
 export async function keepAlive() {
   const res = await clientAPI.CentralAuth.recordActivity();
   if (res.success) applySession(res.data);
   else toast.error(errorMessage(res));
 }
 
-/** D6. Thành công → tab dùng luôn phiên ẩn danh mới, xóa cache, báo các tab khác. */
+/**
+ * Đăng xuất / đổi người dùng. Thành công → tab dùng luôn phiên ẩn danh mới, xóa cache, báo các tab
+ * khác.
+ */
 export async function logout(mode: LogoutMode): Promise<NotifiedClient[] | null> {
   const res = await clientAPI.CentralAuth.logout({ body: { mode } });
   if (!res.success) {
@@ -113,7 +116,7 @@ export async function logout(mode: LogoutMode): Promise<NotifiedClient[] | null>
   return res.data.notifiedClients;
 }
 
-/** Phiên hiện tại vừa kết thúc (D6, revoke-all kể cả phiên này): dùng luôn phiên ẩn danh mới BE
+/** Phiên hiện tại vừa kết thúc (đăng xuất, revoke-all kể cả phiên này): dùng luôn phiên ẩn danh mới BE
  * trả, xóa cache, báo các tab khác. */
 export function applyLoggedOut(csrfToken: string, sessionId: string) {
   sessionStore.setAnonymous(csrfToken, sessionId);
@@ -121,7 +124,7 @@ export function applyLoggedOut(csrfToken: string, sessionId: string) {
   broadcast("logged-out");
 }
 
-// ---- S2: step-up theo yêu cầu (REAUTH_REQUIRED) ----
+// ---- Step-up theo yêu cầu (REAUTH_REQUIRED) ----
 
 let reauthResolve: ((ok: boolean) => void) | null = null;
 const reauthListeners = new Set<() => void>();

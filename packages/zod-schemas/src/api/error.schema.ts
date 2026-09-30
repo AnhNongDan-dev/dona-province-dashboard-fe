@@ -74,7 +74,7 @@ export const ErrorCode = {
   InvalidStatusTransition: "InvalidStatusTransition",
   ServiceUnavailable: "ServiceUnavailable",
   AuthFailed: "E_AUTH_FAILED",
-  // Central Auth (TASK-001 bảng mã lỗi) — BE trả nguyên tên mã
+  // Central Auth — BE trả nguyên tên mã
   Unauthenticated: "UNAUTHENTICATED",
   SessionExpired: "SESSION_EXPIRED",
   SessionChanged: "SESSION_CHANGED",
@@ -87,7 +87,7 @@ export const ErrorCode = {
   LoginRequestExpired: "LOGIN_REQUEST_EXPIRED",
   ValidationError: "VALIDATION_ERROR",
   InternalError: "INTERNAL_ERROR",
-  // Central Auth GĐ A — giao dịch liên kết / tạo mới (TASK-003)
+  // Central Auth — giao dịch liên kết / tạo mới
   LinkTxNotFound: "LINK_TX_NOT_FOUND",
   LinkTxExpired: "LINK_TX_EXPIRED",
   LinkTxInvalidState: "LINK_TX_INVALID_STATE",
@@ -107,13 +107,13 @@ export const ErrorCode = {
   UsernameTaken: "USERNAME_TAKEN",
   UsernamePolicyViolation: "USERNAME_POLICY_VIOLATION",
   EmailVerificationRequired: "EMAIL_VERIFICATION_REQUIRED",
-  // Tài khoản chưa có email đã xác minh (TASK-008) — bị giữ ở màn thêm email.
+  // Tài khoản chưa có email đã xác minh — bị giữ ở màn thêm email.
   EmailSetupRequired: "EMAIL_SETUP_REQUIRED",
-  // Central Auth GĐ B — Account Center (TASK-004)
+  // Central Auth — Account Center
   UnlinkNotAllowed: "UNLINK_NOT_ALLOWED",
   ConnectionNotFound: "CONNECTION_NOT_FOUND",
   SessionNotFound: "SESSION_NOT_FOUND",
-  // Central Auth GĐ C — gộp tài khoản, kênh liên lạc (TASK-005)
+  // Central Auth — gộp tài khoản, kênh liên lạc
   MergeTxNotFound: "MERGE_TX_NOT_FOUND",
   MergeTxExpired: "MERGE_TX_EXPIRED",
   MergeTxInvalidState: "MERGE_TX_INVALID_STATE",
@@ -121,11 +121,11 @@ export const ErrorCode = {
   MergeConflictUnresolved: "MERGE_CONFLICT_UNRESOLVED",
   MergeRequiresAdmin: "MERGE_REQUIRES_ADMIN",
   LastAuthMethod: "LAST_AUTH_METHOD",
-  // Tự đăng ký (TASK-007)
+  // Tự đăng ký
   RegistrationNotFound: "REGISTRATION_NOT_FOUND",
   RegistrationExpired: "REGISTRATION_EXPIRED",
   RegistrationInvalidState: "REGISTRATION_INVALID_STATE",
-  // Quản trị (TASK-006)
+  // Quản trị
   AdminForbidden: "ADMIN_FORBIDDEN",
   AdminTargetForbidden: "ADMIN_TARGET_FORBIDDEN",
   UserNotFound: "USER_NOT_FOUND",
@@ -285,7 +285,7 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   },
   [ErrorCode.LegacyAuthTooOld]: {
     statusCode: StatusCode.Conflict,
-    message: "Lần xác minh tài khoản ở hệ thống cũ đã quá lâu. Hãy xác minh lại.",
+    message: "Lần xác minh tài khoản đã quá lâu. Hãy xác minh lại.",
   },
   [ErrorCode.ExternalAlreadyLinked]: {
     statusCode: StatusCode.Conflict,
@@ -299,7 +299,7 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   },
   [ErrorCode.ExternalAccountDisabled]: {
     statusCode: StatusCode.Conflict,
-    message: "Tài khoản ở hệ thống cũ đang bị khóa. Liên hệ quản trị hệ thống đó.",
+    message: "Tài khoản bạn vừa xác minh đang bị khóa ở hệ thống đó. Liên hệ quản trị hệ thống đó.",
   },
   [ErrorCode.ProviderAlreadyLinked]: {
     statusCode: StatusCode.Conflict,
@@ -312,7 +312,8 @@ export const ERROR_DATA: Record<ErrorCode, { statusCode: number; message: string
   },
   [ErrorCode.ProviderVerificationFailed]: {
     statusCode: StatusCode.BadRequest,
-    message: "Không xác minh được tài khoản ở hệ thống cũ (có thể bạn đã bấm hủy).",
+    message:
+      "Chưa xác minh được tài khoản (bạn đã bấm Hủy hoặc thông tin chưa đúng). Hãy bấm Xác minh lại.",
   },
   [ErrorCode.InvalidReturnUrl]: {
     statusCode: StatusCode.BadRequest,

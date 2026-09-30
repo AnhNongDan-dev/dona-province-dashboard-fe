@@ -11,15 +11,15 @@ const c = initContract();
 
 export const connectionContract = c.router({
   listMyConnections: {
-    summary: "D16 — Hệ thống và tài khoản đã liên kết của tôi",
-    description: "Dùng cho dashboard (S8) và Account Center (S9).",
+    summary: "Hệ thống và tài khoản đã liên kết của tôi",
+    description: "Dùng cho trang chủ (các hệ thống) và Account Center (Liên kết tài khoản).",
     method: "GET",
     path: "/api/me/connections",
     responses: { 200: successResponseSchema(z.array(connectionSchema)) },
     metadata: OpenAPIHelper.generateErrorCodes(ErrorCode.Unauthenticated, ErrorCode.SessionExpired),
   },
   unlinkMyConnection: {
-    summary: "D17 — Hủy liên kết",
+    summary: "Hủy liên kết",
     description:
       "Cần xác thực lại ≤ 5 phút. Đăng xuất user khỏi chính hệ thống đó trên mọi thiết bị; phiên Central giữ nguyên.",
     method: "DELETE",

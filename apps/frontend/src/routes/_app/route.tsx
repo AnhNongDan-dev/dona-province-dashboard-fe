@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_app")({
   beforeLoad: () => {
     const session = sessionStore.get();
     if (!session?.authenticated) throw redirect({ to: "/login" });
-    // Cổng tài khoản, theo thứ tự: đổi mật khẩu tạm (TASK-006) → thêm email (TASK-008).
+    // Cổng tài khoản, theo thứ tự: đổi mật khẩu tạm → thêm email.
     if (session.identity?.passwordChangeRequired) throw redirect({ to: "/password-change" });
     if (session.identity?.emailSetupRequired) throw redirect({ to: "/email-setup" });
   },

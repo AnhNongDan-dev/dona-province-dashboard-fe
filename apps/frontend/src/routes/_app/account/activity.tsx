@@ -20,7 +20,7 @@ import { ActivityTable } from "./-components/activity-table";
 
 const PAGE_SIZE = 20;
 
-// S11 — Lịch sử hoạt động (D19). Bộ lọc nằm trên URL; URL đếm trang từ 1, API từ 0.
+// Lịch sử hoạt động. Bộ lọc nằm trên URL; URL đếm trang từ 1, API từ 0.
 export const Route = createFileRoute("/_app/account/activity")({
   validateSearch: z.object({
     page: z.coerce.number().int().min(1).catch(1),

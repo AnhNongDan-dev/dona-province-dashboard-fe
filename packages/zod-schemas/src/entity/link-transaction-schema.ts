@@ -1,8 +1,8 @@
 import z from "zod";
 import { commonZod } from "../common";
 
-// Mirror DTO giao dịch liên kết của BE (TASK-001 D8–D11; TASK-003/004). Nhánh tạo tài khoản trong
-// giao dịch đã gỡ (TASK-007) — đăng ký là phiên đăng ký riêng (registration-schema).
+// Mirror DTO giao dịch liên kết của BE. Nhánh tạo tài khoản trong
+// giao dịch đã gỡ — đăng ký là phiên đăng ký riêng (registration-schema).
 // Enum ở đây chỉ dùng để rẽ nhánh wizard, không hiển thị ra UI → không có LABEL/OPTIONS.
 
 export const LinkState = {
@@ -25,7 +25,7 @@ export const linkIntentZod = z.enum([LinkIntent.LINK, LinkIntent.CREATE]);
 export const LinkAction = {
   RETRY_LEGACY_VERIFICATION: "RETRY_LEGACY_VERIFICATION",
   CENTRAL_LOGIN: "CENTRAL_LOGIN",
-  /** Mở trang đăng ký chung mang theo giao dịch (TASK-007). */
+  /** Mở trang đăng ký chung mang theo giao dịch. */
   REGISTER: "REGISTER",
   CONFIRM: "CONFIRM",
   CANCEL: "CANCEL",
@@ -33,7 +33,7 @@ export const LinkAction = {
 export type LinkAction = (typeof LinkAction)[keyof typeof LinkAction];
 export const linkActionZod = z.enum(Object.values(LinkAction) as [LinkAction, ...LinkAction[]]);
 
-/** LEGACY = F5 (từ hệ thống cũ); ACCOUNT_CENTER = F6 (từ Liên kết tài khoản, GĐ B). */
+/** LEGACY = bắt đầu từ hệ thống cũ; ACCOUNT_CENTER = bắt đầu từ Liên kết tài khoản. */
 export const LinkOrigin = { LEGACY: "LEGACY", ACCOUNT_CENTER: "ACCOUNT_CENTER" } as const;
 export type LinkOrigin = (typeof LinkOrigin)[keyof typeof LinkOrigin];
 export const linkOriginZod = z.enum([LinkOrigin.LEGACY, LinkOrigin.ACCOUNT_CENTER]);
@@ -63,7 +63,7 @@ const centralIdentitySchema = z.object({
   tenantName: z.string().nullable(),
 });
 
-/** D9 — wizard dựng hoàn toàn theo state / intent / allowedActions. */
+/** Trạng thái giao dịch — wizard dựng hoàn toàn theo state / intent / allowedActions. */
 export const linkTransactionSchema = z.object({
   txId: z.guid(),
   state: linkStateZod,
@@ -82,7 +82,7 @@ export const linkTransactionSchema = z.object({
 });
 export type LinkTransaction = z.infer<typeof linkTransactionSchema>;
 
-/** D8 (F6) — FE điều hướng top-level tới legacyVerifyUrl. */
+/** Bắt đầu liên kết từ Account Center — FE điều hướng top-level tới legacyVerifyUrl. */
 export const linkTransactionCreateResultSchema = z.object({
   txId: z.guid(),
   legacyVerifyUrl: z.string(),

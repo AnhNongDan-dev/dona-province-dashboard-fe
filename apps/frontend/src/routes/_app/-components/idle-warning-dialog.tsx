@@ -15,13 +15,14 @@ import { keepAlive, reconcile } from "@/lib/central-session";
 import { msUntil } from "@/lib/session-store";
 
 const WARN_BEFORE_MS = 60_000;
-// Chặn vòng gọi D1 dồn dập nếu đồng hồ lệch làm hạn "đã qua" mà BE vẫn thấy phiên còn.
+// Chặn vòng đọc trạng thái phiên dồn dập nếu đồng hồ lệch làm hạn "đã qua" mà BE vẫn thấy phiên
+// còn.
 const MIN_RECHECK_MS = 2_000;
 
 /**
- * F9 — hạn do BE trả (idleExpiresAt / absoluteExpiresAt), FE không tự tính.
- * Tới mốc thì đọc lại D1 (không kéo dài idle): tab/request khác đã kéo dài → hẹn lại;
- * vẫn sắp hết → cảnh báo; đã hết → reconcile đưa sang S4.
+ * Hết phiên — hạn do BE trả (idleExpiresAt / absoluteExpiresAt), FE không tự tính.
+ * Tới mốc thì đọc lại trạng thái phiên (không kéo dài idle): tab/request khác đã kéo dài → hẹn lại;
+ * vẫn sắp hết → cảnh báo; đã hết → reconcile đưa sang trang phiên kết thúc.
  */
 export function IdleWarningDialog({ session }: { session: Session }) {
   const { idleExpiresAt, absoluteExpiresAt } = session;

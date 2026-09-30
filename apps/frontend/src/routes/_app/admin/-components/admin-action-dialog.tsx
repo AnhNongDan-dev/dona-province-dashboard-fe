@@ -22,7 +22,8 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { errorMessage } from "@/lib/api-error";
 
-// Lỗi làm thao tác không còn hợp lệ với tài khoản đang xem → đóng hộp, trang đọc lại AD2.
+// Lỗi làm thao tác không còn hợp lệ với tài khoản đang xem → đóng hộp, trang đọc lại chi tiết tài
+// khoản.
 const STALE_TARGET_CODES: string[] = [
   ErrorCode.UserNotFound,
   ErrorCode.AdminTargetForbidden,
@@ -38,9 +39,10 @@ export function notifiedText(clients: NotifiedClient[]) {
 }
 
 /**
- * Hộp xác nhận cho mọi thao tác ghi của admin (AD4–AD8): nêu hệ quả + lý do bắt buộc (1–500).
- * REAUTH_REQUIRED → clientAPI tự mở S2 và gửi lại đúng một lần (chỉ khi BE đã từ chối thao tác,
- * nên an toàn cả với AD6 không idempotent). Không tự thử lại khi lỗi mạng.
+ * Hộp xác nhận cho mọi thao tác ghi của admin (khóa / mở khóa / cấp lại mật khẩu / đăng xuất mọi
+ * phiên / hủy liên kết): nêu hệ quả + lý do bắt buộc (1–500).
+ * REAUTH_REQUIRED → clientAPI tự mở hộp xác thực lại và gửi lại đúng một lần (chỉ khi BE đã từ chối
+ * thao tác, nên an toàn cả với cấp lại mật khẩu không idempotent). Không tự thử lại khi lỗi mạng.
  */
 export function AdminActionDialog<T>({
   open,
@@ -107,7 +109,7 @@ export function AdminActionDialog<T>({
       return setError(networkErrorText);
     }
     if (res.errorCode === ErrorCode.AdminForbidden) {
-      // Khu quản trị tự đóng khi D1 đọc lại (clientAPI → onAdminLost).
+      // Khu quản trị tự đóng khi trạng thái phiên được đọc lại (clientAPI → onAdminLost).
       return onOpenChange(false);
     }
     if (STALE_TARGET_CODES.includes(res.errorCode)) {

@@ -8,6 +8,7 @@ import {
 import { createFileRoute, Link, redirect, useRouterState } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
 import z from "zod";
+import { PasswordInput } from "@/components/auth/password-input";
 import { SystemLogo } from "@/components/auth/system-logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ import { errorMessage, errorParam } from "@/lib/api-error";
 import { broadcast, loadSession, logout } from "@/lib/central-session";
 import { sessionStore, useSession } from "@/lib/session-store";
 
-// S1 — đăng nhập Central. `req` là mã opaque do BE sinh ở /oauth2/authorize.
+// Đăng nhập Central. `req` là mã opaque do BE sinh ở /oauth2/authorize.
 // FE không bao giờ tự dựng URL chuyển hướng: chỉ đi tới redirectUrl / continueUrl / returnUrl của BE.
 export const Route = createFileRoute("/_auth/login")({
   validateSearch: z.object({
@@ -139,7 +140,7 @@ function LoginForm({
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const lock = useCountdown();
-  // Từ trang đăng ký: SĐT / email vừa chứng minh sở hữu đã thuộc một tài khoản → điền sẵn.
+  // Từ trang đăng ký: email vừa nhập đã thuộc một tài khoản → điền sẵn.
   const suggestedLoginId = useRouterState({ select: (s) => s.location.state.loginId });
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -148,7 +149,7 @@ function LoginForm({
     const loginId = String(form.get("loginId") ?? "").trim();
     const password = String(form.get("password") ?? "");
     const missing: FieldErrors = {
-      ...(!loginId && { loginId: "Vui lòng nhập tên đăng nhập, email hoặc số điện thoại" }),
+      ...(!loginId && { loginId: "Vui lòng nhập tên đăng nhập hoặc email" }),
       ...(!password && { password: "Vui lòng nhập mật khẩu" }),
     };
     setFieldErrors(missing);
@@ -171,8 +172,8 @@ function LoginForm({
 
     if (res.success) {
       broadcast("changed");
-      // Cổng tài khoản: đổi mật khẩu tạm (TASK-006) / thêm email (TASK-008) trước; xong thì đi
-      // tiếp bằng req (D3 continueUrl). redirectUrl không cần: không có req thì đích luôn là "/".
+      // Cổng tài khoản: đổi mật khẩu tạm / thêm email trước; xong thì đi
+      // tiếp bằng req (continueUrl). redirectUrl không cần: không có req thì đích luôn là "/".
       const gatePage = LOGIN_GATE_PAGE[res.data.next];
       if (gatePage) {
         const query = req ? `?${new URLSearchParams({ req })}` : "";
@@ -237,7 +238,7 @@ function LoginForm({
         <form onSubmit={onSubmit} noValidate>
           <FieldGroup>
             <Field data-invalid={!!fieldErrors.loginId}>
-              <FieldLabel htmlFor="loginId">Tên đăng nhập, email hoặc số điện thoại</FieldLabel>
+              <FieldLabel htmlFor="loginId">Tên đăng nhập hoặc email</FieldLabel>
               <Input
                 id="loginId"
                 name="loginId"
@@ -250,10 +251,9 @@ function LoginForm({
             </Field>
             <Field data-invalid={!!fieldErrors.password}>
               <FieldLabel htmlFor="password">Mật khẩu</FieldLabel>
-              <Input
+              <PasswordInput
                 id="password"
                 name="password"
-                type="password"
                 autoComplete="current-password"
                 aria-invalid={!!fieldErrors.password}
               />

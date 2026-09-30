@@ -30,10 +30,10 @@ const writeErrors = [
   ErrorCode.IdentityMerged,
 ] as const;
 
-// Màn quản trị (TASK-006). Cần phiên admin — không phải admin → ADMIN_FORBIDDEN.
+// Màn quản trị. Cần phiên admin — không phải admin → ADMIN_FORBIDDEN.
 export const adminContract = c.router({
   searchUsers: {
-    summary: "AD1 — Tìm tài khoản",
+    summary: "Tìm tài khoản",
     description:
       "q 2–100 ký tự: họ tên / username bỏ dấu, chứa chuỗi; email / SĐT / username hệ thống cũ khớp đúng. Sắp theo createdAt giảm dần.",
     method: "GET",
@@ -49,7 +49,7 @@ export const adminContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(ErrorCode.AdminForbidden, ErrorCode.ValidationError),
   },
   getUser: {
-    summary: "AD2 — Chi tiết tài khoản",
+    summary: "Chi tiết tài khoản",
     method: "GET",
     path: "/api/admin/users/:id",
     pathParams: userParams,
@@ -57,8 +57,8 @@ export const adminContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(ErrorCode.AdminForbidden, ErrorCode.UserNotFound),
   },
   searchUserActivities: {
-    summary: "AD3 — Lịch sử hoạt động của tài khoản",
-    description: "Cùng hình dạng D19.",
+    summary: "Lịch sử hoạt động của tài khoản",
+    description: "Cùng hình dạng lịch sử hoạt động của chính user.",
     method: "GET",
     path: "/api/admin/users/:id/activities",
     pathParams: userParams,
@@ -77,7 +77,7 @@ export const adminContract = c.router({
     ),
   },
   lockUser: {
-    summary: "AD4 — Khóa tài khoản",
+    summary: "Khóa tài khoản",
     description: "Thu hồi mọi phiên + back-channel logout. Đã khóa → 200 trạng thái hiện tại.",
     method: "POST",
     path: "/api/admin/users/:id/lock",
@@ -87,7 +87,7 @@ export const adminContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(...writeErrors),
   },
   unlockUser: {
-    summary: "AD5 — Mở khóa tài khoản",
+    summary: "Mở khóa tài khoản",
     method: "POST",
     path: "/api/admin/users/:id/unlock",
     pathParams: userParams,
@@ -96,7 +96,7 @@ export const adminContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(...writeErrors),
   },
   resetUserPassword: {
-    summary: "AD6 — Cấp lại mật khẩu",
+    summary: "Cấp lại mật khẩu",
     description: "Không idempotent: gọi lại = mật khẩu tạm mới. FE không tự gửi lại.",
     method: "POST",
     path: "/api/admin/users/:id/password-reset",
@@ -106,7 +106,7 @@ export const adminContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(...writeErrors),
   },
   revokeUserSessions: {
-    summary: "AD7 — Đăng xuất mọi phiên",
+    summary: "Đăng xuất mọi phiên",
     method: "POST",
     path: "/api/admin/users/:id/sessions/revoke-all",
     pathParams: userParams,
@@ -115,7 +115,7 @@ export const adminContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(...writeErrors),
   },
   unlinkUserConnection: {
-    summary: "AD8 — Hủy liên kết (kể cả hệ thống SSO-only)",
+    summary: "Hủy liên kết (kể cả hệ thống SSO-only)",
     method: "POST",
     path: "/api/admin/users/:id/connections/:linkId/unlink",
     pathParams: z.object({ id: z.guid(), linkId: commonZod.pathId }),
@@ -124,7 +124,7 @@ export const adminContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(...writeErrors, ErrorCode.ConnectionNotFound),
   },
   searchAudit: {
-    summary: "AD10 — Nhật ký quản trị",
+    summary: "Nhật ký quản trị",
     description: "from/to là ngày (YYYY-MM-DD) giờ VN, tính cả hai đầu.",
     method: "GET",
     path: "/api/admin/audit",

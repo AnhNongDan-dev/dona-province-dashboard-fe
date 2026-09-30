@@ -20,7 +20,7 @@ export async function fetchTx(txId: string): Promise<TxResult> {
 
 /**
  * Mã báo giao dịch đã đổi trạng thái phía BE (FAILED, hết hạn, sai bước…). Gặp các mã này FE
- * không tự đoán mà đọc lại D9 rồi hiện màn theo state / failureCode (TASK-003 quyết định 12).
+ * không tự đoán mà đọc lại trạng thái giao dịch rồi hiện màn theo state / failureCode.
  */
 export const TX_RELOAD_CODES: string[] = [
   ErrorCode.ProviderAlreadyLinked,
@@ -40,7 +40,10 @@ export type Wizard = {
   policy: CredentialPolicy | null;
   setTx: (data: unknown) => void;
   reload: () => Promise<void>;
-  /** Hiện lỗi của một request; mã trong TX_RELOAD_CODES thì đọc lại D9. Trả câu để hiển thị. */
+  /**
+   * Hiện lỗi của một request; mã trong TX_RELOAD_CODES thì đọc lại trạng thái giao dịch. Trả câu để
+   * hiển thị.
+   */
   fail: (res: ErrorResponse) => string;
   can: (action: LinkAction) => boolean;
 };

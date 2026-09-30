@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-// F9.4 — tab cũ của người A sau khi người B đã đăng nhập ở tab khác.
+// Tab cũ của người A sau khi người B đã đăng nhập ở tab khác.
 export const Route = createFileRoute("/_auth/session-changed")({
   component: SessionChangedPage,
 });

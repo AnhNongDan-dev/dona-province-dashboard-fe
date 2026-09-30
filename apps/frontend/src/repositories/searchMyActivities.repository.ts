@@ -4,7 +4,7 @@ import { clientAPI } from "@/config/clientAPI.config";
 import { createQueryRepository } from "./-factory";
 import { defaultPagedResult, mapPaging, type PagedResult } from "./-paging";
 
-// D19 — lịch sử hoạt động của chính user (S11). Phân trang + lọc phía server; page tính từ 0.
+// Lịch sử hoạt động của chính user. Phân trang + lọc phía server; page tính từ 0.
 export type SearchMyActivitiesQuery = {
   page: number;
   size: number;

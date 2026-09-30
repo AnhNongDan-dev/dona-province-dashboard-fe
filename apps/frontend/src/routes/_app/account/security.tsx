@@ -20,8 +20,8 @@ import { mySecurityRepository } from "@/repositories/mySecurity.repository";
 import { ContactsCard } from "./-components/contacts-card";
 import { MergeCard } from "./-components/merge-card";
 
-// S12 — Bảo mật: thông tin (D20a), kênh liên lạc (D24 / D20c), đổi mật khẩu (D20b), gộp tài
-// khoản (D22). Các thao tác ghi cần xác thực lại (S2 tự mở).
+// Bảo mật: thông tin, kênh liên lạc (email / SĐT), đổi mật khẩu, gộp tài khoản. Các thao tác
+// ghi cần xác thực lại (hộp xác thực lại tự mở).
 export const Route = createFileRoute("/_app/account/security")({
   loader: () =>
     Promise.all([mySecurityRepository().loader(), credentialPolicyRepository().loader()]),
@@ -87,7 +87,8 @@ function ChangePasswordCard({
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setPending(true);
-    // Cần xác thực lại: clientAPI tự mở S2 khi gặp REAUTH_REQUIRED rồi gửi lại một lần.
+    // Cần xác thực lại: clientAPI tự mở hộp xác thực lại khi gặp REAUTH_REQUIRED rồi gửi lại một
+    // lần.
     const res = await clientAPI.AccountCenter.changeMyPassword({ body: { newPassword: password } });
     setPending(false);
     if (res.success) {
@@ -95,7 +96,7 @@ function ChangePasswordCard({
       mySecurityRepository().updateCache({ passwordChangedAt: result.passwordChangedAt });
       setPassword("");
       setConfirm("");
-      // Phiên hiện tại giữ nguyên token → không cần báo các tab khác (TASK-004).
+      // Phiên hiện tại giữ nguyên token → không cần báo các tab khác.
       return toast.success(
         result.revokedCount > 0
           ? `Đã đổi mật khẩu. Đã đăng xuất ${result.revokedCount} phiên khác.`

@@ -3,9 +3,9 @@ import { commonZod } from "../common";
 import { notifiedClientSchema } from "./central-auth-schema";
 import { otpChannelZod } from "./link-transaction-schema";
 
-// Mirror DTO Account Center GĐ B (TASK-004): D18 phiên, D19 lịch sử, D20a/b bảo mật, D25 quên mật khẩu.
+// Mirror DTO Account Center: phiên, lịch sử hoạt động, bảo mật, quên mật khẩu.
 
-/** D18 — một phiên còn sống của user. id = sessionId. Chuỗi thiết bị do BE tách sẵn. */
+/** Một phiên còn sống của user. id = sessionId. Chuỗi thiết bị do BE tách sẵn. */
 export const deviceSessionSchema = z.object({
   id: z.guid(),
   deviceLabel: z.string(),
@@ -21,14 +21,16 @@ export type DeviceSession = z.infer<typeof deviceSessionSchema>;
 
 export const notifiedResultSchema = z.object({ notifiedClients: z.array(notifiedClientSchema) });
 
-/** D18 revoke-all — csrfToken/sessionId chỉ có khi includeCurrent=true (phiên ẩn danh mới). */
+/**
+ * Đăng xuất tất cả phiên — csrfToken/sessionId chỉ có khi includeCurrent=true (phiên ẩn danh mới).
+ */
 export const revokeAllResultSchema = notifiedResultSchema.extend({
   revokedCount: z.int(),
   csrfToken: z.string().nullable(),
   sessionId: z.guid().nullable(),
 });
 
-// D19 — 25 mã sự kiện chốt cứng (TASK-004 → TASK-006). Mã lạ → "Hoạt động khác".
+// Lịch sử hoạt động — 25 mã sự kiện chốt cứng. Mã lạ → "Hoạt động khác".
 export const ActivityType = {
   LOGIN: "LOGIN",
   REAUTHENTICATE: "REAUTHENTICATE",
@@ -50,7 +52,7 @@ export const ActivityType = {
   CONTACT_CHANGED: "CONTACT_CHANGED",
   CONTACT_REMOVED: "CONTACT_REMOVED",
   IDENTITY_REGISTERED: "IDENTITY_REGISTERED",
-  // Quản trị viên tác động lên tài khoản (TASK-006) — không có IP / thiết bị.
+  // Quản trị viên tác động lên tài khoản — không có IP / thiết bị.
   ADMIN_LOCKED: "ADMIN_LOCKED",
   ADMIN_UNLOCKED: "ADMIN_UNLOCKED",
   ADMIN_PASSWORD_RESET: "ADMIN_PASSWORD_RESET",
@@ -107,7 +109,7 @@ export const activitySchema = z.object({
   // null khi sự kiện không đến từ trình duyệt nào (vd. phiên tự hết hạn).
   ip: z.string().nullable(),
   deviceLabel: z.string().nullable(),
-  // Chuỗi hiển thị, đã che (GĐ C): IDENTITY_MERGED → định danh tài khoản bị gộp; CONTACT_* → kênh.
+  // Chuỗi hiển thị, đã che: IDENTITY_MERGED → định danh tài khoản bị gộp; CONTACT_* → kênh.
   detail: z.string().nullable(),
 });
 export type Activity = z.infer<typeof activitySchema>;
@@ -125,7 +127,10 @@ export const pagedSchema = <T extends z.ZodType>(item: T) =>
     }),
   });
 
-/** D24 gửi mã / pendingContacts của D20a — mã đang chờ xác minh của một kênh. */
+/**
+ * Gửi mã thêm / đổi email, hoặc pendingContacts của thông tin bảo mật — mã đang chờ xác minh của
+ * một kênh.
+ */
 export const pendingContactSchema = z.object({
   channel: otpChannelZod,
   maskedDestination: z.string(),
@@ -135,7 +140,10 @@ export const pendingContactSchema = z.object({
 });
 export type PendingContact = z.infer<typeof pendingContactSchema>;
 
-/** D20a — contacts chỉ gồm kênh đã xác minh, đã che; tối đa 1 SĐT + 1 email (TASK-005 Q4). */
+/**
+ * Thông tin bảo mật — contacts chỉ gồm email đã xác minh (đã che). SĐT là thông tin tự khai, không
+ * xác minh: trả nguyên số của chính chủ, null nếu chưa khai.
+ */
 export const accountSecuritySchema = z.object({
   username: z.string(),
   contacts: z.array(
@@ -145,18 +153,19 @@ export const accountSecuritySchema = z.object({
       verifiedAt: commonZod.datetime,
     }),
   ),
+  phone: z.string().nullable(),
   passwordChangedAt: commonZod.datetime,
   pendingContacts: z.array(pendingContactSchema),
 });
 export type AccountSecurity = z.infer<typeof accountSecuritySchema>;
 
-/** D20b */
+/** Đổi mật khẩu */
 export const passwordUpdateResultSchema = notifiedResultSchema.extend({
   passwordChangedAt: commonZod.datetime,
   revokedCount: z.int(),
 });
 
-/** D25 bước 1 — luôn cùng hình dạng dù định danh có tồn tại hay không. */
+/** Quên mật khẩu bước 1 — luôn cùng hình dạng dù định danh có tồn tại hay không. */
 export const passwordResetSchema = z.object({
   resetId: z.guid(),
   resendAvailableAt: commonZod.datetime,

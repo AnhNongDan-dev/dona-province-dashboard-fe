@@ -17,10 +17,10 @@ import { OpenAPIHelper } from "../openapi/openAPI.helper";
 
 const c = initContract();
 
-// Account Center GĐ B (TASK-004): D18 phiên & thiết bị, D19 lịch sử, D20a/b bảo mật. Cần phiên.
+// Account Center: phiên & thiết bị, lịch sử hoạt động, bảo mật. Cần phiên.
 export const accountCenterContract = c.router({
   listMySessions: {
-    summary: "D18 — Phiên đăng nhập còn sống",
+    summary: "Phiên đăng nhập còn sống",
     description: "Phiên hiện tại đứng đầu, sau đó theo lastActiveAt giảm dần. Không phân trang.",
     method: "GET",
     path: "/api/me/sessions",
@@ -28,8 +28,9 @@ export const accountCenterContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(),
   },
   revokeMySession: {
-    summary: "D18 — Đăng xuất một phiên khác",
-    description: "Không nhận phiên hiện tại (VALIDATION_ERROR / CURRENT_SESSION) — dùng D6.",
+    summary: "Đăng xuất một phiên khác",
+    description:
+      "Không nhận phiên hiện tại (VALIDATION_ERROR / CURRENT_SESSION) — dùng API đăng xuất.",
     method: "DELETE",
     path: "/api/me/sessions/:id",
     pathParams: z.object({ id: z.guid() }),
@@ -41,9 +42,9 @@ export const accountCenterContract = c.router({
     ),
   },
   revokeAllMySessions: {
-    summary: "D18 — Đăng xuất tất cả phiên",
+    summary: "Đăng xuất tất cả phiên",
     description:
-      "Cần xác thực lại ≤ 5 phút. includeCurrent=true trả token phiên ẩn danh mới như D6.",
+      "Cần xác thực lại ≤ 5 phút. includeCurrent=true trả token phiên ẩn danh mới như đăng xuất.",
     method: "POST",
     path: "/api/me/sessions/revoke-all",
     body: z.object({ includeCurrent: z.boolean() }),
@@ -51,7 +52,7 @@ export const accountCenterContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(ErrorCode.ReauthRequired),
   },
   searchMyActivities: {
-    summary: "D19 — Lịch sử hoạt động",
+    summary: "Lịch sử hoạt động",
     description:
       "page từ 0, size 1..100; types phân cách dấu phẩy; from/to là ngày giờ VN, tính cả hai đầu.",
     method: "GET",
@@ -67,7 +68,7 @@ export const accountCenterContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(ErrorCode.ValidationError),
   },
   getMySecurity: {
-    summary: "D20a — Thông tin bảo mật",
+    summary: "Thông tin bảo mật",
     description: "Username, kênh liên lạc đã xác minh (đã che), lần đổi mật khẩu gần nhất.",
     method: "GET",
     path: "/api/me/security",
@@ -75,9 +76,9 @@ export const accountCenterContract = c.router({
     metadata: OpenAPIHelper.generateErrorCodes(),
   },
   changeMyPassword: {
-    summary: "D20b — Đổi mật khẩu",
+    summary: "Đổi mật khẩu",
     description:
-      "Cần xác thực lại ≤ 5 phút (không hỏi mật khẩu cũ). Giữ phiên hiện tại, đăng xuất mọi phiên khác. Được miễn cổng đổi mật khẩu (TASK-006).",
+      "Cần xác thực lại ≤ 5 phút (không hỏi mật khẩu cũ). Giữ phiên hiện tại, đăng xuất mọi phiên khác. Được miễn cổng đổi mật khẩu.",
     method: "PUT",
     path: "/api/me/password",
     body: z.object({ newPassword: z.string().min(1) }),
@@ -88,9 +89,9 @@ export const accountCenterContract = c.router({
     ),
   },
   addMyContact: {
-    summary: "D24 — Gửi mã thêm / đổi kênh liên lạc",
+    summary: "Gửi mã thêm / đổi email",
     description:
-      "Cần xác thực lại ≤ 5 phút. Gọi lại cùng channel = gửi lại mã (destination khác thì thay đích). Tài khoản chưa có email: chỉ channel=EMAIL.",
+      "Cần xác thực lại ≤ 5 phút. Gọi lại = gửi lại mã (destination khác thì thay đích). Chỉ channel=EMAIL.",
     method: "POST",
     path: "/api/me/contacts",
     body: z.object({ channel: otpChannelZod, destination: z.string().trim().min(1) }),
@@ -104,9 +105,9 @@ export const accountCenterContract = c.router({
     ),
   },
   verifyMyContact: {
-    summary: "D24 — Xác minh kênh liên lạc",
+    summary: "Xác minh kênh liên lạc",
     description:
-      "Không cần fresh (mã gắn phiên đã gửi). Giá trị mới thêm vào hoặc thay giá trị cũ cùng loại; trả D20a.",
+      "Không cần fresh (mã gắn phiên đã gửi). Giá trị mới thêm vào hoặc thay giá trị cũ cùng loại; trả thông tin bảo mật mới.",
     method: "POST",
     path: "/api/me/contacts/verify",
     body: z.object({ channel: otpChannelZod, code: z.string().trim().min(1) }),
@@ -119,19 +120,14 @@ export const accountCenterContract = c.router({
       ErrorCode.EmailSetupRequired,
     ),
   },
-  removeMyContact: {
-    summary: "D20c — Gỡ kênh liên lạc",
+  updateMyPhone: {
+    summary: "Số điện thoại (tự khai, không xác minh)",
     description:
-      "Cần xác thực lại ≤ 5 phút. Email là định danh chính — không gỡ được (LAST_AUTH_METHOD), chỉ đổi; SĐT gỡ được. Trả D20a.",
-    method: "DELETE",
-    path: "/api/me/contacts/:channel",
-    pathParams: z.object({ channel: otpChannelZod }),
-    body: c.noBody(),
-    responses: { 200: successResponseSchema(accountSecuritySchema) },
-    metadata: OpenAPIHelper.generateErrorCodes(
-      ErrorCode.ReauthRequired,
-      ErrorCode.LastAuthMethod,
-      ErrorCode.ValidationError,
-    ),
+      "SĐT chỉ là thông tin liên hệ — không mã, không dùng đăng nhập / lấy lại mật khẩu. null / rỗng = xóa.",
+    method: "PUT",
+    path: "/api/me/phone",
+    body: z.object({ phone: z.string().trim().nullable() }),
+    responses: { 200: successResponseSchema(z.object({ phone: z.string().nullable() })) },
+    metadata: OpenAPIHelper.generateErrorCodes(ErrorCode.ValidationError),
   },
 });

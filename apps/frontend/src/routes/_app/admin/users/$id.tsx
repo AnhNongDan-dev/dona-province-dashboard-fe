@@ -45,7 +45,7 @@ import { Pager } from "../-components/pager";
 import { TempPasswordDialog, type TempPasswordResult } from "../-components/temp-password-dialog";
 import { UserStatusBadge } from "../-components/user-status-badge";
 
-// A2 — chi tiết tài khoản (AD2 + AD3) và các thao tác A3 (AD4–AD8). Nút hiện theo
+// Chi tiết tài khoản (kèm lịch sử hoạt động) và các thao tác quản trị. Nút hiện theo
 // `allowedActions` của BE, FE không tự suy luật từ status / admin.
 export const Route = createFileRoute("/_app/admin/users/$id")({
   loader: ({ params }) => findAdminUserRepository(params.id).loader(),
@@ -549,7 +549,7 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-/** AD3 — lịch sử của tài khoản; phân trang trong trang (không lên URL). */
+/** Lịch sử của tài khoản; phân trang trong trang (không lên URL). */
 function UserActivities({ id }: { id: string }) {
   const [page, setPage] = useState(1);
   const { data, isLoading, isError, refetch, isFetching } = searchAdminUserActivitiesRepository({

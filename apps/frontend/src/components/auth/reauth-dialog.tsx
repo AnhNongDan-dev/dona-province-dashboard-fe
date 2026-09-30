@@ -1,6 +1,7 @@
 import { ErrorCode } from "@repo/zod-schemas/src/api/error.schema";
 import { LogoutMode } from "@repo/zod-schemas/src/entity/central-auth-schema";
 import { type FormEvent, useState } from "react";
+import { PasswordInput } from "@/components/auth/password-input";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,7 +12,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { clientAPI } from "@/config/clientAPI.config";
 import { formatSeconds, useCountdown } from "@/hooks/use-countdown";
@@ -20,7 +20,7 @@ import { errorMessage, errorParam } from "@/lib/api-error";
 import { closeReauth, useReauthOpen } from "@/lib/central-session";
 import { useSession } from "@/lib/session-store";
 
-/** S2 — xác thực lại tại chỗ khi BE trả REAUTH_REQUIRED. Chỉ nhập password của chủ phiên. */
+/** Xác thực lại tại chỗ khi BE trả REAUTH_REQUIRED. Chỉ nhập password của chủ phiên. */
 export function ReauthDialog() {
   const open = useReauthOpen();
   const identity = useSession()?.identity;
@@ -77,10 +77,9 @@ export function ReauthDialog() {
         <form id="reauth-form" onSubmit={onSubmit} className="flex flex-col gap-4">
           <Field data-invalid={!!error}>
             <FieldLabel htmlFor="reauth-password">Mật khẩu</FieldLabel>
-            <Input
+            <PasswordInput
               id="reauth-password"
               name="password"
-              type="password"
               autoComplete="current-password"
               autoFocus
               aria-invalid={!!error}

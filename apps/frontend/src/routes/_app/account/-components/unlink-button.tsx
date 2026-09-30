@@ -25,7 +25,7 @@ function blockedReason(reason: string | null, providerName: string) {
     : "Không thể hủy liên kết hệ thống này. Liên hệ quản trị nếu cần.";
 }
 
-/** D17 — cần xác thực lại (S2 tự mở và gửi lại một lần). */
+/** Hủy liên kết — cần xác thực lại (hộp xác thực lại tự mở và gửi lại một lần). */
 export function UnlinkButton({
   connection: c,
   account,

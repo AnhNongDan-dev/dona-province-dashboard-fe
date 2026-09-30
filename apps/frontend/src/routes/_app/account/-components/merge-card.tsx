@@ -10,8 +10,8 @@ import { errorMessage } from "@/lib/api-error";
 import { useSession } from "@/lib/session-store";
 
 /**
- * D22 — bắt đầu gộp (cần xác thực lại: clientAPI tự mở S2 khi gặp REAUTH_REQUIRED rồi gửi lại
- * một lần) → /merge/:txId. Dùng ở khối "Gộp tài khoản" và gợi ý khi CONTACT_ALREADY_USED.
+ * Bắt đầu gộp (cần xác thực lại: clientAPI tự mở hộp xác thực lại khi gặp REAUTH_REQUIRED rồi gửi
+ * lại một lần) → /merge/:txId. Dùng ở khối "Gộp tài khoản" và gợi ý khi CONTACT_ALREADY_USED.
  */
 export function useStartMerge() {
   const navigate = useNavigate();
